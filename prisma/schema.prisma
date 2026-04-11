@@ -1,0 +1,734 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// ===========================
+/// ENUMS
+/// ===========================
+
+enum EstadoRegistroBasico {
+  ACTIVO
+  INACTIVO
+}
+
+enum EstadoUsuario {
+  ACTIVO
+  INACTIVO
+  BLOQUEADO
+}
+
+enum TipoCliente {
+  INDIVIDUAL
+  EMPRESA
+}
+
+enum EstadoUbicacion {
+  ACTIVA
+  INACTIVA
+}
+
+enum EstadoArchivo {
+  ACTIVO
+  OCULTO
+  ANULADO
+}
+
+enum ModalidadServicio {
+  PUNTUAL
+  RECURRENTE
+}
+
+enum FrecuenciaServicio {
+  SEMANAL
+  QUINCENAL
+  MENSUAL
+  BIMESTRAL
+  TRIMESTRAL
+  SEMESTRAL
+  ANUAL
+}
+
+enum EstadoCuentaServicio {
+  ACTIVA
+  SUSPENDIDA
+  FINALIZADA
+  CANCELADA
+}
+
+enum TipoVencimiento {
+  FIN_MES
+  FECHA_FIJA
+  DIAS_DESPUES
+}
+
+enum TipoMora {
+  FIJA
+  DIARIA
+  PORCENTAJE
+}
+
+enum OrigenOrden {
+  PROGRAMADA
+  MANUAL
+  INCIDENCIA
+}
+
+enum PrioridadOrden {
+  BAJA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+enum EstadoOrdenServicio {
+  PENDIENTE
+  PROGRAMADA
+  EN_PROCESO
+  PAUSADA
+  FINALIZADA
+  CANCELADA
+}
+
+enum EstadoAsignacionOrden {
+  ACTIVA
+  REMOVIDA
+  FINALIZADA
+}
+
+enum TipoEventoOrden {
+  COMENTARIO
+  VISITA
+  LLAMADA
+  INCIDENTE
+  NOTA_TECNICA
+  CIERRE
+}
+
+enum TipoCargo {
+  SERVICIO
+  MORA
+  AJUSTE
+  EXTRAORDINARIO
+}
+
+enum EstadoCargo {
+  PENDIENTE
+  PARCIAL
+  PAGADO
+  VENCIDO
+  ANULADO
+}
+
+enum EstadoMora {
+  ACTIVA
+  APLICADA
+  ANULADA
+}
+
+enum EstadoPago {
+  REGISTRADO
+  CONFIRMADO
+  ANULADO
+}
+
+enum ModuloHistorial {
+  EMPRESAS
+  ROLES
+  USUARIOS
+  CLIENTES
+  UBICACIONES
+  CUENTAS_SERVICIO
+  ORDENES
+  CARGOS
+  MORAS
+  PAGOS
+  ARCHIVOS
+  CONFIGURACION
+}
+
+enum AccionHistorial {
+  CREAR
+  EDITAR
+  CAMBIAR_ESTADO
+  REGISTRAR_PAGO
+  APLICAR_PAGO
+  ANULAR
+  ASIGNAR
+  REMOVER
+  SUBIR_ARCHIVO
+  CALCULAR_MORA
+  EMITIR_CARGO
+}
+
+/// ===========================
+/// ORGANIZACION
+/// ===========================
+
+model Empresa {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre     String   @db.VarChar(150)
+  nit        String?  @db.VarChar(30)
+  telefono   String?  @db.VarChar(30)
+  direccion  String?
+  estado     EstadoRegistroBasico
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  roles              Rol[]
+  usuarios           Usuario[]
+  clientes           Cliente[]
+  tiposServicio      TipoServicio[]
+  politicasCobro     PoliticaCobro[]
+  cuentasServicio    CuentaServicio[]
+  ordenesServicio    OrdenServicio[]
+  metodosPago        MetodoPago[]
+  cargos             Cargo[]
+  moras              Mora[]
+  pagos              Pago[]
+  historial          Historial[]
+
+  @@map("empresa")
+}
+
+model Rol {
+  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId   String               @map("empresa_id") @db.Uuid
+  nombre      String               @db.VarChar(80)
+  descripcion String?
+  estado      EstadoRegistroBasico
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa     Empresa              @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuarios    Usuario[]
+
+  @@unique([empresaId, nombre])
+  @@index([empresaId])
+  @@map("rol")
+}
+
+model Usuario {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId      String           @map("empresa_id") @db.Uuid
+  rolId          String           @map("rol_id") @db.Uuid
+  nombres        String           @db.VarChar(120)
+  apellidos      String?          @db.VarChar(120)
+  email          String           @db.VarChar(180)
+  passwordHash   String           @map("password_hash")
+  telefono       String?          @db.VarChar(30)
+  estado         EstadoUsuario
+  ultimoAcceso   DateTime?        @map("ultimo_acceso") @db.Timestamptz(6)
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa                      Empresa                    @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  rol                          Rol                        @relation(fields: [rolId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  clienteArchivos             ClienteArchivo[]
+  cuentaServicioArchivos      CuentaServicioArchivo[]
+  ordenAsignaciones           OrdenServicioAsignacion[]  @relation("OrdenAsignacionUsuario")
+  ordenAsignadasPor           OrdenServicioAsignacion[]  @relation("OrdenAsignacionAsignadoPor")
+  ordenEventos                OrdenServicioEvento[]
+  ordenArchivos               OrdenServicioArchivo[]
+  ordenEstados                OrdenServicioEstado[]
+  pagosRegistrados            Pago[]
+  historial                   Historial[]
+
+  @@unique([empresaId, email])
+  @@index([empresaId])
+  @@index([rolId])
+  @@map("usuario")
+}
+
+/// ===========================
+/// CLIENTES
+/// ===========================
+
+model Cliente {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId         String        @map("empresa_id") @db.Uuid
+  codigo            String        @db.VarChar(50)
+  tipoCliente       TipoCliente   @map("tipo_cliente")
+  nombreRazonSocial String        @map("nombre_razon_social") @db.VarChar(180)
+  nombreComercial   String?       @map("nombre_comercial") @db.VarChar(180)
+  identificacion    String?       @db.VarChar(60)
+  telefono          String?       @db.VarChar(30)
+  email             String?       @db.VarChar(180)
+  estado            EstadoRegistroBasico
+  observaciones     String?
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa           Empresa               @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ubicaciones       ClienteUbicacion[]
+  archivos          ClienteArchivo[]
+  cuentasServicio   CuentaServicio[]
+  ordenesServicio   OrdenServicio[]
+  cargos            Cargo[]
+  pagos             Pago[]
+
+  @@unique([empresaId, codigo])
+  @@index([empresaId])
+  @@index([nombreRazonSocial])
+  @@index([telefono])
+  @@map("cliente")
+}
+
+model ClienteUbicacion {
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clienteId   String            @map("cliente_id") @db.Uuid
+  nombre      String            @db.VarChar(120)
+  direccion   String
+  referencia  String?
+  latitud     Decimal?          @db.Decimal(10, 7)
+  longitud    Decimal?          @db.Decimal(10, 7)
+  esPrincipal Boolean           @default(false) @map("es_principal")
+  estado      EstadoUbicacion
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cliente           Cliente           @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cuentasServicio   CuentaServicio[]
+  ordenesServicio   OrdenServicio[]
+
+  @@index([clienteId])
+  @@index([clienteId, esPrincipal])
+  @@map("cliente_ubicacion")
+}
+
+model ClienteArchivo {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clienteId    String         @map("cliente_id") @db.Uuid
+  subidoPor    String         @map("subido_por") @db.Uuid
+  nombre       String         @db.VarChar(255)
+  categoria    String         @db.VarChar(50)
+  mimeType     String         @map("mime_type") @db.VarChar(120)
+  extension    String?        @db.VarChar(20)
+  tamanoBytes  Int?           @map("tamano_bytes")
+  storageKey   String         @map("storage_key")
+  url          String?
+  estado       EstadoArchivo
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cliente      Cliente        @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario      Usuario        @relation(fields: [subidoPor], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([clienteId])
+  @@index([subidoPor])
+  @@map("cliente_archivo")
+}
+
+/// ===========================
+/// COMERCIAL
+/// ===========================
+
+model TipoServicio {
+  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId   String               @map("empresa_id") @db.Uuid
+  nombre      String               @db.VarChar(120)
+  descripcion String?
+  precioBase  Decimal              @map("precio_base") @db.Decimal(12, 2)
+  estado      EstadoRegistroBasico
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa            Empresa           @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cuentasServicio    CuentaServicio[]
+  ordenesServicio    OrdenServicio[]
+
+  @@unique([empresaId, nombre])
+  @@index([empresaId])
+  @@map("tipo_servicio")
+}
+
+model PoliticaCobro {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId        String             @map("empresa_id") @db.Uuid
+  nombre           String             @db.VarChar(120)
+  tipoVencimiento  TipoVencimiento    @map("tipo_vencimiento")
+  diaCorte         Int?               @map("dia_corte")
+  diaVencimiento   Int?               @map("dia_vencimiento")
+  diasGracia       Int                @map("dias_gracia")
+  tipoMora         TipoMora?          @map("tipo_mora")
+  valorMora        Decimal?           @map("valor_mora") @db.Decimal(12, 2)
+  aplicaMora       Boolean            @default(false) @map("aplica_mora")
+  estado           EstadoRegistroBasico
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa          Empresa            @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cuentasServicio  CuentaServicio[]
+  cargos           Cargo[]
+
+  @@unique([empresaId, nombre])
+  @@index([empresaId])
+  @@map("politica_cobro")
+}
+
+model CuentaServicio {
+  id               String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId        String                 @map("empresa_id") @db.Uuid
+  clienteId        String                 @map("cliente_id") @db.Uuid
+  ubicacionId      String?                @map("ubicacion_id") @db.Uuid
+  tipoServicioId   String                 @map("tipo_servicio_id") @db.Uuid
+  politicaCobroId  String?                @map("politica_cobro_id") @db.Uuid
+  codigo           String                 @db.VarChar(50)
+  nombre           String                 @db.VarChar(180)
+  descripcion      String?
+  modalidad        ModalidadServicio
+  frecuencia       FrecuenciaServicio?
+  fechaInicio      DateTime?              @map("fecha_inicio") @db.Date
+  fechaFin         DateTime?              @map("fecha_fin") @db.Date
+  montoBase        Decimal                @map("monto_base") @db.Decimal(12, 2)
+  diaCorte         Int?                   @map("dia_corte")
+  diaPago          Int?                   @map("dia_pago")
+  estado           EstadoCuentaServicio
+  observaciones    String?
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa          Empresa                @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cliente          Cliente                @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ubicacion        ClienteUbicacion?      @relation(fields: [ubicacionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  tipoServicio     TipoServicio           @relation(fields: [tipoServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  politicaCobro    PoliticaCobro?         @relation(fields: [politicaCobroId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  archivos         CuentaServicioArchivo[]
+  ordenesServicio  OrdenServicio[]
+  cargos           Cargo[]
+
+  @@unique([empresaId, codigo])
+  @@index([empresaId])
+  @@index([clienteId])
+  @@index([ubicacionId])
+  @@index([tipoServicioId])
+  @@index([politicaCobroId])
+  @@map("cuenta_servicio")
+}
+
+model CuentaServicioArchivo {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cuentaServicioId  String         @map("cuenta_servicio_id") @db.Uuid
+  subidoPor         String         @map("subido_por") @db.Uuid
+  nombre            String         @db.VarChar(255)
+  categoria         String         @db.VarChar(50)
+  mimeType          String         @map("mime_type") @db.VarChar(120)
+  extension         String?        @db.VarChar(20)
+  tamanoBytes       Int?           @map("tamano_bytes")
+  storageKey        String         @map("storage_key")
+  url               String?
+  estado            EstadoArchivo
+  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cuentaServicio    CuentaServicio @relation(fields: [cuentaServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario           Usuario        @relation(fields: [subidoPor], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([cuentaServicioId])
+  @@index([subidoPor])
+  @@map("cuenta_servicio_archivo")
+}
+
+/// ===========================
+/// OPERACION
+/// ===========================
+
+model OrdenServicio {
+  id                     String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId              String                    @map("empresa_id") @db.Uuid
+  cuentaServicioId       String                    @map("cuenta_servicio_id") @db.Uuid
+  clienteId              String                    @map("cliente_id") @db.Uuid
+  ubicacionId            String                    @map("ubicacion_id") @db.Uuid
+  tipoServicioId         String                    @map("tipo_servicio_id") @db.Uuid
+  numeroOrden            String                    @map("numero_orden") @db.VarChar(50)
+  titulo                 String                    @db.VarChar(180)
+  descripcion            String?
+  origen                 OrigenOrden
+  prioridad              PrioridadOrden
+  estado                 EstadoOrdenServicio
+  fechaProgramada        DateTime?                 @map("fecha_programada") @db.Timestamptz(6)
+  fechaInicio            DateTime?                 @map("fecha_inicio") @db.Timestamptz(6)
+  fechaCierre            DateTime?                 @map("fecha_cierre") @db.Timestamptz(6)
+  requiereEvidenciaFinal Boolean                   @default(false) @map("requiere_evidencia_final")
+  motivoCancelacion      String?                   @map("motivo_cancelacion")
+  observacionesGenerales String?                   @map("observaciones_generales")
+  createdAt              DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa                Empresa                   @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cuentaServicio         CuentaServicio            @relation(fields: [cuentaServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cliente                Cliente                   @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ubicacion              ClienteUbicacion          @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  tipoServicio           TipoServicio              @relation(fields: [tipoServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  asignaciones           OrdenServicioAsignacion[]
+  eventos                OrdenServicioEvento[]
+  archivos               OrdenServicioArchivo[]
+  estados                OrdenServicioEstado[]
+  cargos                 Cargo[]
+
+  @@unique([empresaId, numeroOrden])
+  @@index([empresaId])
+  @@index([cuentaServicioId])
+  @@index([clienteId])
+  @@index([ubicacionId])
+  @@index([tipoServicioId])
+  @@index([estado])
+  @@map("orden_servicio")
+}
+
+model OrdenServicioAsignacion {
+  id               String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ordenServicioId  String                 @map("orden_servicio_id") @db.Uuid
+  usuarioId        String                 @map("usuario_id") @db.Uuid
+  rolEnOrden       String                 @map("rol_en_orden") @db.VarChar(50)
+  estado           EstadoAsignacionOrden
+  asignadoPor      String                 @map("asignado_por") @db.Uuid
+  fechaAsignacion  DateTime               @map("fecha_asignacion") @db.Timestamptz(6)
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ordenServicio    OrdenServicio          @relation(fields: [ordenServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario          Usuario                @relation("OrdenAsignacionUsuario", fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  asignador        Usuario                @relation("OrdenAsignacionAsignadoPor", fields: [asignadoPor], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([ordenServicioId])
+  @@index([usuarioId])
+  @@index([asignadoPor])
+  @@index([ordenServicioId, estado])
+  @@map("orden_servicio_asignacion")
+}
+
+model OrdenServicioEvento {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ordenServicioId  String           @map("orden_servicio_id") @db.Uuid
+  usuarioId        String           @map("usuario_id") @db.Uuid
+  tipoEvento       TipoEventoOrden  @map("tipo_evento")
+  titulo           String?          @db.VarChar(180)
+  detalle          String
+  visibleCliente   Boolean          @default(false) @map("visible_cliente")
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ordenServicio    OrdenServicio    @relation(fields: [ordenServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario          Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([ordenServicioId])
+  @@index([usuarioId])
+  @@index([tipoEvento])
+  @@map("orden_servicio_evento")
+}
+
+model OrdenServicioArchivo {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ordenServicioId  String         @map("orden_servicio_id") @db.Uuid
+  usuarioId        String         @map("usuario_id") @db.Uuid
+  nombre           String         @db.VarChar(255)
+  categoria        String         @db.VarChar(50)
+  mimeType         String         @map("mime_type") @db.VarChar(120)
+  extension        String?        @db.VarChar(20)
+  tamanoBytes      Int?           @map("tamano_bytes")
+  storageKey       String         @map("storage_key")
+  url              String?
+  estado           EstadoArchivo
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ordenServicio    OrdenServicio  @relation(fields: [ordenServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario          Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([ordenServicioId])
+  @@index([usuarioId])
+  @@map("orden_servicio_archivo")
+}
+
+model OrdenServicioEstado {
+  id               String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ordenServicioId  String                @map("orden_servicio_id") @db.Uuid
+  estadoAnterior   EstadoOrdenServicio?  @map("estado_anterior")
+  estadoNuevo      EstadoOrdenServicio   @map("estado_nuevo")
+  motivo           String?
+  usuarioId        String                @map("usuario_id") @db.Uuid
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  ordenServicio    OrdenServicio         @relation(fields: [ordenServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario          Usuario               @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([ordenServicioId])
+  @@index([usuarioId])
+  @@index([estadoNuevo])
+  @@map("orden_servicio_estado")
+}
+
+/// ===========================
+/// FINANZAS
+/// ===========================
+
+model MetodoPago {
+  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId   String               @map("empresa_id") @db.Uuid
+  nombre      String               @db.VarChar(80)
+  descripcion String?
+  estado      EstadoRegistroBasico
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa     Empresa              @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  pagos       Pago[]
+
+  @@unique([empresaId, nombre])
+  @@index([empresaId])
+  @@map("metodo_pago")
+}
+
+model Cargo {
+  id                        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId                 String          @map("empresa_id") @db.Uuid
+  clienteId                 String          @map("cliente_id") @db.Uuid
+  cuentaServicioId          String          @map("cuenta_servicio_id") @db.Uuid
+  ordenServicioId           String?         @map("orden_servicio_id") @db.Uuid
+  politicaCobroId           String?         @map("politica_cobro_id") @db.Uuid
+  cargoOrigenId             String?         @map("cargo_origen_id") @db.Uuid
+  tipoCargo                 TipoCargo       @map("tipo_cargo")
+  concepto                  String          @db.VarChar(255)
+  periodoReferencia         String?         @map("periodo_referencia") @db.VarChar(50)
+  monto                     Decimal         @db.Decimal(12, 2)
+  saldo                     Decimal         @db.Decimal(12, 2)
+  fechaEmision              DateTime        @map("fecha_emision") @db.Date
+  fechaVencimiento          DateTime?       @map("fecha_vencimiento") @db.Date
+  diasGraciaAplicados       Int?            @map("dias_gracia_aplicados")
+  tipoMoraAplicada          TipoMora?       @map("tipo_mora_aplicada")
+  valorMoraAplicado         Decimal?        @map("valor_mora_aplicado") @db.Decimal(12, 2)
+  fechaUltimaMoraCalculada  DateTime?       @map("fecha_ultima_mora_calculada") @db.Date
+  estado                    EstadoCargo
+  createdAt                 DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa                   Empresa         @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cliente                   Cliente         @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cuentaServicio            CuentaServicio  @relation(fields: [cuentaServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ordenServicio             OrdenServicio?  @relation(fields: [ordenServicioId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  politicaCobro             PoliticaCobro?  @relation(fields: [politicaCobroId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  cargoOrigen               Cargo?          @relation("CargoOrigenToDerivados", fields: [cargoOrigenId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  cargosDerivados           Cargo[]         @relation("CargoOrigenToDerivados")
+
+  morasCalculadas           Mora[]          @relation("CargoPrincipalMora")
+  moraComoCargoAplicado     Mora[]          @relation("CargoMoraAplicado")
+
+  aplicacionesPago          AplicacionPago[]
+
+  @@index([empresaId])
+  @@index([clienteId])
+  @@index([cuentaServicioId])
+  @@index([ordenServicioId])
+  @@index([politicaCobroId])
+  @@index([cargoOrigenId])
+  @@index([estado])
+  @@index([tipoCargo])
+  @@index([fechaVencimiento])
+  @@index([clienteId, estado])
+  @@index([cuentaServicioId, periodoReferencia])
+  @@map("cargo")
+}
+
+model Mora {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId      String       @map("empresa_id") @db.Uuid
+  cargoId        String       @map("cargo_id") @db.Uuid
+  cargoMoraId    String?      @map("cargo_mora_id") @db.Uuid
+  tipoMora       TipoMora     @map("tipo_mora")
+  valorBase      Decimal      @map("valor_base") @db.Decimal(12, 2)
+  diasAtraso     Int          @map("dias_atraso")
+  montoGenerado  Decimal      @map("monto_generado") @db.Decimal(12, 2)
+  fechaCalculo   DateTime     @map("fecha_calculo") @db.Date
+  estado         EstadoMora
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa        Empresa      @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cargo          Cargo        @relation("CargoPrincipalMora", fields: [cargoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cargoMora      Cargo?       @relation("CargoMoraAplicado", fields: [cargoMoraId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([empresaId])
+  @@index([cargoId])
+  @@index([cargoMoraId])
+  @@index([fechaCalculo])
+  @@index([estado])
+  @@map("mora")
+}
+
+model Pago {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId       String        @map("empresa_id") @db.Uuid
+  clienteId       String        @map("cliente_id") @db.Uuid
+  metodoPagoId    String        @map("metodo_pago_id") @db.Uuid
+  registradoPor   String        @map("registrado_por") @db.Uuid
+  montoTotal      Decimal       @map("monto_total") @db.Decimal(12, 2)
+  referencia      String?       @db.VarChar(120)
+  fechaPago       DateTime      @map("fecha_pago") @db.Date
+  fechaRegistro   DateTime      @map("fecha_registro") @db.Timestamptz(6)
+  estado          EstadoPago
+  observaciones   String?
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa         Empresa       @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cliente         Cliente       @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  metodoPago      MetodoPago    @relation(fields: [metodoPagoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  registradoBy    Usuario       @relation(fields: [registradoPor], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  aplicaciones    AplicacionPago[]
+
+  @@index([empresaId])
+  @@index([clienteId])
+  @@index([metodoPagoId])
+  @@index([registradoPor])
+  @@index([estado])
+  @@index([fechaPago])
+  @@map("pago")
+}
+
+model AplicacionPago {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pagoId         String     @map("pago_id") @db.Uuid
+  cargoId        String     @map("cargo_id") @db.Uuid
+  montoAplicado  Decimal    @map("monto_aplicado") @db.Decimal(12, 2)
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  pago           Pago       @relation(fields: [pagoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cargo          Cargo      @relation(fields: [cargoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([pagoId])
+  @@index([cargoId])
+  @@unique([pagoId, cargoId])
+  @@map("aplicacion_pago")
+}
+
+/// ===========================
+/// TRANSVERSAL
+/// ===========================
+
+model Historial {
+  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId  String            @map("empresa_id") @db.Uuid
+  usuarioId  String            @map("usuario_id") @db.Uuid
+  modulo     ModuloHistorial
+  accion     AccionHistorial
+  entidad    String            @db.VarChar(50)
+  entidadId  String            @map("entidad_id") @db.Uuid
+  detalle    String?
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  empresa    Empresa           @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario    Usuario           @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([empresaId])
+  @@index([usuarioId])
+  @@index([entidad, entidadId])
+  @@index([modulo, accion])
+  @@map("historial")
+}

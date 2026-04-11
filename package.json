@@ -1,0 +1,37 @@
+{
+  "name": "cubitservices-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.js",
+  "scripts": {
+    "prisma:generate": "prisma generate",
+    "predev": "pnpm prisma:generate",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "6",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
+    "express": "^4.22.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/node": "^20.0.0",
+    "prisma": "6",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
