@@ -6,6 +6,8 @@ import prisma from "./config/prisma";
 import authRoutes from "./modules/auth/auth.routes";
 import rolesRoutes from "./modules/roles/roles.routes";
 import usuariosRoutes from "./modules/usuarios/usuarios.routes";
+import tiposServicioRoutes from "./modules/tipos-servicio/tipos-servicio.routes";
+import metodosPagoRoutes from "./modules/metodos-pago/metodos-pago.routes";
 const app = express();
 
 app.use(cors());
@@ -27,5 +29,7 @@ app.get("/test-db", async (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/roles", rolesRoutes);
 app.use("/usuarios", usuariosRoutes);
+app.use("/tipos-servicio", tiposServicioRoutes);
+app.use("/metodos-pago", metodosPagoRoutes);
 
 export default app;
