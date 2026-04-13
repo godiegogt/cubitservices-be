@@ -164,6 +164,12 @@ enum AccionHistorial {
   CALCULAR_MORA
   EMITIR_CARGO
 }
+enum TipoIdentificacion {
+  DPI
+  NIT
+  PASAPORTE
+  OTRO
+}
 
 /// ===========================
 /// ORGANIZACION
@@ -249,19 +255,30 @@ model Usuario {
 /// ===========================
 
 model Cliente {
-  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  empresaId         String        @map("empresa_id") @db.Uuid
-  codigo            String        @db.VarChar(50)
-  tipoCliente       TipoCliente   @map("tipo_cliente")
-  nombreRazonSocial String        @map("nombre_razon_social") @db.VarChar(180)
-  nombreComercial   String?       @map("nombre_comercial") @db.VarChar(180)
-  identificacion    String?       @db.VarChar(60)
-  telefono          String?       @db.VarChar(30)
-  email             String?       @db.VarChar(180)
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId         String               @map("empresa_id") @db.Uuid
+  codigo            String               @db.VarChar(50)
+  tipoCliente       TipoCliente          @map("tipo_cliente")
+
+  primerNombre      String?              @map("primer_nombre") @db.VarChar(80)
+  segundoNombre     String?              @map("segundo_nombre") @db.VarChar(80)
+  primerApellido    String?              @map("primer_apellido") @db.VarChar(80)
+  segundoApellido   String?              @map("segundo_apellido") @db.VarChar(80)
+
+  nombreRazonSocial String               @map("nombre_razon_social") @db.VarChar(180)
+  nombreComercial   String?              @map("nombre_comercial") @db.VarChar(180)
+
+  tipoIdentificacion TipoIdentificacion? @map("tipo_identificacion")
+  identificacion    String?              @db.VarChar(60)
+
+  telefono          String?              @db.VarChar(30)
+  email             String?              @db.VarChar(180)
+  direccionFiscal   String?              @map("direccion_fiscal")
+
   estado            EstadoRegistroBasico
   observaciones     String?
-  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   empresa           Empresa               @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   ubicaciones       ClienteUbicacion[]
