@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import prisma from "./config/prisma";
+import authRoutes from "./modules/auth/auth.routes";
 
 const app = express();
 
@@ -21,5 +22,7 @@ app.get("/test-db", async (req, res) => {
   const result = await prisma.$queryRaw`SELECT NOW()`;
   res.json(result);
 });
+
+app.use("/auth", authRoutes);
 
 export default app;
