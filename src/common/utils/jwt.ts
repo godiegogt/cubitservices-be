@@ -7,9 +7,12 @@ type JwtPayload = {
   rolId: string;
 };
 
+export const ACCESS_TOKEN_EXPIRES_IN = "8h";
+export const ACCESS_TOKEN_MAX_AGE_MS = 8 * 60 * 60 * 1000;
+
 export function signAccessToken(payload: JwtPayload) {
   return jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: "8h",
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
   });
 }
 

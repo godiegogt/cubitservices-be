@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import { env } from "./config/env";
 import prisma from "./config/prisma";
 import authRoutes from "./modules/auth/auth.routes";
 import rolesRoutes from "./modules/roles/roles.routes";
@@ -10,8 +11,12 @@ import tiposServicioRoutes from "./modules/tipos-servicio/tipos-servicio.routes"
 import metodosPagoRoutes from "./modules/metodos-pago/metodos-pago.routes";
 import clientesRoutes from "./modules/clientes/clientes.routes";
 const app = express();
-
-app.use(cors());
+app.use(
+  cors({
+    origin: env.CLIENT_ORIGIN,
+    credentials: true,
+  })
+);
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
