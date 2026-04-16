@@ -15,6 +15,9 @@ export async function findClientesByEmpresa(empresaId: string) {
 export async function findClienteById(id: string) {
   return prisma.cliente.findUnique({
     where: { id },
+    include: {
+      ubicaciones: true
+    }
   });
 }
 

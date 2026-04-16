@@ -7,6 +7,7 @@ import {
   updateClienteHandler,
   updateClienteStatusHandler,
 } from "./clientes.controller";
+import ubicacionesRouter from "../ubicaciones/ubicacion.routes";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.get("/:id", getClienteHandler);
 router.post("/", createClienteHandler);
 router.patch("/:id", updateClienteHandler);
 router.patch("/:id/estado", updateClienteStatusHandler);
+router.use("/:clienteId/ubicaciones", ubicacionesRouter);
 
 export default router;
