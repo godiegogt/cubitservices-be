@@ -16,7 +16,33 @@ export async function findClienteById(id: string) {
   return prisma.cliente.findUnique({
     where: { id },
     include: {
-      ubicaciones: true
+      ubicaciones: true,
+      cuentasServicio: {
+        include: {
+          tipoServicio: {
+            select: {
+              nombre: true
+            }
+          }
+        }
+      },
+      pagos: {
+        include: {
+          metodoPago: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
+          registradoBy: {
+            select: {
+              id: true,
+              nombres: true,
+              apellidos: true
+            },
+          },
+        },
+      }
     }
   });
 }
