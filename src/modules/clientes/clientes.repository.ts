@@ -14,20 +14,14 @@ export async function findClientesByEmpresa(empresaId: string) {
 
 export async function findClienteById(id: string) {
   return prisma.cliente.findUnique({
-    where: { id },
-    include: {
-      ubicaciones: true,
-      cuentasServicio: {
-        include: {
-          tipoServicio: {
-            select: {
-              nombre: true
-            }
-          }
-        }
-      },
-      pagos: {
-        include: {
+    where: { id }
+  });
+}
+
+export async function getPagosByClient(id: string) {
+  return prisma.pago.findMany({
+    where: {clienteId: id},
+      include: {
           metodoPago: {
             select: {
               id: true,
@@ -41,10 +35,21 @@ export async function findClienteById(id: string) {
               apellidos: true
             },
           },
-        },
+      },
+  })
+}
+
+export async function getCuentasByClient(id: string) {
+  return prisma.cuentaServicio.findMany({
+    where: {clienteId: id},
+      include: {
+        tipoServicio: {
+          select: {
+            nombre: true
+          }
+        }
       }
-    }
-  });
+  })
 }
 
 export async function findClienteByCodigo(empresaId: string, codigo: string) {
