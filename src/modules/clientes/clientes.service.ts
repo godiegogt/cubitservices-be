@@ -8,6 +8,8 @@ import {
   findClienteByCodigo,
   findClienteById,
   findClientesByEmpresa,
+  getCuentasByClient,
+  getPagosByClient,
   updateCliente,
   updateClienteStatus,
 } from "./clientes.repository";
@@ -23,7 +25,12 @@ export async function getClienteByIdService(id: string, empresaId: string) {
     throw new Error("Cliente no encontrado");
   }
 
-  return cliente;
+  const [pagos, cuentasServicio] = await Promise.all([
+    getPagosByClient(id),
+    getCuentasByClient(id),
+  ]);
+
+  return { ...cliente, pagos, cuentasServicio };
 }
 
 export async function createClienteService(input: {

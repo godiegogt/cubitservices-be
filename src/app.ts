@@ -11,6 +11,8 @@ import tiposServicioRoutes from "./modules/tipos-servicio/tipos-servicio.routes"
 import metodosPagoRoutes from "./modules/metodos-pago/metodos-pago.routes";
 import clientesRoutes from "./modules/clientes/clientes.routes";
 import politicasCobroRoutes from "./modules/politicas-cobro/politicas-cobro.routes";
+import ubicacionesRoutes from "./modules/ubicaciones/ubicacion.routes";
+
 const app = express();
 app.use(
   cors({
