@@ -12,6 +12,7 @@ import metodosPagoRoutes from "./modules/metodos-pago/metodos-pago.routes";
 import clientesRoutes from "./modules/clientes/clientes.routes";
 import politicasCobroRoutes from "./modules/politicas-cobro/politicas-cobro.routes";
 import ubicacionesRoutes from "./modules/ubicaciones/ubicacion.routes";
+import cuentasServicioRoutes from "./modules/cuentas-servicio/cuentas-servicio.routes";
 
 const app = express();
 app.use(
@@ -42,5 +43,6 @@ app.use("/tipos-servicio", tiposServicioRoutes);
 app.use("/metodos-pago", metodosPagoRoutes);
 app.use("/clientes", clientesRoutes);
 app.use("/politicas-cobro", politicasCobroRoutes);
+app.use("/cuentas-servicio", cuentasServicioRoutes);
 
 export default app;
