@@ -4,6 +4,7 @@ import {
   createClienteHandler,
   getClienteHandler,
   listClientes,
+  searchClientesSelectHandler,
   updateClienteHandler,
   updateClienteStatusHandler,
 } from "./clientes.controller";
@@ -14,6 +15,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/", listClientes);
+router.get("/select", searchClientesSelectHandler);
 router.get("/:id", getClienteHandler);
 router.post("/", createClienteHandler);
 router.patch("/:id", updateClienteHandler);

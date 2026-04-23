@@ -10,12 +10,20 @@ import {
   findClientesByEmpresa,
   getCuentasByClient,
   getPagosByClient,
+  searchClientesForSelect,
   updateCliente,
   updateClienteStatus,
 } from "./clientes.repository";
 
 export async function getClientes(empresaId: string) {
   return findClientesByEmpresa(empresaId);
+}
+
+export async function searchClientesForSelectService(
+  empresaId: string,
+  options?: { search?: string }
+) {
+  return searchClientesForSelect(empresaId, options);
 }
 
 export async function getClienteByIdService(id: string, empresaId: string) {

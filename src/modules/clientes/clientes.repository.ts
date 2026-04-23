@@ -61,6 +61,29 @@ export async function findClienteByCodigo(empresaId: string, codigo: string) {
   });
 }
 
+export async function searchClientesForSelect( empresaId: string, options?: { search?: string}
+) {
+  const { search } = options ?? {};
+
+  return prisma.cliente.findMany({
+    where: {
+      empresaId,
+      ...(search && {
+        OR: [
+          { nombreRazonSocial: { contains: search, mode: "insensitive" as const } },
+          { codigo: { contains: search, mode: "insensitive" as const } },
+        ],
+      }),
+    },
+    orderBy: { nombreRazonSocial: "asc" },
+    select: {
+      id: true,
+      codigo: true,
+      nombreRazonSocial: true,
+    },
+  });
+}
+
 export async function createCliente(data: {
   empresaId: string;
   codigo: string;

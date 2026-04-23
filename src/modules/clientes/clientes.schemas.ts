@@ -69,3 +69,7 @@ export const updateClienteSchema = z.object({
 export const updateClienteStatusSchema = z.object({
   estado: z.nativeEnum(EstadoRegistroBasico),
 });
+
+export const searchClientesSelectSchema = z.object({
+  search: z.string().max(100).optional(),
+});

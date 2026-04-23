@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   createClienteSchema,
+  searchClientesSelectSchema,
   updateClienteSchema,
   updateClienteStatusSchema,
 } from "./clientes.schemas";
@@ -8,6 +9,7 @@ import {
   createClienteService,
   getClienteByIdService,
   getClientes,
+  searchClientesForSelectService,
   updateClienteService,
   updateClienteStatusService,
 } from "./clientes.service";
@@ -112,6 +114,26 @@ export async function updateClienteStatusHandler(req: Request, res: Response) {
       success: false,
       message:
         error instanceof Error ? error.message : "Error actualizando estado del cliente",
+    });
+  }
+}
+
+export async function searchClientesSelectHandler(req: Request, res: Response) {
+  try {
+    const empresaId = req.auth!.empresaId;
+    const { search } = searchClientesSelectSchema.parse(req.query);
+
+    const clientes = await searchClientesForSelectService(empresaId, { search });
+
+    return res.json({
+      success: true,
+      message: "Clientes obtenidos correctamente",
+      data: clientes,
+    });
+  } catch {
+    return res.status(500).json({
+      success: false,
+      message: "Error buscando clientes",
     });
   }
 }
