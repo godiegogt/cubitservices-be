@@ -11,7 +11,7 @@ import path from "path";
 import fs from "fs";
 
 const router = Router({ mergeParams: true });
-const upload = multer({dest: "uploads/"})
+const upload = multer({storage: multer.memoryStorage()})
 
 router.use(requireAuth);
 

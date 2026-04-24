@@ -6,7 +6,6 @@ export const createArchivoSchema = z.object({
     categoria: z.string().min(1).max(50),
     mimeType: z.string().min(1).max(120),
     storageKey: z.string().min(1),
-    subidoPor: z.string(),
     estado: z.nativeEnum(EstadoArchivo).optional(),
 });
 

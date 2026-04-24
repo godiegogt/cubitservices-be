@@ -9,6 +9,7 @@ import {
     updateArchivoEstadoService,
 } from "./cuentas-servicio-archivo.service";
 import { EstadoArchivo } from "@prisma/client";
+import { uploadToSpaces } from "../../config/uploadToSpaces";
 
 export async function listArchivos(req: Request, res: Response) {
     try {
@@ -41,13 +42,13 @@ export async function createArchivoHandler(req: Request, res: Response) {
             return res.status(400).json({ success: false, message: "No se recibió ningún archivo" });
         }
 
+        const { url, storageKey } = await uploadToSpaces(file, "cuentas-servicio", cuentaServicioId);
+
         const parsed = createArchivoSchema.parse({
             nombre: req.body.nombre,
             categoria: req.body.categoria,
-            mimeType: file.mimetype,           
-            storageKey: file.filename,         
-            subidoPor: usuarioId,             
-            estado: EstadoArchivo.ACTIVO,     
+            mimeType: file.mimetype,
+            storageKey,
         });
 
         const archivo = await createArchivoService(
@@ -58,6 +59,7 @@ export async function createArchivoHandler(req: Request, res: Response) {
                 ...parsed,
                 extension: file.originalname.split(".").pop(),
                 tamanoBytes: file.size,
+                url,
             }
         );
 
