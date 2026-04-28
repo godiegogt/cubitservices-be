@@ -10,6 +10,7 @@ import {
   createCuentaServicioService,
   getCuentaServicioByIdService,
   getCuentasServicio,
+  getCuentasServicioSelectByClienteService,
   updateCuentaServicioService,
   updateCuentaServicioStatusService,
 } from "./cuentas-servicio.service";
@@ -144,3 +145,28 @@ export async function updateCuentaServicioStatusHandler(
     });
   }
 }
+
+export async function listCuentasServicioSelectHandler(req: Request, res: Response) {
+    try {
+        const empresaId = req.auth!.empresaId;
+        const { clienteId } = req.params;
+
+        const cuentas = await getCuentasServicioSelectByClienteService(clienteId, empresaId);
+
+        return res.json({
+            success: true,
+            message: "Cuentas de servicio obtenidas correctamente",
+            data: cuentas,
+        });
+    } catch (error) {
+        return res.status(404).json({
+            success: false,
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Error obteniendo cuentas de servicio",
+        });
+    }
+}
+
+

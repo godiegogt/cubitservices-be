@@ -10,6 +10,7 @@ import {
   findCuentaServicioByCodigo,
   findCuentaServicioById,
   findCuentasServicioByEmpresa,
+  findCuentasServicioSelectByCliente,
   findPoliticaCobroById,
   findTipoServicioById,
   findUbicacionById,
@@ -268,4 +269,17 @@ export async function updateCuentaServicioStatusService(
   }
 
   return updateCuentaServicioStatus(id, estado);
+}
+
+export async function getCuentasServicioSelectByClienteService(
+    clienteId: string,
+    empresaId: string
+) {
+    const cliente = await findClienteById(clienteId);
+
+    if (!cliente || cliente.empresaId !== empresaId) {
+        throw new Error("Cliente no encontrado");
+    }
+
+    return findCuentasServicioSelectByCliente(clienteId, empresaId);
 }

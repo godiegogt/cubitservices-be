@@ -202,3 +202,35 @@ export async function updateCuentaServicioStatus(
     include: cuentaServicioInclude,
   });
 }
+
+
+export async function findCuentasServicioSelectByCliente(
+    clienteId: string,
+    empresaId: string
+) {
+    return prisma.cuentaServicio.findMany({
+        where: {
+            clienteId,
+            empresaId,
+        },
+        orderBy: { nombre: "asc" },
+        select: {
+            id: true,
+            codigo: true,
+            nombre: true,
+            ubicacion: {
+                select: {
+                    id: true,
+                    nombre: true,
+                    direccion: true,
+                },
+            },
+            tipoServicio: {
+                select: {
+                    id: true,
+                    nombre: true,
+                },
+            },
+        },
+    });
+}
