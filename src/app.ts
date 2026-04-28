@@ -13,6 +13,7 @@ import clientesRoutes from "./modules/clientes/clientes.routes";
 import politicasCobroRoutes from "./modules/politicas-cobro/politicas-cobro.routes";
 import ubicacionesRoutes from "./modules/ubicaciones/ubicacion.routes";
 import cuentasServicioRoutes from "./modules/cuentas-servicio/cuentas-servicio.routes";
+import ordenesRoutes from "./modules/ordenes/ordenes.routes";
 
 const app = express();
 app.use(
@@ -44,5 +45,6 @@ app.use("/metodos-pago", metodosPagoRoutes);
 app.use("/clientes", clientesRoutes);
 app.use("/politicas-cobro", politicasCobroRoutes);
 app.use("/cuentas-servicio", cuentasServicioRoutes);
+app.use("/ordenes", ordenesRoutes);
 
 export default app;
