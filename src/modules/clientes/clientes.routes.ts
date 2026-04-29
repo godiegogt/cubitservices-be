@@ -10,6 +10,7 @@ import {
 } from "./clientes.controller";
 import ubicacionesRouter from "../ubicaciones/ubicacion.routes";
 import clienteArchivosRouter from "../cliente-archivos/cliente-archivo.routes"
+import { listCuentasServicioSelectHandler } from "../cuentas-servicio/cuentas-servicio.controller";
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.patch("/:id", updateClienteHandler);
 router.patch("/:id/estado", updateClienteStatusHandler);
 router.use("/:clienteId/ubicaciones", ubicacionesRouter);
 router.use("/:clienteId/archivos", clienteArchivosRouter)
+router.get("/:clienteId/servicios/select", listCuentasServicioSelectHandler);
 
 export default router;
