@@ -8,6 +8,7 @@ import {
   updateOrdenHandler,
   updateOrdenStatusHandler,
 } from "./ordenes.controller";
+import ordenServicioArchivosRouter from "../ordenes-archivos/orden-archivo.routes"
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.get("/:id/estados", listOrdenEstados);
 router.post("/", createOrdenHandler);
 router.patch("/:id", updateOrdenHandler);
 router.patch("/:id/estado", updateOrdenStatusHandler);
+router.use("/:ordenServicioId/archivos", ordenServicioArchivosRouter)
 
 export default router;
