@@ -17,13 +17,16 @@ import {
 export async function listOrdenes(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
+    const page  = Math.max(1, parseInt(req.query.page  as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
     const parsedQuery = listOrdenesQuerySchema.parse(req.query);
-    const ordenes = await getOrdenes(empresaId, parsedQuery);
+    const result = await getOrdenes(empresaId, page, limit, parsedQuery);
 
     return res.json({
       success: true,
       message: "Ordenes de servicio obtenidas correctamente",
-      data: ordenes,
+      data: result.data,
+      meta: result.meta,
     });
   } catch (error) {
     return res.status(400).json({

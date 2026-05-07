@@ -58,6 +58,8 @@ const ordenServicioEstadoInclude = {
 
 export async function findOrdenesByEmpresa(
   empresaId: string,
+  page: number,
+  limit: number,
   filters?: {
     estado?: EstadoOrdenServicio;
     clienteId?: string;
@@ -68,27 +70,59 @@ export async function findOrdenesByEmpresa(
     search?: string;
   }
 ) {
-  return prisma.ordenServicio.findMany({
-    where: {
-      empresaId,
-      estado: filters?.estado,
-      clienteId: filters?.clienteId,
-      cuentaServicioId: filters?.cuentaServicioId,
-      tipoServicioId: filters?.tipoServicioId,
-      prioridad: filters?.prioridad,
-      origen: filters?.origen,
-      ...(filters?.search
-        ? {
-            OR: [
-              { numeroOrden: { contains: filters.search, mode: "insensitive" } },
-              { titulo: { contains: filters.search, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
-    include: ordenServicioInclude,
-    orderBy: { createdAt: "desc" },
-  });
+  const skip = (page - 1) * limit;
+
+  const where: Prisma.OrdenServicioWhereInput = {
+  empresaId,
+
+  ...(filters?.estado && { estado: filters.estado }),
+  ...(filters?.clienteId && { clienteId: filters.clienteId }),
+  ...(filters?.cuentaServicioId && {
+    cuentaServicioId: filters.cuentaServicioId,
+  }),
+  ...(filters?.tipoServicioId && {
+    tipoServicioId: filters.tipoServicioId,
+  }),
+  ...(filters?.prioridad && { prioridad: filters.prioridad }),
+  ...(filters?.origen && { origen: filters.origen }),
+
+  ...(filters?.search && {
+    OR: [
+      {
+        numeroOrden: {
+          contains: filters.search,
+          mode: "insensitive" as const,
+        },
+      },
+      {
+        cliente: {
+          nombreRazonSocial: {
+            contains: filters.search,
+            mode: "insensitive" as const,
+          },
+        },
+      },
+      {
+        titulo: {
+          contains: filters.search,
+          mode: "insensitive" as const,
+        },
+      },
+    ],
+  }),
+};
+
+  const [ordenes, total] = await Promise.all([
+    prisma.ordenServicio.findMany({
+      where,
+      include: ordenServicioInclude,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.ordenServicio.count({ where }),
+  ]);
+  return { ordenes, total };
 }
 
 export async function findOrdenById(id: string) {
