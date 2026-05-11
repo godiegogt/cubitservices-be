@@ -13,6 +13,7 @@ import {
   findOrdenById,
   findOrdenByNumero,
   findOrdenesByEmpresa,
+  findOrdenesSelect,
   findTipoServicioById,
   findUbicacionById,
   updateOrden,
@@ -282,4 +283,20 @@ export async function getOrdenEstadosService(id: string, empresaId: string) {
   }
 
   return findEstadosByOrdenId(id);
+}
+
+export async function getOrdenesSelectService(
+  empresaId: string,
+  filters: {
+    cuentaServicioId: string;
+    search?: string;
+  }
+) {
+  const cuentaServicio = await findCuentaServicioById(filters.cuentaServicioId);
+
+  if (!cuentaServicio || cuentaServicio.empresaId !== empresaId) {
+    throw new Error("Cuenta de servicio no encontrada");
+  }
+
+  return findOrdenesSelect(empresaId, filters);
 }

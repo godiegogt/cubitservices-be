@@ -234,3 +234,46 @@ export async function findCuentasServicioSelectByCliente(
         },
     });
 }
+
+export async function findCuentasServicioSelect(
+  empresaId: string,
+  filters?: {
+    clienteId?: string;
+    search?: string;
+  }
+) {
+  return prisma.cuentaServicio.findMany({
+    where: {
+      empresaId,
+      estado: EstadoCuentaServicio.ACTIVA, // solo activas para selects
+      clienteId: filters?.clienteId,
+      ...(filters?.search
+        ? {
+            OR: [
+              { codigo: { contains: filters.search, mode: "insensitive" } },
+              { nombre: { contains: filters.search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: { nombre: "asc" },
+    select: {
+      id: true,
+      codigo: true,
+      nombre: true,
+      ubicacion: {
+        select: {
+          id: true,
+          nombre: true,
+          direccion: true,
+        },
+      },
+      tipoServicio: {
+        select: {
+          id: true,
+          nombre: true,
+        },
+      },
+    },
+  });
+}

@@ -9,10 +9,12 @@ import {
   createOrdenService,
   getOrdenByIdService,
   getOrdenes,
+  getOrdenesSelectService,
   getOrdenEstadosService,
   updateOrdenService,
   updateOrdenStatusService,
 } from "./ordenes.service";
+import { z } from "zod";
 
 export async function listOrdenes(req: Request, res: Response) {
   try {
@@ -153,6 +155,34 @@ export async function listOrdenEstados(req: Request, res: Response) {
         error instanceof Error
           ? error.message
           : "Error obteniendo historial de estados",
+    });
+  }
+}
+
+const listOrdenesSelectQuerySchema = z.object({
+  search: z.string().min(1).optional(),
+});
+
+export async function listOrdenesSelectHandler(req: Request, res: Response) {
+  try {
+    const empresaId = req.auth!.empresaId;
+    const { cuentaServicioId } = req.params;
+    const { search } = listOrdenesSelectQuerySchema.parse(req.query);
+
+    const ordenes = await getOrdenesSelectService(empresaId, { search, cuentaServicioId });
+
+    return res.json({
+      success: true,
+      message: "Ordenes de servicio obtenidas correctamente",
+      data: ordenes,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Error obteniendo ordenes de servicio",
     });
   }
 }
