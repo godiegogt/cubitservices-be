@@ -262,12 +262,20 @@ export async function createCargoFromCuentaService(input: {
   return createCargoInternal(input);
 }
 
+const TRANSICIONES_VALIDAS: Record<EstadoCargo, EstadoCargo[]> = {
+  [EstadoCargo.PENDIENTE]: [EstadoCargo.ANULADO, EstadoCargo.VENCIDO, EstadoCargo.PAGADO, EstadoCargo.PARCIAL],
+  [EstadoCargo.PARCIAL]:   [EstadoCargo.ANULADO, EstadoCargo.VENCIDO, EstadoCargo.PAGADO, EstadoCargo.PENDIENTE],
+  [EstadoCargo.PAGADO]:    [],
+  [EstadoCargo.VENCIDO]:   [],
+  [EstadoCargo.ANULADO]:   [],
+};
+
 export async function updateCargoStatusService(
   id: string,
   empresaId: string,
   input: {
     estado: EstadoCargo;
-    motivo: string;
+    motivo?: string;
   }
 ) {
   const cargo = await findCargoById(id);
@@ -276,17 +284,17 @@ export async function updateCargoStatusService(
     throw new Error("Cargo no encontrado");
   }
 
-  if (input.estado !== EstadoCargo.ANULADO) {
-    throw new Error("Solo se permite anular cargos por ahora");
+  const transicionesPermitidas = TRANSICIONES_VALIDAS[cargo.estado] ?? [];
+
+  if (!transicionesPermitidas.includes(input.estado)) {
+    throw new Error(
+      `No se puede cambiar el estado de ${cargo.estado} a ${input.estado}`
+    );
   }
 
-  if (cargo.estado === EstadoCargo.PAGADO) {
-    throw new Error("No se puede anular un cargo PAGADO");
+  if (input.estado === EstadoCargo.ANULADO && (!input.motivo || input.motivo.trim().length < 3)) {
+    throw new Error("El motivo es obligatorio para anular un cargo (mínimo 3 caracteres)");
   }
 
-  if (cargo.estado === EstadoCargo.ANULADO) {
-    throw new Error("El cargo ya esta ANULADO");
-  }
-
-  return updateCargoStatus(id, EstadoCargo.ANULADO);
+  return updateCargoStatus(id, input.estado);
 }
