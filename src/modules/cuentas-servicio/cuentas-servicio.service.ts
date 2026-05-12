@@ -114,6 +114,8 @@ async function validateCuentaServicioRelations(input: {
 
 export async function getCuentasServicio(
   empresaId: string,
+  page: number,
+  limit: number,
   filters?: {
     clienteId?: string;
     estado?: EstadoCuentaServicio;
@@ -121,7 +123,17 @@ export async function getCuentasServicio(
     search?: string;
   }
 ) {
-  return findCuentasServicioByEmpresa(empresaId, filters);
+  const { cuentasServicio, total } = await findCuentasServicioByEmpresa(
+    empresaId,
+    page,
+    limit,
+    filters
+  );
+
+  return {
+    data: cuentasServicio,
+    meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 export async function getCuentaServicioByIdService(id: string, empresaId: string) {

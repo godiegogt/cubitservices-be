@@ -56,6 +56,8 @@ export type CuentaServicioWithRelations = Prisma.CuentaServicioGetPayload<{
 
 export async function findCuentasServicioByEmpresa(
   empresaId: string,
+  page: number,
+  limit: number,
   filters?: {
     clienteId?: string;
     estado?: EstadoCuentaServicio;
@@ -63,24 +65,37 @@ export async function findCuentasServicioByEmpresa(
     search?: string;
   }
 ) {
-  return prisma.cuentaServicio.findMany({
-    where: {
-      empresaId,
-      clienteId: filters?.clienteId,
-      estado: filters?.estado,
-      tipoServicioId: filters?.tipoServicioId,
-      ...(filters?.search
-        ? {
-            OR: [
-              { codigo: { contains: filters.search, mode: "insensitive" } },
-              { nombre: { contains: filters.search, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
-    include: cuentaServicioInclude,
-    orderBy: { createdAt: "desc" },
-  });
+  const skip = (page - 1) * limit;
+
+  const where = {
+    empresaId,
+    clienteId: filters?.clienteId,
+    estado: filters?.estado,
+    tipoServicioId: filters?.tipoServicioId,
+    ...(filters?.search
+    ? {
+        OR: [
+          { codigo:  { contains: filters.search, mode: "insensitive" as const } },
+          { nombre:  { contains: filters.search, mode: "insensitive" as const } },
+          { cliente: { nombreRazonSocial: { contains: filters.search, mode: "insensitive" as const } } },
+          { cliente: { nombreComercial:   { contains: filters.search, mode: "insensitive" as const } } },
+        ],
+      }
+    : {}),
+  };
+
+  const [cuentasServicio, total] = await Promise.all([
+    prisma.cuentaServicio.findMany({
+      where,
+      include: cuentaServicioInclude,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.cuentaServicio.count({ where }),
+  ]);
+
+  return { cuentasServicio, total };
 }
 
 export async function findCuentaServicioById(id: string) {

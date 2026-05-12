@@ -99,6 +99,8 @@ async function validateUbicacion(clienteId: string, ubicacionId: string) {
 
 export async function getOrdenes(
   empresaId: string,
+  page: number,
+  limit: number,
   filters?: {
     estado?: EstadoOrdenServicio;
     clienteId?: string;
@@ -109,7 +111,12 @@ export async function getOrdenes(
     search?: string;
   }
 ) {
-  return findOrdenesByEmpresa(empresaId, filters);
+  const { ordenes, total } = await findOrdenesByEmpresa(empresaId, page, limit, filters);
+
+  return {
+    data: ordenes,
+    meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 export async function getOrdenByIdService(id: string, empresaId: string) {

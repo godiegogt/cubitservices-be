@@ -25,13 +25,17 @@ const listCuentasServicioQuerySchema = z.object({
 export async function listCuentasServicio(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
+    const page = Math.max(1, parseInt(req.query.page  as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
     const parsedQuery = listCuentasServicioQuerySchema.parse(req.query);
-    const cuentasServicio = await getCuentasServicio(empresaId, parsedQuery);
+
+    const result = await getCuentasServicio(empresaId, page, limit, parsedQuery);
 
     return res.json({
       success: true,
       message: "Cuentas de servicio obtenidas correctamente",
-      data: cuentasServicio,
+      data: result.data,
+      meta: result.meta,
     });
   } catch (error) {
     return res.status(400).json({

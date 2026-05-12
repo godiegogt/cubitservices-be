@@ -14,9 +14,19 @@ import {
   updateCliente,
   updateClienteStatus,
 } from "./clientes.repository";
+export async function getClientes(
+  empresaId: string,
+  page: number,
+  limit: number,
+  search?: string,
+  estado?: string
+) {
+  const { clientes, total } = await findClientesByEmpresa(empresaId, page, limit, search, estado);
 
-export async function getClientes(empresaId: string) {
-  return findClientesByEmpresa(empresaId);
+  return {
+    data: clientes,
+    meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 export async function searchClientesForSelectService(

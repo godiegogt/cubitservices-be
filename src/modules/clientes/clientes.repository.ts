@@ -5,11 +5,38 @@ import {
   TipoIdentificacion,
 } from "@prisma/client";
 
-export async function findClientesByEmpresa(empresaId: string) {
-  return prisma.cliente.findMany({
-    where: { empresaId },
-    orderBy: { createdAt: "desc" },
-  });
+export async function findClientesByEmpresa(
+  empresaId: string,
+  page: number,
+  limit: number,
+  search?: string,
+  estado?: string
+) {
+  const skip = (page - 1) * limit;
+
+  const where = {
+    empresaId,
+    ...(estado && { estado: estado as EstadoRegistroBasico }),
+    ...(search && {
+      OR: [
+        { nombreRazonSocial: { contains: search, mode: "insensitive" as const } },
+        { telefono: { contains: search, mode: "insensitive" as const } },
+        { codigo: { contains: search, mode: "insensitive" as const } },
+      ],
+    }),
+  };
+
+  const [clientes, total] = await Promise.all([
+    prisma.cliente.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.cliente.count({ where }),
+  ]);
+
+  return { clientes, total };
 }
 
 export async function findClienteById(id: string) {

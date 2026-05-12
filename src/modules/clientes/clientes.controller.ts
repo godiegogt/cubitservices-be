@@ -17,18 +17,21 @@ import {
 export async function listClientes(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
-    const clientes = await getClientes(empresaId);
+    const page  = Math.max(1, parseInt(req.query.page  as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
+    const search = (req.query.search as string) || undefined;
+    const estado = (req.query.estado as string) || undefined;
+
+    const result = await getClientes(empresaId, page, limit, search, estado);
 
     return res.json({
       success: true,
       message: "Clientes obtenidos correctamente",
-      data: clientes,
+      data: result.data,
+      meta: result.meta,
     });
   } catch {
-    return res.status(500).json({
-      success: false,
-      message: "Error obteniendo clientes",
-    });
+    return res.status(500).json({ success: false, message: "Error obteniendo clientes" });
   }
 }
 
