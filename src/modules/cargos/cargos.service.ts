@@ -219,11 +219,21 @@ export async function getCargosService(
     tipoCargo?: TipoCargo;
     periodoReferencia?: string;
     search?: string;
+    page?: number;
+    limit?: number;
   }
 ) {
-  const cargos = await findCargosByEmpresa(empresaId, filters);
-
-  return cargos.map(formatCargo);
+  const page  = Math.max(1, filters?.page  ?? 1);
+  const limit = Math.min(100, Math.max(1, filters?.limit ?? 20));
+  const { cargos, total } = await findCargosByEmpresa(
+    empresaId,
+    filters,
+    { page, limit }
+  );
+  return {
+    data: cargos.map(formatCargo),
+    meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 export async function getCargoByIdService(id: string, empresaId: string) {

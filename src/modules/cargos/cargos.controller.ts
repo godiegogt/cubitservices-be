@@ -17,12 +17,13 @@ export async function listCargos(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
     const parsedQuery = getCargosQuerySchema.parse(req.query);
-    const cargos = await getCargosService(empresaId, parsedQuery);
+    const result = await getCargosService(empresaId, parsedQuery);
 
     return res.json({
       success: true,
       message: "Cargos obtenidos correctamente",
-      data: cargos,
+      data: result.data,
+      meta: result.meta,
     });
   } catch (error) {
     return res.status(400).json({
