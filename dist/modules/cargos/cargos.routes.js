@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_middleware_1 = require("../../common/middleware/auth.middleware");
+const cargos_controller_1 = require("./cargos.controller");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.requireAuth);
+router.get("/", cargos_controller_1.listCargos);
+router.get("/:id", cargos_controller_1.getCargoHandler);
+router.post("/", cargos_controller_1.createCargoHandler);
+router.post("/:id/cargos", cargos_controller_1.createCargoFromCuentaHandler);
+router.patch("/:id/estado", cargos_controller_1.updateCargoStatusHandler);
+exports.default = router;

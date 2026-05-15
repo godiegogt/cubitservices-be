@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_middleware_1 = require("../../common/middleware/auth.middleware");
+const metodos_pago_controller_1 = require("./metodos-pago.controller");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.requireAuth);
+router.get("/", metodos_pago_controller_1.listMetodosPago);
+router.post("/", metodos_pago_controller_1.createMetodoPagoHandler);
+router.patch("/:id", metodos_pago_controller_1.updateMetodoPagoHandler);
+router.patch("/:id/estado", metodos_pago_controller_1.updateMetodoPagoStatusHandler);
+exports.default = router;
