@@ -4,6 +4,7 @@ import {
   createCuentaServicioHandler,
   getCuentaServicioHandler,
   listCuentasServicio,
+  listCuentasServicioSelectHandler,
   updateCuentaServicioHandler,
   updateCuentaServicioStatusHandler,
 } from "./cuentas-servicio.controller";
@@ -14,6 +15,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/", listCuentasServicio);
+router.get("/select", listCuentasServicioSelectHandler);
 router.get("/:id", getCuentaServicioHandler);
 router.post("/", createCuentaServicioHandler);
 router.patch("/:id", updateCuentaServicioHandler);

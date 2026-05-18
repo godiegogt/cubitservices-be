@@ -71,33 +71,50 @@ export async function findCargosByEmpresa(
     tipoCargo?: TipoCargo;
     periodoReferencia?: string;
     search?: string;
+  },
+  pagination?: {
+    page: number;
+    limit: number;
   }
 ) {
-  return prisma.cargo.findMany({
-    where: {
-      empresaId,
-      clienteId: filters?.clienteId,
-      cuentaServicioId: filters?.cuentaServicioId,
-      estado: filters?.estado,
-      tipoCargo: filters?.tipoCargo,
-      periodoReferencia: filters?.periodoReferencia,
-      ...(filters?.search
-        ? {
-            OR: [
-              { concepto: { contains: filters.search, mode: "insensitive" } },
-              {
-                periodoReferencia: {
-                  contains: filters.search,
-                  mode: "insensitive",
-                },
+  const page  = pagination?.page  ?? 1;
+  const limit = pagination?.limit ?? 20;
+  const skip  = (page - 1) * limit;
+
+  const where: Prisma.CargoWhereInput = {
+    empresaId,
+    clienteId: filters?.clienteId,
+    cuentaServicioId: filters?.cuentaServicioId,
+    estado: filters?.estado,
+    tipoCargo: filters?.tipoCargo,
+    periodoReferencia: filters?.periodoReferencia,
+    ...(filters?.search
+      ? {
+          OR: [
+            { concepto: { contains: filters.search, mode: "insensitive" } },
+            {
+              periodoReferencia: {
+                contains: filters.search,
+                mode: "insensitive",
               },
-            ],
-          }
-        : {}),
-    },
-    include: cargoListInclude,
-    orderBy: { createdAt: "desc" },
-  });
+            },
+          ],
+        }
+      : {}),
+  };
+
+  const [cargos, total] = await Promise.all([
+    prisma.cargo.findMany({
+      where,
+      include: cargoListInclude,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.cargo.count({ where }),
+  ]);
+
+  return { cargos, total };
 }
 
 export async function findCargoById(id: string) {

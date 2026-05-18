@@ -283,3 +283,50 @@ export async function findEstadosByOrdenId(ordenServicioId: string) {
     orderBy: { createdAt: "asc" },
   });
 }
+
+export async function findOrdenesSelect(
+  empresaId: string,
+  filters?: {
+    search?: string;
+    cuentaServicioId?: string;
+    clienteId?: string;
+  }
+) {
+  return prisma.ordenServicio.findMany({
+    where: {
+      empresaId,
+      cuentaServicioId: filters?.cuentaServicioId,
+      clienteId: filters?.clienteId,
+      ...(filters?.search
+        ? {
+            OR: [
+              { numeroOrden: { contains: filters.search, mode: "insensitive" } },
+              { titulo: { contains: filters.search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: { numeroOrden: "asc" },
+    select: {
+      id: true,
+      numeroOrden: true,
+      titulo: true,
+      estado: true,
+      prioridad: true,
+      cliente: {
+        select: {
+          id: true,
+          nombreRazonSocial: true,
+          nombreComercial: true,
+        },
+      },
+      cuentaServicio: {
+        select: {
+          id: true,
+          codigo: true,
+          nombre: true,
+        },
+      },
+    },
+  });
+}

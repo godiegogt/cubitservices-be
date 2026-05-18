@@ -4,6 +4,7 @@ import {
   createOrdenHandler,
   getOrdenHandler,
   listOrdenes,
+  listOrdenesSelectHandler,
   listOrdenEstados,
   updateOrdenHandler,
   updateOrdenStatusHandler,
@@ -15,6 +16,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/", listOrdenes);
+router.get("/select/:cuentaServicioId", listOrdenesSelectHandler);
 router.get("/:id", getOrdenHandler);
 router.get("/:id/estados", listOrdenEstados);
 router.post("/", createOrdenHandler);

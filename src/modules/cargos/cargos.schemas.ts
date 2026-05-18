@@ -28,8 +28,8 @@ export const createCargoFromCuentaSchema = z
 
 export const updateCargoStatusSchema = z
   .object({
-    estado: z.literal(EstadoCargo.ANULADO),
-    motivo: z.string().min(3).max(500),
+    estado: z.nativeEnum(EstadoCargo),
+    motivo: z.string().min(3).max(500).optional(),
   })
   .strict();
 
@@ -40,4 +40,6 @@ export const getCargosQuerySchema = z.object({
   tipoCargo: z.nativeEnum(TipoCargo).optional(),
   periodoReferencia: z.string().max(50).optional(),
   search: z.string().min(1).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 });

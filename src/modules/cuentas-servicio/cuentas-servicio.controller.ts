@@ -11,6 +11,7 @@ import {
   getCuentaServicioByIdService,
   getCuentasServicio,
   getCuentasServicioSelectByClienteService,
+  getCuentasServicioSelectService,
   updateCuentaServicioService,
   updateCuentaServicioStatusService,
 } from "./cuentas-servicio.service";
@@ -19,6 +20,11 @@ const listCuentasServicioQuerySchema = z.object({
   clienteId: z.string().uuid().optional(),
   estado: z.nativeEnum(EstadoCuentaServicio).optional(),
   tipoServicioId: z.string().uuid().optional(),
+  search: z.string().min(1).optional(),
+});
+
+const listCuentasServicioSelectQuerySchema = z.object({
+  clienteId: z.string().uuid().optional(),
   search: z.string().min(1).optional(),
 });
 
@@ -151,26 +157,26 @@ export async function updateCuentaServicioStatusHandler(
 }
 
 export async function listCuentasServicioSelectHandler(req: Request, res: Response) {
-    try {
-        const empresaId = req.auth!.empresaId;
-        const { clienteId } = req.params;
+  try {
+    const empresaId = req.auth!.empresaId;
+    const parsed = listCuentasServicioSelectQuerySchema.parse(req.query);
 
-        const cuentas = await getCuentasServicioSelectByClienteService(clienteId, empresaId);
+    const cuentas = await getCuentasServicioSelectService(empresaId, parsed);
 
-        return res.json({
-            success: true,
-            message: "Cuentas de servicio obtenidas correctamente",
-            data: cuentas,
-        });
-    } catch (error) {
-        return res.status(404).json({
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Error obteniendo cuentas de servicio",
-        });
-    }
+    return res.json({
+      success: true,
+      message: "Cuentas de servicio obtenidas correctamente",
+      data: cuentas,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Error obteniendo cuentas de servicio",
+    });
+  }
 }
 
 

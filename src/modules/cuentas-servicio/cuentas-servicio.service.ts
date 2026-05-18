@@ -10,6 +10,7 @@ import {
   findCuentaServicioByCodigo,
   findCuentaServicioById,
   findCuentasServicioByEmpresa,
+  findCuentasServicioSelect,
   findCuentasServicioSelectByCliente,
   findPoliticaCobroById,
   findTipoServicioById,
@@ -294,4 +295,22 @@ export async function getCuentasServicioSelectByClienteService(
     }
 
     return findCuentasServicioSelectByCliente(clienteId, empresaId);
+}
+
+export async function getCuentasServicioSelectService(
+  empresaId: string,
+  filters?: {
+    clienteId?: string;
+    search?: string;
+  }
+) {
+  if (filters?.clienteId) {
+    const cliente = await findClienteById(filters.clienteId);
+
+    if (!cliente || cliente.empresaId !== empresaId) {
+      throw new Error("Cliente no encontrado");
+    }
+  }
+
+  return findCuentasServicioSelect(empresaId, filters);
 }
