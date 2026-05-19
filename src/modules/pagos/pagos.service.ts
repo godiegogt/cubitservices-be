@@ -149,15 +149,30 @@ export async function getPagosService(
     fechaDesde?: string;
     fechaHasta?: string;
     search?: string;
+    page?: number;
+    limit?: number;
   }
 ) {
-  const pagos = await findPagosByEmpresa(empresaId, {
-    ...filters,
-    fechaDesde: filters?.fechaDesde ? parseDateOnly(filters.fechaDesde) : undefined,
-    fechaHasta: filters?.fechaHasta ? parseDateOnly(filters.fechaHasta) : undefined,
-  });
+  const page = Math.max(1, filters?.page ?? 1);
+  const limit = Math.min(100, Math.max(1, filters?.limit ?? 20));
 
-  return pagos.map(formatPagoListItem);
+  const { pagos, total } = await findPagosByEmpresa(
+    empresaId,
+    {
+      clienteId: filters?.clienteId,
+      metodoPagoId: filters?.metodoPagoId,
+      estado: filters?.estado,
+      fechaDesde: filters?.fechaDesde ? parseDateOnly(filters.fechaDesde) : undefined,
+      fechaHasta: filters?.fechaHasta ? parseDateOnly(filters.fechaHasta) : undefined,
+      search: filters?.search,
+    },
+    { page, limit }
+  );
+
+  return {
+    data: pagos.map(formatPagoListItem),
+    meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 export async function getPagoByIdService(id: string, empresaId: string) {

@@ -73,8 +73,16 @@ export async function findPagosByEmpresa(
     fechaDesde?: Date;
     fechaHasta?: Date;
     search?: string;
+  },
+  pagination?: {
+    page: number;
+    limit: number;
   }
 ) {
+  const page = pagination?.page ?? 1;
+  const limit = pagination?.limit ?? 20;
+  const skip = (page - 1) * limit;
+
   const where: Prisma.PagoWhereInput = {
     empresaId,
     clienteId: filters?.clienteId,
@@ -103,11 +111,18 @@ export async function findPagosByEmpresa(
       : {}),
   };
 
-  return prisma.pago.findMany({
-    where,
-    include: pagoListInclude,
-    orderBy: { createdAt: "desc" },
-  });
+  const [pagos, total] = await Promise.all([
+    prisma.pago.findMany({
+      where,
+      include: pagoListInclude,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.pago.count({ where }),
+  ]);
+
+  return { pagos, total };
 }
 
 export async function findPagoById(id: string, client: PrismaClientLike = prisma) {
