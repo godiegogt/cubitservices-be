@@ -15,6 +15,7 @@ import ubicacionesRoutes from "./modules/ubicaciones/ubicacion.routes";
 import cuentasServicioRoutes from "./modules/cuentas-servicio/cuentas-servicio.routes";
 import ordenesRoutes from "./modules/ordenes/ordenes.routes";
 import cargosRoutes from "./modules/cargos/cargos.routes";
+import pagosRoutes from "./modules/pagos/pagos.routes";
 
 const app = express();
 app.use(
@@ -48,6 +49,7 @@ app.use("/politicas-cobro", politicasCobroRoutes);
 app.use("/cuentas-servicio", cuentasServicioRoutes);
 app.use("/ordenes", ordenesRoutes);
 app.use("/cargos", cargosRoutes);
+app.use("/pagos", pagosRoutes);
 app.use("/cuentas-servicio", cargosRoutes);
 
 export default app;
