@@ -17,12 +17,13 @@ export async function listPagos(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
     const parsedQuery = getPagosQuerySchema.parse(req.query);
-    const pagos = await getPagosService(empresaId, parsedQuery);
+    const result = await getPagosService(empresaId, parsedQuery);
 
     return res.json({
       success: true,
       message: "Pagos obtenidos correctamente",
-      data: pagos,
+      data: result.data,
+      meta: result.meta,
     });
   } catch (error) {
     return res.status(400).json({
