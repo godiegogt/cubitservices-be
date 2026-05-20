@@ -106,6 +106,11 @@ export async function findPagosByEmpresa(
                 mode: "insensitive",
               },
             },
+            {
+              cliente: {
+                nombreRazonSocial: { contains: filters.search, mode: "insensitive" },
+              },
+            },
           ],
         }
       : {}),
