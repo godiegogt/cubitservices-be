@@ -159,7 +159,7 @@ export async function updateCuentaServicioStatusHandler(
 export async function listCuentasServicioSelectHandler(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
-    const parsed = listCuentasServicioSelectQuerySchema.parse(req.query);
+    const parsed = listCuentasServicioSelectQuerySchema.parse({...req.query, clienteId: req.params.clienteId,});
 
     const cuentas = await getCuentasServicioSelectService(empresaId, parsed);
 
