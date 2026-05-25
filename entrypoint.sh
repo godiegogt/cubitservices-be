@@ -2,7 +2,7 @@
 set -e
 
 echo "⏳ Esperando a que PostgreSQL esté listo..."
-until npx prisma db execute --stdin <<< "SELECT 1" 2>/dev/null; do
+until npx prisma db execute --sql "SELECT 1" 2>/dev/null; do
   sleep 2
 done
 
