@@ -276,6 +276,7 @@ export async function findCuentasServicioSelect(
       id: true,
       codigo: true,
       nombre: true,
+      montoBase: true,
       ubicacion: {
         select: {
           id: true,
