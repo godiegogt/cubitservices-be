@@ -12,7 +12,8 @@ COPY . .
 RUN pnpm prisma generate
 
 RUN pnpm run build
-
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && pnpm start"]
+CMD ["sh", "./entrypoint.sh"]
