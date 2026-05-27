@@ -22,6 +22,10 @@ export const createUbicacion = (data: {
     latitud?: number | null;
     longitud?: number | null;
     esPrincipal: boolean;
+    zona?: number | null;
+    calle?: string | null;
+    avenida?: string | null;
+    numeroCasa?: number | null;
 }) => {
     return prisma.clienteUbicacion.create({
     data: {
@@ -40,7 +44,11 @@ export const updateUbicacion = (
     latitud?: number | null;
     longitud?: number | null;
     esPrincipal?: boolean;
-    }
+    zona?: number | null;
+    calle?: string | null;
+    avenida?: string | null;
+    numeroCasa?: number | null;
+}
 ) => {
     return prisma.clienteUbicacion.update({
     where: { id },
