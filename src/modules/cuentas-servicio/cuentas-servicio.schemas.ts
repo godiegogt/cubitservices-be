@@ -103,5 +103,5 @@ export const updateCuentaServicioSchema = updateCuentaServicioBaseSchema.superRe
 
 export const updateCuentaServicioStatusSchema = z.object({
   estado: z.nativeEnum(EstadoCuentaServicio),
-  motivo: z.string().max(500).optional(),
+  motivo: z.string().min(3).max(500),
 });

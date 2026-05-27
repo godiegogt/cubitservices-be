@@ -18,6 +18,7 @@ import {
   updateCuentaServicio,
   updateCuentaServicioStatus,
 } from "./cuentas-servicio.repository";
+import type { Observacion } from "../../types/observacion";
 
 const terminalStates = new Set<EstadoCuentaServicio>([
   EstadoCuentaServicio.CANCELADA,
@@ -261,7 +262,8 @@ export async function updateCuentaServicioService(
 export async function updateCuentaServicioStatusService(
   id: string,
   empresaId: string,
-  estado: EstadoCuentaServicio
+  estado: EstadoCuentaServicio,
+  motivo: string
 ) {
   const cuentaServicio = await findCuentaServicioById(id);
 
@@ -281,7 +283,9 @@ export async function updateCuentaServicioStatusService(
     );
   }
 
-  return updateCuentaServicioStatus(id, estado);
+  const observacionesActuales = (cuentaServicio.observaciones as unknown as Observacion[]) ?? [];
+
+  return updateCuentaServicioStatus(id, estado, observacionesActuales, motivo);
 }
 
 export async function getCuentasServicioSelectByClienteService(

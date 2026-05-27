@@ -6,6 +6,7 @@ import {
   Prisma,
 } from "@prisma/client";
 import prisma from "../../config/prisma";
+import { Observacion } from "../../types/observacion"
 
 const cuentaServicioInclude = {
   cliente: {
@@ -173,7 +174,7 @@ export async function createCuentaServicio(data: {
       montoBase: data.montoBase,
       diaCorte: data.diaCorte,
       diaPago: data.diaPago,
-      observaciones: data.observaciones,
+      observaciones: data.observaciones ? [{ texto: data.observaciones, fecha: new Date().toISOString(), estado: EstadoCuentaServicio.ACTIVA }]: [],
       estado: EstadoCuentaServicio.ACTIVA,
     },
     include: cuentaServicioInclude,
@@ -209,11 +210,20 @@ export async function updateCuentaServicio(
 
 export async function updateCuentaServicioStatus(
   id: string,
-  estado: EstadoCuentaServicio
+  estado: EstadoCuentaServicio,
+  observacionesActuales: Observacion[],
+  motivo: string
 ) {
+  const nuevaObservacion: Observacion = {
+    texto: motivo,
+    fecha: new Date().toISOString(),
+    estado,
+  };
   return prisma.cuentaServicio.update({
     where: { id },
-    data: { estado },
+    data: { estado,
+      observaciones: [...observacionesActuales, nuevaObservacion] as unknown as Prisma.InputJsonValue,
+    },
     include: cuentaServicioInclude,
   });
 }
