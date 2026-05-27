@@ -18,7 +18,7 @@ import {
   updateCuentaServicio,
   updateCuentaServicioStatus,
 } from "./cuentas-servicio.repository";
-import type { Observacion } from "../../types/observacion";
+import type { MotivoCambioEstado } from "../../types/motivos";
 
 const terminalStates = new Set<EstadoCuentaServicio>([
   EstadoCuentaServicio.CANCELADA,
@@ -282,10 +282,11 @@ export async function updateCuentaServicioStatusService(
       `No se permite cambiar de ${cuentaServicio.estado} a ${estado}`
     );
   }
+  
+  const raw = (cuentaServicio as Record<string, unknown>)["motivo"];
+  const motivosActuales: MotivoCambioEstado[] = Array.isArray(raw) ? (raw as unknown as MotivoCambioEstado[]) : [];
 
-  const observacionesActuales = (cuentaServicio.observaciones as unknown as Observacion[]) ?? [];
-
-  return updateCuentaServicioStatus(id, estado, observacionesActuales, motivo);
+  return updateCuentaServicioStatus(id, estado, motivosActuales, motivo);
 }
 
 export async function getCuentasServicioSelectByClienteService(

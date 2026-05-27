@@ -1,4 +1,4 @@
-export interface Observacion {
+export interface MotivoCambioEstado {
     texto: string
     fecha: string
     estado: string
