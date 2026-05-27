@@ -409,7 +409,8 @@ model CuentaServicio {
   diaCorte         Int?                   @map("dia_corte")
   diaPago          Int?                   @map("dia_pago")
   estado           EstadoCuentaServicio
-  observaciones    Json?                  @default("[]")
+  observaciones    String?
+  motivo           Json?                  @default("[]")
   createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
 
