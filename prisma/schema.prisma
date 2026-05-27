@@ -639,6 +639,7 @@ model Cargo {
 
   morasCalculadas           Mora[]          @relation("CargoPrincipalMora")
   moraComoCargoAplicado     Mora[]          @relation("CargoMoraAplicado")
+  motivo                    String?         @db.VarChar(255)
 
   aplicacionesPago          AplicacionPago[]
 
