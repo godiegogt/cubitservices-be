@@ -154,6 +154,7 @@ export async function createCuentaServicio(data: {
   montoBase: number;
   diaCorte?: number;
   diaPago?: number;
+  observaciones?: string;
 }) {
   return prisma.cuentaServicio.create({
     data: {
@@ -172,6 +173,7 @@ export async function createCuentaServicio(data: {
       montoBase: data.montoBase,
       diaCorte: data.diaCorte,
       diaPago: data.diaPago,
+      observaciones: data.observaciones,
       estado: EstadoCuentaServicio.ACTIVA,
     },
     include: cuentaServicioInclude,
@@ -195,6 +197,7 @@ export async function updateCuentaServicio(
     montoBase?: number;
     diaCorte?: number | null;
     diaPago?: number | null;
+    observaciones?: string;
   }
 ) {
   return prisma.cuentaServicio.update({
