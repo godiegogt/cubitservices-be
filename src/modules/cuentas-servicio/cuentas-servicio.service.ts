@@ -163,7 +163,6 @@ export async function createCuentaServicioService(input: {
   montoBase: number;
   diaCorte?: number;
   diaPago?: number;
-  observaciones?: string;
 }) {
   const existing = await findCuentaServicioByCodigo(input.empresaId, input.codigo);
 
@@ -206,7 +205,6 @@ export async function updateCuentaServicioService(
     montoBase?: number;
     diaCorte?: number | null;
     diaPago?: number | null;
-    observaciones?: string;
   }
 ) {
   const cuentaServicio = await findCuentaServicioById(id);
