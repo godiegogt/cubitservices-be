@@ -59,8 +59,8 @@ export async function createUbicacionService(
     longitud?: number | null;
     esPrincipal: boolean;
     zona?: number | null;
-    calle?: string | null;
-    avenida?: string | null;
+    calle?: number | null;
+    avenida?: number | null;
     numeroCasa?: number | null;
     }
 ) {
@@ -96,8 +96,8 @@ export async function updateUbicacionService(
     longitud?: number | null;
     esPrincipal?: boolean;
     zona?: number | null;
-    calle?: string | null;
-    avenida?: string | null;
+    calle?: number | null;
+    avenida?: number | null;
     numeroCasa?: number | null;
     }
 ) {

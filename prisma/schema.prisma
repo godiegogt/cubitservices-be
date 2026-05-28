@@ -308,8 +308,8 @@ model ClienteUbicacion {
   createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
   zona        Int?
-  calle       String?           @db.VarChar(50)
-  avenida     String?           @db.VarChar(100)
+  calle       Int?
+  avenida     Int?
   numeroCasa  Int?              @map("numero_casa")
 
   cliente           Cliente           @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)

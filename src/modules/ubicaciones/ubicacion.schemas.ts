@@ -9,8 +9,8 @@ export const createUbicacionSchema = z.object({
     longitud: z.number().nullable().optional(),
     esPrincipal: z.boolean().optional().default(false),
     zona: z.number().nullable().optional(),
-    calle: z.string().nullable().optional(),
-    avenida: z.string().nullable().optional(),
+    calle: z.number().nullable().optional(),
+    avenida: z.number().nullable().optional(),
     numeroCasa: z.number().nullable().optional(),
 });
 
@@ -22,8 +22,8 @@ export const updateUbicacionSchema = z.object({
     longitud: z.number().nullable().optional(),
     esPrincipal: z.boolean().optional(),
     zona: z.number().nullable().optional(),
-    calle: z.string().nullable().optional(),
-    avenida: z.string().nullable().optional(),
+    calle: z.number().nullable().optional(),
+    avenida: z.number().nullable().optional(),
     numeroCasa: z.number().nullable().optional(),
 });
 

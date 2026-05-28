@@ -23,8 +23,8 @@ export const createUbicacion = (data: {
     longitud?: number | null;
     esPrincipal: boolean;
     zona?: number | null;
-    calle?: string | null;
-    avenida?: string | null;
+    calle?: number | null;
+    avenida?: number | null;
     numeroCasa?: number | null;
 }) => {
     return prisma.clienteUbicacion.create({
@@ -45,8 +45,8 @@ export const updateUbicacion = (
     longitud?: number | null;
     esPrincipal?: boolean;
     zona?: number | null;
-    calle?: string | null;
-    avenida?: string | null;
+    calle?: number | null;
+    avenida?: number | null;
     numeroCasa?: number | null;
 }
 ) => {
