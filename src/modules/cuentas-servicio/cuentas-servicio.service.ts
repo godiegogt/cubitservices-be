@@ -18,6 +18,8 @@ import {
   updateCuentaServicio,
   updateCuentaServicioStatus,
 } from "./cuentas-servicio.repository";
+import type { MotivoCambioEstado } from "../../types/motivos";
+import { Observacion } from "../../types/observacion";
 
 const terminalStates = new Set<EstadoCuentaServicio>([
   EstadoCuentaServicio.CANCELADA,
@@ -183,6 +185,9 @@ export async function createCuentaServicioService(input: {
 
   return createCuentaServicio({
     ...input,
+    observaciones: input.observaciones
+    ? [{ texto: input.observaciones, fecha: new Date().toISOString() }]
+    : [],
     fechaInicio: parseDateOnly(input.fechaInicio) ?? undefined,
     fechaFin: parseDateOnly(input.fechaFin),
   });
@@ -210,6 +215,18 @@ export async function updateCuentaServicioService(
   }
 ) {
   const cuentaServicio = await findCuentaServicioById(id);
+
+  const rawObs = (cuentaServicio as Record<string, unknown>)["observaciones"];
+  const observacionesActuales: Observacion[] = Array.isArray(rawObs) 
+    ? (rawObs as unknown as Observacion[]) 
+    : [];
+
+  const nuevaObservacion = input.observaciones
+  ? [...observacionesActuales, { 
+      texto: input.observaciones, 
+      fecha: new Date().toISOString(), // también cambiar a string para consistencia
+    }]
+  : observacionesActuales;
 
   if (!cuentaServicio || cuentaServicio.empresaId !== empresaId) {
     throw new Error("Cuenta de servicio no encontrada");
@@ -255,7 +272,7 @@ export async function updateCuentaServicioService(
     fechaFin: parseDateOnly(input.fechaFin),
   };
 
-  return updateCuentaServicio(id, dataToUpdate);
+  return updateCuentaServicio(id, {...dataToUpdate, observaciones: nuevaObservacion});
 }
 
 export async function updateCuentaServicioStatusService(
