@@ -213,11 +213,6 @@ export async function updateCuentaServicioService(
 ) {
   const cuentaServicio = await findCuentaServicioById(id);
 
-  const rawObs = (cuentaServicio as Record<string, unknown>)["observaciones"];
-  const observacionesActuales: Observacion[] = Array.isArray(rawObs) 
-    ? (rawObs as unknown as Observacion[]) 
-    : [];
-
   if (!cuentaServicio || cuentaServicio.empresaId !== empresaId) {
     throw new Error("Cuenta de servicio no encontrada");
   }
