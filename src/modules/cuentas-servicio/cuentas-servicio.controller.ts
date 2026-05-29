@@ -84,6 +84,7 @@ export async function createCuentaServicioHandler(req: Request, res: Response) {
 
     const cuentaServicio = await createCuentaServicioService({
       empresaId,
+      usuarioId: req.auth!.userId,
       ...parsed,
     });
 
@@ -107,7 +108,12 @@ export async function updateCuentaServicioHandler(req: Request, res: Response) {
     const { id } = req.params;
     const parsed = updateCuentaServicioSchema.parse(req.body);
 
-    const cuentaServicio = await updateCuentaServicioService(id, empresaId, parsed);
+    const cuentaServicio = await updateCuentaServicioService(
+      id,
+      empresaId,
+      parsed,
+      req.auth!.userId
+    );
 
     return res.json({
       success: true,

@@ -5,6 +5,8 @@ type JwtPayload = {
   userId: string;
   empresaId: string;
   rolId: string;
+  nombres: string;
+  apellidos: string;
 };
 
 export const ACCESS_TOKEN_EXPIRES_IN = "8h";

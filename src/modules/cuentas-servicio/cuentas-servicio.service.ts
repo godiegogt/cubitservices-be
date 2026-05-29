@@ -151,6 +151,7 @@ export async function getCuentaServicioByIdService(id: string, empresaId: string
 
 export async function createCuentaServicioService(input: {
   empresaId: string;
+  usuarioId: string;
   clienteId: string;
   ubicacionId?: string;
   tipoServicioId: string;
@@ -165,9 +166,10 @@ export async function createCuentaServicioService(input: {
   montoBase: number;
   diaCorte?: number;
   diaPago?: number;
-  observaciones?: string;
 }) {
-  const existing = await findCuentaServicioByCodigo(input.empresaId, input.codigo);
+  const [existing] = await Promise.all([
+    findCuentaServicioByCodigo(input.empresaId, input.codigo),
+  ]);
 
   if (existing) {
     throw new Error("Ya existe una cuenta de servicio con ese cÃ³digo");
@@ -211,8 +213,7 @@ export async function updateCuentaServicioService(
     montoBase?: number;
     diaCorte?: number | null;
     diaPago?: number | null;
-    observaciones?: string;
-  }
+  }, usuarioId: string
 ) {
   const cuentaServicio = await findCuentaServicioById(id);
 
