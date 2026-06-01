@@ -59,12 +59,12 @@ export async function createObservacionHandler(req: Request, res: Response) {
     const { cuentaServicioId } = req.params;
     const parsed = createObservacionSchema.parse(req.body);
 
-    const creadoPor =
-        parsed.creadoPor ?? `${nombres} ${apellidos}`.trim();
+    const createdBy =
+        parsed.createdBy ?? `${nombres} ${apellidos}`.trim();
 
     const data = await createObservacionService(cuentaServicioId, empresaId, {
         ...parsed,
-        creadoPor,
+        createdBy,
     });
 
     return res.status(201).json({
@@ -83,15 +83,21 @@ export async function createObservacionHandler(req: Request, res: Response) {
 
 export async function updateObservacionHandler(req: Request, res: Response) {
     try {
-    const empresaId = req.auth!.empresaId;
+    const { empresaId, nombres, apellidos } = req.auth!;
     const { cuentaServicioId, observacionId } = req.params;
     const parsed = updateObservacionSchema.parse(req.body);
+
+    const updatedBy =
+        parsed.updatedBy ?? `${nombres} ${apellidos}`.trim();
 
     const data = await updateObservacionService(
         cuentaServicioId,
         empresaId,
         observacionId,
-        parsed
+        {
+            ...parsed,
+            updatedBy: updatedBy
+        }
     );
 
     return res.json({

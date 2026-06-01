@@ -16,13 +16,21 @@ async function getCuentaYObservaciones(
     const cuenta = await findCuentaServicioObservaciones(cuentaServicioId);
 
     if (!cuenta || cuenta.empresaId !== empresaId) {
-    throw new Error("Cuenta de servicio no encontrada");
+        throw new Error("Cuenta de servicio no encontrada");
     }
 
     const raw = cuenta.observaciones;
 
     if (!raw) return [];
-    if (Array.isArray(raw)) return raw as Observacion[];
+    if (Array.isArray(raw)) {
+        const observaciones = raw as Observacion[];
+
+        return observaciones.sort((a, b) => {
+            const fechaA = new Date(a.updatedAt ?? a.createdAt).getTime();
+            const fechaB = new Date(b.updatedAt ?? b.createdAt).getTime();
+            return fechaB - fechaA;
+        });
+    }
 
     throw new Error("El campo observaciones tiene un formato inválido");
 }
@@ -59,8 +67,8 @@ export async function createObservacionService(
     const nueva: Observacion = {
     id: randomUUID(),
     texto: dto.texto,
-    ...(dto.creadoPor ? { creadoPor: dto.creadoPor } : {}),
-    creadoEn: new Date().toISOString(),
+    createdBy: dto.createdBy,
+    createdAt: new Date().toISOString(),
     };
 
     await updateObservaciones(cuentaServicioId, [...observaciones, nueva]);
@@ -85,7 +93,8 @@ export async function updateObservacionService(
     const actualizada: Observacion = {
     ...observaciones[index],
     texto: dto.texto,
-    actualizadoEn: new Date().toISOString(),
+    updatedBy: dto.updatedBy,
+    updatedAt: new Date().toISOString(),
     };
 
     const nuevasObservaciones = [...observaciones];
