@@ -145,7 +145,15 @@ export async function getCuentaServicioByIdService(id: string, empresaId: string
     throw new Error("Cuenta de servicio no encontrada");
   }
 
-  return cuentaServicio;
+  const raw = (cuentaServicio as Record<string, unknown>)["motivo"];
+
+  const motivos: MotivoCambioEstado[] = Array.isArray(raw)
+    ? (raw as MotivoCambioEstado[]).sort(
+        (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+      )
+    : [];
+
+  return { ...cuentaServicio, motivo: motivos };
 }
 
 export async function createCuentaServicioService(input: {
