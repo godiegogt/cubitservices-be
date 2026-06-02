@@ -18,6 +18,7 @@ import {
   updateCuentaServicio,
   updateCuentaServicioStatus,
 } from "./cuentas-servicio.repository";
+import type { MotivoCambioEstado } from "../../types/motivos";
 
 const terminalStates = new Set<EstadoCuentaServicio>([
   EstadoCuentaServicio.CANCELADA,
@@ -144,7 +145,15 @@ export async function getCuentaServicioByIdService(id: string, empresaId: string
     throw new Error("Cuenta de servicio no encontrada");
   }
 
-  return cuentaServicio;
+  const raw = (cuentaServicio as Record<string, unknown>)["motivo"];
+
+  const motivos: MotivoCambioEstado[] = Array.isArray(raw)
+    ? (raw as MotivoCambioEstado[]).sort(
+        (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+      )
+    : [];
+
+  return { ...cuentaServicio, motivo: motivos };
 }
 
 export async function createCuentaServicioService(input: {
@@ -261,7 +270,8 @@ export async function updateCuentaServicioService(
 export async function updateCuentaServicioStatusService(
   id: string,
   empresaId: string,
-  estado: EstadoCuentaServicio
+  estado: EstadoCuentaServicio,
+  motivo: string
 ) {
   const cuentaServicio = await findCuentaServicioById(id);
 
@@ -280,8 +290,11 @@ export async function updateCuentaServicioStatusService(
       `No se permite cambiar de ${cuentaServicio.estado} a ${estado}`
     );
   }
+  
+  const raw = (cuentaServicio as Record<string, unknown>)["motivo"];
+  const motivosActuales: MotivoCambioEstado[] = Array.isArray(raw) ? (raw as unknown as MotivoCambioEstado[]) : [];
 
-  return updateCuentaServicioStatus(id, estado);
+  return updateCuentaServicioStatus(id, estado, motivosActuales, motivo);
 }
 
 export async function getCuentasServicioSelectByClienteService(
