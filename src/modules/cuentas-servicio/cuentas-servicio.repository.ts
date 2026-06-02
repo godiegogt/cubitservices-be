@@ -6,6 +6,7 @@ import {
   Prisma,
 } from "@prisma/client";
 import prisma from "../../config/prisma";
+import { Observacion } from "../../types/observacion"
 import { MotivoCambioEstado } from "../../types/motivos";
 
 const cuentaServicioInclude = {
@@ -54,6 +55,13 @@ const cuentaServicioInclude = {
 export type CuentaServicioWithRelations = Prisma.CuentaServicioGetPayload<{
   include: typeof cuentaServicioInclude;
 }>;
+
+export async function findUsuarioById(id: string) {
+  return prisma.usuario.findUnique({
+    where: { id },
+    select: { id: true, nombres: true, apellidos: true },
+  });
+}
 
 export async function findCuentasServicioByEmpresa(
   empresaId: string,
@@ -182,7 +190,6 @@ export async function createCuentaServicio(data: {
   montoBase: number;
   diaCorte?: number;
   diaPago?: number;
-  observaciones?: string;
 }) {
   return prisma.cuentaServicio.create({
     data: {
@@ -201,7 +208,7 @@ export async function createCuentaServicio(data: {
       montoBase: data.montoBase,
       diaCorte: data.diaCorte,
       diaPago: data.diaPago,
-      observaciones: data.observaciones,
+      observaciones: [],
       motivo: [],
       estado: EstadoCuentaServicio.ACTIVA,
     },
@@ -226,12 +233,11 @@ export async function updateCuentaServicio(
     montoBase?: number;
     diaCorte?: number | null;
     diaPago?: number | null;
-    observaciones?: string;
   },
 ) {
   return prisma.cuentaServicio.update({
     where: { id },
-    data,
+    data: data,
     include: cuentaServicioInclude,
   });
 }

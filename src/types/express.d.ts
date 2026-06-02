@@ -5,6 +5,8 @@ declare global {
         userId: string;
         empresaId: string;
         rolId: string;
+        nombres: string;
+        apellidos: string;
       };
     }
   }
