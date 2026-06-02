@@ -306,5 +306,5 @@ export async function updateCargoStatusService(
     throw new Error("El motivo es obligatorio para anular un cargo (mínimo 3 caracteres)");
   }
 
-  return updateCargoStatus(id, input.estado);
+  return updateCargoStatus(id, input.estado, input.motivo);
 }
