@@ -198,13 +198,14 @@ export async function createCargo(data: {
   });
 }
 
-export async function updateCargoStatus(id: string, estado: EstadoCargo) {
+export async function updateCargoStatus(id: string, estado: EstadoCargo, motivo?: string) {
   return prisma.cargo.update({
     where: { id },
-    data: { estado },
+    data: { estado, motivo },
     select: {
       id: true,
       estado: true,
+      motivo: true,
     },
   });
 }

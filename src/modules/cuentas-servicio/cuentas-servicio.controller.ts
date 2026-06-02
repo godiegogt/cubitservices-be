@@ -143,7 +143,8 @@ export async function updateCuentaServicioStatusHandler(
     const cuentaServicio = await updateCuentaServicioStatusService(
       id,
       empresaId,
-      parsed.estado
+      parsed.estado,
+      parsed.motivo
     );
 
     return res.json({

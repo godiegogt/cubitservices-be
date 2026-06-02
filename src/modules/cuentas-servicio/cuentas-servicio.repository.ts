@@ -7,6 +7,7 @@ import {
 } from "@prisma/client";
 import prisma from "../../config/prisma";
 import { Observacion } from "../../types/observacion"
+import { MotivoCambioEstado } from "../../types/motivos";
 
 const cuentaServicioInclude = {
   cliente: {
@@ -71,7 +72,7 @@ export async function findCuentasServicioByEmpresa(
     estado?: EstadoCuentaServicio;
     tipoServicioId?: string;
     search?: string;
-  }
+  },
 ) {
   const skip = (page - 1) * limit;
 
@@ -81,15 +82,39 @@ export async function findCuentasServicioByEmpresa(
     estado: filters?.estado,
     tipoServicioId: filters?.tipoServicioId,
     ...(filters?.search
-    ? {
-        OR: [
-          { codigo:  { contains: filters.search, mode: "insensitive" as const } },
-          { nombre:  { contains: filters.search, mode: "insensitive" as const } },
-          { cliente: { nombreRazonSocial: { contains: filters.search, mode: "insensitive" as const } } },
-          { cliente: { nombreComercial:   { contains: filters.search, mode: "insensitive" as const } } },
-        ],
-      }
-    : {}),
+      ? {
+          OR: [
+            {
+              codigo: {
+                contains: filters.search,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              nombre: {
+                contains: filters.search,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              cliente: {
+                nombreRazonSocial: {
+                  contains: filters.search,
+                  mode: "insensitive" as const,
+                },
+              },
+            },
+            {
+              cliente: {
+                nombreComercial: {
+                  contains: filters.search,
+                  mode: "insensitive" as const,
+                },
+              },
+            },
+          ],
+        }
+      : {}),
   };
 
   const [cuentasServicio, total] = await Promise.all([
@@ -113,7 +138,10 @@ export async function findCuentaServicioById(id: string) {
   });
 }
 
-export async function findCuentaServicioByCodigo(empresaId: string, codigo: string) {
+export async function findCuentaServicioByCodigo(
+  empresaId: string,
+  codigo: string,
+) {
   return prisma.cuentaServicio.findFirst({
     where: {
       empresaId,
@@ -216,45 +244,55 @@ export async function updateCuentaServicio(
 
 export async function updateCuentaServicioStatus(
   id: string,
-  estado: EstadoCuentaServicio
+  estado: EstadoCuentaServicio,
+  motivosActuales: MotivoCambioEstado[],
+  motivo: string
 ) {
+  const nuevoMotivo: MotivoCambioEstado = {
+    texto: motivo,
+    fecha: new Date().toISOString(),
+    estado,
+  };
+
   return prisma.cuentaServicio.update({
     where: { id },
-    data: { estado },
+    data: {
+      estado,
+      motivo: [...motivosActuales, nuevoMotivo] as unknown as Prisma.InputJsonValue,
+    },
     include: cuentaServicioInclude,
   });
 }
 
-
 export async function findCuentasServicioSelectByCliente(
-    clienteId: string,
-    empresaId: string
+  clienteId: string,
+  empresaId: string,
 ) {
-    return prisma.cuentaServicio.findMany({
-        where: {
-            clienteId,
-            empresaId,
-        },
-        orderBy: { nombre: "asc" },
+  return prisma.cuentaServicio.findMany({
+    where: {
+      clienteId,
+      empresaId,
+    },
+    orderBy: { nombre: "asc" },
+    select: {
+      id: true,
+      codigo: true,
+      nombre: true,
+      ubicacion: {
         select: {
-            id: true,
-            codigo: true,
-            nombre: true,
-            ubicacion: {
-                select: {
-                    id: true,
-                    nombre: true,
-                    direccion: true,
-                },
-            },
-            tipoServicio: {
-                select: {
-                    id: true,
-                    nombre: true,
-                },
-            },
+          id: true,
+          nombre: true,
+          direccion: true,
         },
-    });
+      },
+      tipoServicio: {
+        select: {
+          id: true,
+          nombre: true,
+        },
+      },
+    },
+  });
 }
 
 export async function findCuentasServicioSelect(
@@ -262,7 +300,7 @@ export async function findCuentasServicioSelect(
   filters?: {
     clienteId?: string;
     search?: string;
-  }
+  },
 ) {
   return prisma.cuentaServicio.findMany({
     where: {
