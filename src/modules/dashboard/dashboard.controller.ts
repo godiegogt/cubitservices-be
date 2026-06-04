@@ -16,11 +16,6 @@ export async function dashboardCajeroController(
 ): Promise<void> {
     const empresaId = (req.query.empresaId as string) ?? (req as any).user?.empresaId;
 
-    if (!empresaId) {
-        res.status(400).json({ error: 'empresaId es requerido' });
-        return;
-    }
-
     const { fechaDesde, fechaHasta } = req.query;
 
     if (fechaDesde !== undefined) {
