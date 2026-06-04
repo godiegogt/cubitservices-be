@@ -1,21 +1,27 @@
-export interface CajeroDashBoardResponse {
-    kpis: {
-        totalCobradoHoy: number;
-        pagosRegistrados: number;
-        diferenciaCaja: number;
-    }
+export interface DashboardCajeroKpis {
+    totalCobradoHoy: number;
+    pagosRegistrados: number;
+    diferenciaCaja: number;
+}
 
-    cobroPorMetodoPago: {
-        metodo: string;
-        total: number;
+export interface DashboardCajeroResumen {
+    cobroPorMetodo: {
+    metodo: string;
+    total: number;
     }[];
+}
 
-    pagosDia: {
-        id: string;
-        fecha: Date;
-        cliente: string;
-        monto: number;
-        metodoPago: string;
-        usuario: string;
-    }[];
+export interface PagoDiaRow {
+    id: string;
+    fecha: string;
+    cliente: string;
+    metodoPago: string;
+    monto: number;
+    usuario: string;
+}
+
+export interface DashboardCajeroResponse {
+    kpis: DashboardCajeroKpis;
+    resumen: DashboardCajeroResumen;
+    pagosDia: PagoDiaRow[];
 }
