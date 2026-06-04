@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { cajeroDashboardController } from './dashboard.controller';
+import { dashboardCajeroController } from './dashboard.controller';
 
 const router = Router();
 
-router.get('/cajero', cajeroDashboardController)
+router.get('/cajero', dashboardCajeroController)
 
 export default router;

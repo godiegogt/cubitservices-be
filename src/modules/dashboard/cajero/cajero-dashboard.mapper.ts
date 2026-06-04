@@ -29,16 +29,20 @@ export function toPagoDiaRow(raw: {
     fechaPago: Date;
     montoTotal: { toString(): string } | number | string;
     metodoPago: { nombre: string };
-    cliente: { nombre: string };
-    registradoBy: { nombre: string };
+    cliente: { nombreRazonSocial: string };
+    registradoBy: { nombres: string; apellidos: string | null };
 }): PagoDiaRow {
+    const usuario = [raw.registradoBy.nombres, raw.registradoBy.apellidos]
+    .filter(Boolean)
+    .join(' ');
+
     return {
     id: raw.id,
     fecha: toDateString(raw.fechaPago),
-    cliente: raw.cliente.nombre,
+    cliente: raw.cliente.nombreRazonSocial,
     metodoPago: raw.metodoPago.nombre,
     monto: parseFloat(raw.montoTotal.toString()),
-    usuario: raw.registradoBy.nombre,
+    usuario,
     };
 }
 

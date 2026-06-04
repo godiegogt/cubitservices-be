@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from "../../../config/prisma";
 
 const hoyInicio = (): Date => {
     const d = new Date();
@@ -119,8 +117,8 @@ export async function getPagosDia(empresaId: string) {
         fechaPago: true,
         montoTotal: true,
         metodoPago: { select: { nombre: true } },
-        cliente: { select: { nombre: true } },
-        registradoBy: { select: { nombre: true } },
+        cliente: { select: { nombreRazonSocial: true } },
+        registradoBy: { select: { nombres: true, apellidos: true } },
     },
     });
 }

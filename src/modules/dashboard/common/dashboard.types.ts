@@ -8,6 +8,6 @@ export interface RawPagoDia {
     fechaPago: Date;
     montoTotal: string | number;
     metodoPago: { nombre: string };
-    cliente: { nombre: string };
-    registradoBy: { nombre: string };
+    cliente: { nombreRazonSocial: string };
+    registradoBy: { nombres: string; apellidos: string | null };
 }
