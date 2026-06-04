@@ -1,52 +1,51 @@
-import { formatMonto, toPagoDiaRow } from '../common/dashboard.mapper';
 import {
-    CobroPorMetodo,
     DashboardCajeroKpis,
     DashboardCajeroResumen,
+    DashboardCajeroResponse,
     PagoDiaRow,
-} from '../common/dashboard.types';
+} from '../common/dashboard.dto';
+import { toDateString } from '../common/dashboard.mapper';
 
-export function mapKpis(raw: {
-    totalCobradoHoy: number;
-    pagosRegistrados: number;
-    diferenciaCaja: number;
-}): DashboardCajeroKpis {
+export function toKpis(
+    totalCobradoHoy: number,
+    pagosRegistrados: number,
+    diferenciaCaja: number,
+): DashboardCajeroKpis {
     return {
-    totalCobradoHoy: formatMonto(raw.totalCobradoHoy),
-    pagosRegistrados: raw.pagosRegistrados,
-    diferenciaCaja: formatMonto(raw.diferenciaCaja),
+    totalCobradoHoy,
+    pagosRegistrados,
+    diferenciaCaja,
     };
 }
 
-export function mapResumen(
-    rawCobros: { metodoPago: string; _sum: { monto: number | null } }[],
+export function toResumen(
+    cobroPorMetodo: { metodo: string; total: number }[],
 ): DashboardCajeroResumen {
-    const cobroPorMetodo: CobroPorMetodo[] = rawCobros.map((row) => ({
-    metodo: row.metodoPago,
-    total: formatMonto(row._sum.monto ?? 0),
-    }));
-
     return { cobroPorMetodo };
 }
 
-export function mapPagosDia(
-    rawPagos: {
+export function toPagoDiaRow(raw: {
     id: string;
     fechaPago: Date;
-    monto: number | string;
-    metodoPago: string;
+    montoTotal: { toString(): string } | number | string;
+    metodoPago: { nombre: string };
     cliente: { nombre: string };
-    usuario: { nombre: string };
-    }[],
-): PagoDiaRow[] {
-    return rawPagos.map((p) =>
-    toPagoDiaRow({
-        id: p.id,
-        fechaPago: p.fechaPago,
-        clienteNombre: p.cliente?.nombre ?? 'Sin cliente',
-        metodoPago: p.metodoPago,
-        monto: p.monto,
-        usuarioNombre: p.usuario?.nombre ?? 'Sin usuario',
-    }),
-    );
+    registradoBy: { nombre: string };
+}): PagoDiaRow {
+    return {
+    id: raw.id,
+    fecha: toDateString(raw.fechaPago),
+    cliente: raw.cliente.nombre,
+    metodoPago: raw.metodoPago.nombre,
+    monto: parseFloat(raw.montoTotal.toString()),
+    usuario: raw.registradoBy.nombre,
+    };
+}
+
+export function toDashboardCajeroResponse(
+    kpis: DashboardCajeroKpis,
+    resumen: DashboardCajeroResumen,
+    pagosDia: PagoDiaRow[],
+): DashboardCajeroResponse {
+    return { kpis, resumen, pagosDia };
 }
