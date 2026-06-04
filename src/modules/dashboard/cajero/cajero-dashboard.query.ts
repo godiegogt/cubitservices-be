@@ -2,86 +2,125 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-function buildWhere(start: Date, end: Date, usuarioId?: string) {
-    return {
-    fechaPago: { gte: start, lte: end },
-    ...(usuarioId ? { usuarioId } : {}),
-    };
-}
+const hoyInicio = (): Date => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+};
 
-export async function getTotalCobradoHoy(
-    start: Date,
-    end: Date,
-    usuarioId?: string,
-): Promise<number> {
+const hoyFin = (): Date => {
+    const d = new Date();
+    d.setHours(23, 59, 59, 999);
+    return d;
+};
+
+export async function getTotalCobradoHoy(empresaId: string): Promise<number> {
     const result = await prisma.pago.aggregate({
-    _sum: { monto: true },
-    where: buildWhere(start, end, usuarioId),
+    where: {
+        empresaId,
+        fechaPago: {
+        gte: hoyInicio(),
+        lte: hoyFin(),
+        },
+        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
+    },
+    _sum: { montoTotal: true },
     });
 
-    return result._sum.monto ?? 0;
+    return parseFloat(result._sum.montoTotal?.toString() ?? '0');
 }
 
-export async function getPagosRegistradosHoy(
-    start: Date,
-    end: Date,
-    usuarioId?: string,
-): Promise<number> {
+export async function getPagosRegistradosHoy(empresaId: string): Promise<number> {
     return prisma.pago.count({
-    where: buildWhere(start, end, usuarioId),
+    where: {
+        empresaId,
+        fechaPago: {
+        gte: hoyInicio(),
+        lte: hoyFin(),
+        },
+        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
+    },
     });
 }
 
 export async function getDiferenciaCaja(
-    start: Date,
-    end: Date,
-    usuarioId?: string,
+    empresaId: string,
+    totalCobrado: number,
 ): Promise<number> {
-    const cierre = await prisma.cierreCaja.findFirst({
+    const pagosHoy = await prisma.pago.findMany({
     where: {
-        fecha: { gte: start, lte: end },
-        ...(usuarioId ? { usuarioId } : {}),
+        empresaId,
+        fechaPago: {
+        gte: hoyInicio(),
+        lte: hoyFin(),
+        },
+        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
     },
-    orderBy: { fecha: 'desc' },
+    select: { id: true },
     });
 
-    if (!cierre) return 0;
+    const pagoIds = pagosHoy.map((p) => p.id);
 
-    return (cierre.montoEsperado ?? 0) - (cierre.montoReal ?? 0);
+    if (pagoIds.length === 0) return 0;
+
+    const aplicado = await prisma.aplicacionPago.aggregate({
+    where: { pagoId: { in: pagoIds } },
+    _sum: { montoAplicado: true },
+    });
+
+    const totalAplicado = parseFloat(aplicado._sum.montoAplicado?.toString() ?? '0');
+    return parseFloat((totalCobrado - totalAplicado).toFixed(2));
 }
 
 export async function getCobroPorMetodo(
-    start: Date,
-    end: Date,
-    usuarioId?: string,
-): Promise<{ metodoPago: string; _sum: { monto: number | null } }[]> {
-    return prisma.pago.groupBy({
-    by: ['metodoPago'],
-    _sum: { monto: true },
-    where: buildWhere(start, end, usuarioId),
-    orderBy: { _sum: { monto: 'desc' } },
-    }) as any;
+    empresaId: string,
+): Promise<{ metodo: string; total: number }[]> {
+    const pagos = await prisma.pago.findMany({
+    where: {
+        empresaId,
+        fechaPago: {
+        gte: hoyInicio(),
+        lte: hoyFin(),
+        },
+        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
+    },
+    select: {
+        montoTotal: true,
+        metodoPago: { select: { nombre: true } },
+    },
+    });
+
+    const acumulado: Record<string, number> = {};
+    for (const pago of pagos) {
+    const nombre = pago.metodoPago.nombre;
+    const monto = parseFloat(pago.montoTotal.toString());
+    acumulado[nombre] = (acumulado[nombre] ?? 0) + monto;
+    }
+
+    return Object.entries(acumulado).map(([metodo, total]) => ({
+    metodo,
+    total: parseFloat(total.toFixed(2)),
+    }));
 }
 
-export async function getPagosDia(
-    start: Date,
-    end: Date,
-    usuarioId?: string,
-) {
+export async function getPagosDia(empresaId: string) {
     return prisma.pago.findMany({
-    where: buildWhere(start, end, usuarioId),
-    orderBy: { fechaPago: 'desc' },
+    where: {
+        empresaId,
+        fechaPago: {
+        gte: hoyInicio(),
+        lte: hoyFin(),
+        },
+        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
+    },
+    orderBy: { fechaRegistro: 'desc' },
     select: {
         id: true,
         fechaPago: true,
-        monto: true,
-        metodoPago: true,
-        cliente: {
-        select: { nombre: true },
-        },
-        usuario: {
-        select: { nombre: true },
-        },
+        montoTotal: true,
+        metodoPago: { select: { nombre: true } },
+        cliente: { select: { nombre: true } },
+        registradoBy: { select: { nombre: true } },
     },
     });
 }
