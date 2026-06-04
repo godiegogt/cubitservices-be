@@ -34,3 +34,25 @@ export interface DashboardCajeroResponse {
     resumen: DashboardCajeroResumen;
     pagosDia: PagoDiaRow[];
 }
+
+// Órdenes
+export interface DashboardOrdenesKpis {
+    total: number;
+    porEstado: { estado: string; cantidad: number }[];
+}
+
+export interface OrdenRow {
+    id: string;
+    numeroOrden: string;
+    titulo: string;
+    cliente: string;
+    estado: string;
+    prioridad: string;
+    fechaProgramada: string | null;
+    zona: number | null;
+}
+
+export interface DashboardOrdenesResponse {
+    kpis: DashboardOrdenesKpis;
+    ordenes: OrdenRow[];
+}

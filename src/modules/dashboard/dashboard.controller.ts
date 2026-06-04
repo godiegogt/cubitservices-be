@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDashboardCajero } from './cajero/cajero-dashboard.service';
+import { getDashboardOrdenes } from './ordenes/ordenes-dashboard.service';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -41,6 +42,46 @@ export async function dashboardCajeroController(
         empresaId,
         fechaDesde as string | undefined,
         fechaHasta as string | undefined,
+    );
+    res.status(200).json(data);
+}
+
+export async function dashboardOrdenesController(
+    req: Request,
+    res: Response,
+): Promise<void> {
+    const { fechaDesde, fechaHasta } = req.query;
+
+    if (fechaDesde !== undefined) {
+        const error = validarFecha(fechaDesde, 'fechaDesde');
+        if (error) { res.status(400).json({ error }); return; }
+    }
+
+    if (fechaHasta !== undefined) {
+        if (fechaDesde === undefined) {
+            res.status(400).json({ error: 'fechaDesde es requerido cuando se especifica fechaHasta' });
+            return;
+        }
+        const error = validarFecha(fechaHasta, 'fechaHasta');
+        if (error) { res.status(400).json({ error }); return; }
+
+        if ((fechaDesde as string) > (fechaHasta as string)) {
+            res.status(400).json({ error: 'fechaDesde no puede ser mayor que fechaHasta' });
+            return;
+        }
+    }
+
+    const zonaRaw = req.query.zona;
+    if (zonaRaw !== undefined && !Number.isInteger(Number(zonaRaw))) {
+        res.status(400).json({ error: 'zona debe ser un número entero' });
+        return;
+    }
+
+    const data = await getDashboardOrdenes(
+        fechaDesde as string | undefined,
+        fechaHasta as string | undefined,
+        zonaRaw !== undefined ? Number(zonaRaw) : undefined,
+        req.query.proximasAEjecutar === 'true',
     );
     res.status(200).json(data);
 }
