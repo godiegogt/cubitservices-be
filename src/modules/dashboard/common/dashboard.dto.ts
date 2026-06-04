@@ -5,6 +5,12 @@ export interface DashboardCajeroKpis {
     pagosRegistrados: number;
     pagosRegistradosAyer: number;
     variacionPagos: number;
+    pagosPendientes: number;
+    pagosPendientesAyer: number;
+    variacionPendientes: number;
+    pagosAnulados: number;
+    pagosAnuladosAyer: number;
+    variacionAnulados: number;
 }
 
 export interface DashboardCajeroResumen {

@@ -17,6 +17,10 @@ export function toKpis(
     totalCobradoAyer: number,
     pagosRegistrados: number,
     pagosRegistradosAyer: number,
+    pagosPendientes: number,
+    pagosPendientesAyer: number,
+    pagosAnulados: number,
+    pagosAnuladosAyer: number,
 ): DashboardCajeroKpis {
     return {
         totalCobradoHoy,
@@ -25,6 +29,12 @@ export function toKpis(
         pagosRegistrados,
         pagosRegistradosAyer,
         variacionPagos: calcularVariacion(pagosRegistrados, pagosRegistradosAyer),
+        pagosPendientes,
+        pagosPendientesAyer,
+        variacionPendientes: calcularVariacion(pagosPendientes, pagosPendientesAyer),
+        pagosAnulados,
+        pagosAnuladosAyer,
+        variacionAnulados: calcularVariacion(pagosAnulados, pagosAnuladosAyer),
     };
 }
 

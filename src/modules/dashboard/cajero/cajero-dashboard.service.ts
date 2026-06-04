@@ -3,6 +3,10 @@ import {
     getTotalCobradoAyer,
     getPagosRegistradosHoy,
     getPagosRegistradosAyer,
+    getPagosPendientesHoy,
+    getPagosPendientesAyer,
+    getPagosAnuladosHoy,
+    getPagosAnuladosAyer,
     getCobroPorMetodo,
     getPagosDia,
 } from './cajero-dashboard.query';
@@ -20,17 +24,40 @@ export async function getDashboardCajero(
 ): Promise<DashboardCajeroResponse> {
     const fecha = fechaStr ? new Date(`${fechaStr}T00:00:00`) : new Date();
 
-    const [totalCobradoHoy, totalCobradoAyer, pagosRegistrados, pagosRegistradosAyer, cobroPorMetodo, rawPagosDia] =
-        await Promise.all([
-            getTotalCobradoHoy(empresaId, fecha),
-            getTotalCobradoAyer(empresaId, fecha),
-            getPagosRegistradosHoy(empresaId, fecha),
-            getPagosRegistradosAyer(empresaId, fecha),
-            getCobroPorMetodo(empresaId, fecha),
-            getPagosDia(empresaId, fecha),
-        ]);
+    const [
+        totalCobradoHoy,
+        totalCobradoAyer,
+        pagosRegistrados,
+        pagosRegistradosAyer,
+        pagosPendientes,
+        pagosPendientesAyer,
+        pagosAnulados,
+        pagosAnuladosAyer,
+        cobroPorMetodo,
+        rawPagosDia,
+    ] = await Promise.all([
+        getTotalCobradoHoy(empresaId, fecha),
+        getTotalCobradoAyer(empresaId, fecha),
+        getPagosRegistradosHoy(empresaId, fecha),
+        getPagosRegistradosAyer(empresaId, fecha),
+        getPagosPendientesHoy(empresaId, fecha),
+        getPagosPendientesAyer(empresaId, fecha),
+        getPagosAnuladosHoy(empresaId, fecha),
+        getPagosAnuladosAyer(empresaId, fecha),
+        getCobroPorMetodo(empresaId, fecha),
+        getPagosDia(empresaId, fecha),
+    ]);
 
-    const kpis = toKpis(totalCobradoHoy, totalCobradoAyer, pagosRegistrados, pagosRegistradosAyer);
+    const kpis = toKpis(
+        totalCobradoHoy,
+        totalCobradoAyer,
+        pagosRegistrados,
+        pagosRegistradosAyer,
+        pagosPendientes,
+        pagosPendientesAyer,
+        pagosAnulados,
+        pagosAnuladosAyer,
+    );
     const resumen = toResumen(cobroPorMetodo);
     const pagosDia = rawPagosDia.map(toPagoDiaRow);
 

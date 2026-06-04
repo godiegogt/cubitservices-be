@@ -20,40 +20,62 @@ const diaAnterior = (fecha: Date): Date => {
     return d;
 };
 
-const whereActivos = (empresaId: string, desde: Date, hasta: Date) => ({
+const ACTIVOS = [EstadoPago.REGISTRADO, EstadoPago.CONFIRMADO];
+const PENDIENTES = [EstadoPago.REGISTRADO];
+const ANULADOS = [EstadoPago.ANULADO];
+
+const wherePagos = (empresaId: string, desde: Date, hasta: Date, estados: EstadoPago[]) => ({
     empresaId,
     fechaPago: { gte: desde, lte: hasta },
-    estado: { in: [EstadoPago.REGISTRADO, EstadoPago.CONFIRMADO] },
+    estado: { in: estados },
 });
 
-export async function getTotalCobradoHoy(empresaId: string, fecha: Date): Promise<number> {
+async function sumarMonto(empresaId: string, desde: Date, hasta: Date, estados: EstadoPago[]): Promise<number> {
     const result = await prisma.pago.aggregate({
-        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
+        where: wherePagos(empresaId, desde, hasta, estados),
         _sum: { montoTotal: true },
     });
     return parseFloat(result._sum.montoTotal?.toString() ?? '0');
+}
+
+async function contarPagos(empresaId: string, desde: Date, hasta: Date, estados: EstadoPago[]): Promise<number> {
+    return prisma.pago.count({ where: wherePagos(empresaId, desde, hasta, estados) });
+}
+
+export async function getTotalCobradoHoy(empresaId: string, fecha: Date): Promise<number> {
+    return sumarMonto(empresaId, inicioDia(fecha), finDia(fecha), ACTIVOS);
 }
 
 export async function getTotalCobradoAyer(empresaId: string, fecha: Date): Promise<number> {
     const ayer = diaAnterior(fecha);
-    const result = await prisma.pago.aggregate({
-        where: whereActivos(empresaId, inicioDia(ayer), finDia(ayer)),
-        _sum: { montoTotal: true },
-    });
-    return parseFloat(result._sum.montoTotal?.toString() ?? '0');
+    return sumarMonto(empresaId, inicioDia(ayer), finDia(ayer), ACTIVOS);
 }
 
 export async function getPagosRegistradosHoy(empresaId: string, fecha: Date): Promise<number> {
-    return prisma.pago.count({
-        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
-    });
+    return contarPagos(empresaId, inicioDia(fecha), finDia(fecha), ACTIVOS);
 }
 
 export async function getPagosRegistradosAyer(empresaId: string, fecha: Date): Promise<number> {
     const ayer = diaAnterior(fecha);
-    return prisma.pago.count({
-        where: whereActivos(empresaId, inicioDia(ayer), finDia(ayer)),
-    });
+    return contarPagos(empresaId, inicioDia(ayer), finDia(ayer), ACTIVOS);
+}
+
+export async function getPagosPendientesHoy(empresaId: string, fecha: Date): Promise<number> {
+    return contarPagos(empresaId, inicioDia(fecha), finDia(fecha), PENDIENTES);
+}
+
+export async function getPagosPendientesAyer(empresaId: string, fecha: Date): Promise<number> {
+    const ayer = diaAnterior(fecha);
+    return contarPagos(empresaId, inicioDia(ayer), finDia(ayer), PENDIENTES);
+}
+
+export async function getPagosAnuladosHoy(empresaId: string, fecha: Date): Promise<number> {
+    return contarPagos(empresaId, inicioDia(fecha), finDia(fecha), ANULADOS);
+}
+
+export async function getPagosAnuladosAyer(empresaId: string, fecha: Date): Promise<number> {
+    const ayer = diaAnterior(fecha);
+    return contarPagos(empresaId, inicioDia(ayer), finDia(ayer), ANULADOS);
 }
 
 export async function getCobroPorMetodo(
@@ -61,7 +83,7 @@ export async function getCobroPorMetodo(
     fecha: Date,
 ): Promise<{ metodo: string; total: number }[]> {
     const pagos = await prisma.pago.findMany({
-        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
+        where: wherePagos(empresaId, inicioDia(fecha), finDia(fecha), ACTIVOS),
         select: {
             montoTotal: true,
             metodoPago: { select: { nombre: true } },
@@ -83,7 +105,7 @@ export async function getCobroPorMetodo(
 
 export async function getPagosDia(empresaId: string, fecha: Date): Promise<RawPagoDia[]> {
     return prisma.pago.findMany({
-        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
+        where: wherePagos(empresaId, inicioDia(fecha), finDia(fecha), ACTIVOS),
         orderBy: { fechaRegistro: 'desc' },
         select: {
             id: true,
