@@ -1,7 +1,8 @@
 import {
     getTotalCobradoHoy,
+    getTotalCobradoAyer,
     getPagosRegistradosHoy,
-    getDiferenciaCaja,
+    getPagosRegistradosAyer,
     getCobroPorMetodo,
     getPagosDia,
 } from './cajero-dashboard.query';
@@ -15,14 +16,21 @@ import { DashboardCajeroResponse } from '../common/dashboard.dto';
 
 export async function getDashboardCajero(
     empresaId: string,
+    fechaStr?: string,
 ): Promise<DashboardCajeroResponse> {
-    const totalCobradoHoy = await getTotalCobradoHoy(empresaId);
-    const pagosRegistrados = await getPagosRegistradosHoy(empresaId);
-    const diferenciaCaja = await getDiferenciaCaja(empresaId, totalCobradoHoy);
-    const cobroPorMetodo = await getCobroPorMetodo(empresaId);
-    const rawPagosDia = await getPagosDia(empresaId);
+    const fecha = fechaStr ? new Date(`${fechaStr}T00:00:00`) : new Date();
 
-    const kpis = toKpis(totalCobradoHoy, pagosRegistrados, diferenciaCaja);
+    const [totalCobradoHoy, totalCobradoAyer, pagosRegistrados, pagosRegistradosAyer, cobroPorMetodo, rawPagosDia] =
+        await Promise.all([
+            getTotalCobradoHoy(empresaId, fecha),
+            getTotalCobradoAyer(empresaId, fecha),
+            getPagosRegistradosHoy(empresaId, fecha),
+            getPagosRegistradosAyer(empresaId, fecha),
+            getCobroPorMetodo(empresaId, fecha),
+            getPagosDia(empresaId, fecha),
+        ]);
+
+    const kpis = toKpis(totalCobradoHoy, totalCobradoAyer, pagosRegistrados, pagosRegistradosAyer);
     const resumen = toResumen(cobroPorMetodo);
     const pagosDia = rawPagosDia.map(toPagoDiaRow);
 

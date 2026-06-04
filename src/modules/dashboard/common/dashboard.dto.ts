@@ -1,7 +1,10 @@
 export interface DashboardCajeroKpis {
     totalCobradoHoy: number;
+    totalCobradoAyer: number;
+    variacionTotal: number;
     pagosRegistrados: number;
-    diferenciaCaja: number;
+    pagosRegistradosAyer: number;
+    variacionPagos: number;
 }
 
 export interface DashboardCajeroResumen {

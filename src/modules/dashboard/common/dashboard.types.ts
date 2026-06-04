@@ -6,7 +6,7 @@ export interface MetodoPagoTotal {
 export interface RawPagoDia {
     id: string;
     fechaPago: Date;
-    montoTotal: string | number;
+    montoTotal: { toString(): string };
     metodoPago: { nombre: string };
     cliente: { nombreRazonSocial: string };
     registradoBy: { nombres: string; apellidos: string | null };

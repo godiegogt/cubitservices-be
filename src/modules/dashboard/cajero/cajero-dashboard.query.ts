@@ -1,124 +1,97 @@
 import prisma from "../../../config/prisma";
+import { EstadoPago } from "@prisma/client";
+import { RawPagoDia } from "../common/dashboard.types";
 
-const hoyInicio = (): Date => {
-    const d = new Date();
+const inicioDia = (fecha: Date): Date => {
+    const d = new Date(fecha);
     d.setHours(0, 0, 0, 0);
     return d;
 };
 
-const hoyFin = (): Date => {
-    const d = new Date();
+const finDia = (fecha: Date): Date => {
+    const d = new Date(fecha);
     d.setHours(23, 59, 59, 999);
     return d;
 };
 
-export async function getTotalCobradoHoy(empresaId: string): Promise<number> {
-    const result = await prisma.pago.aggregate({
-    where: {
-        empresaId,
-        fechaPago: {
-        gte: hoyInicio(),
-        lte: hoyFin(),
-        },
-        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
-    },
-    _sum: { montoTotal: true },
-    });
+const diaAnterior = (fecha: Date): Date => {
+    const d = new Date(fecha);
+    d.setDate(d.getDate() - 1);
+    return d;
+};
 
+const whereActivos = (empresaId: string, desde: Date, hasta: Date) => ({
+    empresaId,
+    fechaPago: { gte: desde, lte: hasta },
+    estado: { in: [EstadoPago.REGISTRADO, EstadoPago.CONFIRMADO] },
+});
+
+export async function getTotalCobradoHoy(empresaId: string, fecha: Date): Promise<number> {
+    const result = await prisma.pago.aggregate({
+        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
+        _sum: { montoTotal: true },
+    });
     return parseFloat(result._sum.montoTotal?.toString() ?? '0');
 }
 
-export async function getPagosRegistradosHoy(empresaId: string): Promise<number> {
+export async function getTotalCobradoAyer(empresaId: string, fecha: Date): Promise<number> {
+    const ayer = diaAnterior(fecha);
+    const result = await prisma.pago.aggregate({
+        where: whereActivos(empresaId, inicioDia(ayer), finDia(ayer)),
+        _sum: { montoTotal: true },
+    });
+    return parseFloat(result._sum.montoTotal?.toString() ?? '0');
+}
+
+export async function getPagosRegistradosHoy(empresaId: string, fecha: Date): Promise<number> {
     return prisma.pago.count({
-    where: {
-        empresaId,
-        fechaPago: {
-        gte: hoyInicio(),
-        lte: hoyFin(),
-        },
-        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
-    },
+        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
     });
 }
 
-export async function getDiferenciaCaja(
-    empresaId: string,
-    totalCobrado: number,
-): Promise<number> {
-    const pagosHoy = await prisma.pago.findMany({
-    where: {
-        empresaId,
-        fechaPago: {
-        gte: hoyInicio(),
-        lte: hoyFin(),
-        },
-        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
-    },
-    select: { id: true },
+export async function getPagosRegistradosAyer(empresaId: string, fecha: Date): Promise<number> {
+    const ayer = diaAnterior(fecha);
+    return prisma.pago.count({
+        where: whereActivos(empresaId, inicioDia(ayer), finDia(ayer)),
     });
-
-    const pagoIds = pagosHoy.map((p) => p.id);
-
-    if (pagoIds.length === 0) return 0;
-
-    const aplicado = await prisma.aplicacionPago.aggregate({
-    where: { pagoId: { in: pagoIds } },
-    _sum: { montoAplicado: true },
-    });
-
-    const totalAplicado = parseFloat(aplicado._sum.montoAplicado?.toString() ?? '0');
-    return parseFloat((totalCobrado - totalAplicado).toFixed(2));
 }
 
 export async function getCobroPorMetodo(
     empresaId: string,
+    fecha: Date,
 ): Promise<{ metodo: string; total: number }[]> {
     const pagos = await prisma.pago.findMany({
-    where: {
-        empresaId,
-        fechaPago: {
-        gte: hoyInicio(),
-        lte: hoyFin(),
+        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
+        select: {
+            montoTotal: true,
+            metodoPago: { select: { nombre: true } },
         },
-        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
-    },
-    select: {
-        montoTotal: true,
-        metodoPago: { select: { nombre: true } },
-    },
     });
 
     const acumulado: Record<string, number> = {};
     for (const pago of pagos) {
-    const nombre = pago.metodoPago.nombre;
-    const monto = parseFloat(pago.montoTotal.toString());
-    acumulado[nombre] = (acumulado[nombre] ?? 0) + monto;
+        const nombre = pago.metodoPago.nombre;
+        const monto = parseFloat(pago.montoTotal.toString());
+        acumulado[nombre] = (acumulado[nombre] ?? 0) + monto;
     }
 
     return Object.entries(acumulado).map(([metodo, total]) => ({
-    metodo,
-    total: parseFloat(total.toFixed(2)),
+        metodo,
+        total: parseFloat(total.toFixed(2)),
     }));
 }
 
-export async function getPagosDia(empresaId: string) {
+export async function getPagosDia(empresaId: string, fecha: Date): Promise<RawPagoDia[]> {
     return prisma.pago.findMany({
-    where: {
-        empresaId,
-        fechaPago: {
-        gte: hoyInicio(),
-        lte: hoyFin(),
+        where: whereActivos(empresaId, inicioDia(fecha), finDia(fecha)),
+        orderBy: { fechaRegistro: 'desc' },
+        select: {
+            id: true,
+            fechaPago: true,
+            montoTotal: true,
+            metodoPago: { select: { nombre: true } },
+            cliente: { select: { nombreRazonSocial: true } },
+            registradoBy: { select: { nombres: true, apellidos: true } },
         },
-        estado: { in: ['REGISTRADO', 'CONFIRMADO'] },
-    },
-    orderBy: { fechaRegistro: 'desc' },
-    select: {
-        id: true,
-        fechaPago: true,
-        montoTotal: true,
-        metodoPago: { select: { nombre: true } },
-        cliente: { select: { nombreRazonSocial: true } },
-        registradoBy: { select: { nombres: true, apellidos: true } },
-    },
     });
 }
