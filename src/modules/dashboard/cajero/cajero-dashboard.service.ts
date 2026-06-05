@@ -14,6 +14,7 @@ import {
     toDashboardCajeroResponse,
 } from './cajero-dashboard.mapper';
 import { DashboardCajeroResponse } from '../common/dashboard.dto';
+import { generarPdfPagosDia } from './cajero-dashboard.report';
 
 const MS_POR_DIA = 86_400_000;
 
@@ -46,6 +47,17 @@ function periodoPrevio(desde: Date, hasta: Date): { desde: Date; hasta: Date } {
         desde: inicioDia(restarDias(desde, duracion)),
         hasta: finDia(restarDias(hasta, duracion)),
     };
+}
+
+export async function getReporteCajeroPagosDia(
+    empresaId: string,
+    fechaDesdeStr?: string,
+    fechaHastaStr?: string,
+): Promise<Buffer> {
+    const { desde, hasta } = parsearPeriodo(fechaDesdeStr, fechaHastaStr);
+    const rawPagosDia = await getPagosDia(empresaId, desde, hasta);
+    const pagosDia = rawPagosDia.map(toPagoDiaRow);
+    return generarPdfPagosDia(pagosDia, desde, hasta);
 }
 
 export async function getDashboardCajero(

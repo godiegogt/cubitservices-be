@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getDashboardCajero } from './cajero/cajero-dashboard.service';
+import { getDashboardCajero, getReporteCajeroPagosDia } from './cajero/cajero-dashboard.service';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -43,4 +43,46 @@ export async function dashboardCajeroController(
         fechaHasta as string | undefined,
     );
     res.status(200).json(data);
+}
+
+export async function dashboardCajeroReporteController(
+    req: Request,
+    res: Response,
+): Promise<void> {
+    const empresaId = (req.query.empresaId as string) ?? (req as any).user?.empresaId;
+
+    const { fechaDesde, fechaHasta } = req.query;
+
+    if (fechaDesde !== undefined) {
+        const error = validarFecha(fechaDesde, 'fechaDesde');
+        if (error) { res.status(400).json({ error }); return; }
+    }
+
+    if (fechaHasta !== undefined) {
+        if (fechaDesde === undefined) {
+            res.status(400).json({ error: 'fechaDesde es requerido cuando se especifica fechaHasta' });
+            return;
+        }
+        const error = validarFecha(fechaHasta, 'fechaHasta');
+        if (error) { res.status(400).json({ error }); return; }
+
+        if ((fechaDesde as string) > (fechaHasta as string)) {
+            res.status(400).json({ error: 'fechaDesde no puede ser mayor que fechaHasta' });
+            return;
+        }
+    }
+
+    const pdf = await getReporteCajeroPagosDia(
+        empresaId,
+        fechaDesde as string | undefined,
+        fechaHasta as string | undefined,
+    );
+
+    const nombre = fechaDesde
+        ? `pagos-${fechaDesde}${fechaHasta && fechaHasta !== fechaDesde ? `-${fechaHasta}` : ''}.pdf`
+        : `pagos-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${nombre}"`);
+    res.send(pdf);
 }
