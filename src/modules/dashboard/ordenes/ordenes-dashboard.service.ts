@@ -1,18 +1,7 @@
 import { getOrdenes, getOrdenesPorEstado, FiltrosOrdenes } from './ordenes-dashboard.query';
 import { toOrdenRow, toKpisOrdenes, toDashboardOrdenesResponse } from './ordenes-dashboard.mapper';
 import { DashboardOrdenesResponse } from '../common/dashboard.dto';
-
-function inicioDia(fecha: Date): Date {
-    const d = new Date(fecha);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-function finDia(fecha: Date): Date {
-    const d = new Date(fecha);
-    d.setHours(23, 59, 59, 999);
-    return d;
-}
+import { inicioDia, finDia } from "../common/utils";
 
 export async function getDashboardOrdenes(
     fechaDesdeStr?: string,
