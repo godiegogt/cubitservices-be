@@ -20,13 +20,13 @@ const MS_POR_DIA = 86_400_000;
 
 function inicioDia(fecha: Date): Date {
     const d = new Date(fecha);
-    d.setHours(0, 0, 0, 0);
+    d.setUTCHours(0, 0, 0, 0);
     return d;
 }
 
 function finDia(fecha: Date): Date {
     const d = new Date(fecha);
-    d.setHours(23, 59, 59, 999);
+    d.setUTCHours(23, 59, 59, 999);
     return d;
 }
 
@@ -35,9 +35,9 @@ function restarDias(fecha: Date, dias: number): Date {
 }
 
 function parsearPeriodo(fechaDesdeStr?: string, fechaHastaStr?: string): { desde: Date; hasta: Date } {
-    const hoy = new Date();
-    const desde = inicioDia(fechaDesdeStr ? new Date(`${fechaDesdeStr}T00:00:00`) : hoy);
-    const hasta = finDia(fechaHastaStr ? new Date(`${fechaHastaStr}T00:00:00`) : desde);
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const desde = new Date(`${fechaDesdeStr ?? hoyStr}T00:00:00.000Z`);
+    const hasta = new Date(`${fechaHastaStr ?? fechaDesdeStr ?? hoyStr}T23:59:59.999Z`);
     return { desde, hasta };
 }
 
