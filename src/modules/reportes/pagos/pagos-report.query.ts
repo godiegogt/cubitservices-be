@@ -42,6 +42,7 @@ export async function queryPagosReporte(
     clienteId?: string;
     codigoCliente?: string;
     nombreCliente?: string;
+    zona?: number;
     metodoPagoId?: string;
     estado?: EstadoPago;
     usuarioRegistradorId?: string;
@@ -55,7 +56,7 @@ export async function queryPagosReporte(
         lte: filters.fechaFin,
     },
     ...(filters.clienteId ? { clienteId: filters.clienteId } : {}),
-    ...(filters.codigoCliente || filters.nombreCliente
+    ...(filters.codigoCliente || filters.nombreCliente || filters.zona !== undefined
         ? {
             cliente: {
             ...(filters.codigoCliente
@@ -63,6 +64,9 @@ export async function queryPagosReporte(
                 : {}),
             ...(filters.nombreCliente
                 ? { nombreRazonSocial: { contains: filters.nombreCliente, mode: "insensitive" as const } }
+                : {}),
+            ...(filters.zona !== undefined
+                ? { ubicaciones: { some: { zona: filters.zona } } }
                 : {}),
             },
         }

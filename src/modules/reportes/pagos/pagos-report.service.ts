@@ -17,6 +17,7 @@ export async function generarReportePagos(
     clienteId: filters.clienteId,
     codigoCliente: filters.codigoCliente,
     nombreCliente: filters.nombreCliente,
+    zona: filters.zona,
     metodoPagoId: filters.metodoPagoId,
     estado: filters.estado as EstadoPago | undefined,
     usuarioRegistradorId: filters.usuarioRegistradorId,

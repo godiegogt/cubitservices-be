@@ -4,6 +4,7 @@ export interface ReportePagosFilters {
     clienteId?: string;
     codigoCliente?: string;
     nombreCliente?: string;
+    zona?: number;
     metodoPagoId?: string;
     estado?: "REGISTRADO" | "CONFIRMADO" | "ANULADO";
     usuarioRegistradorId?: string;
