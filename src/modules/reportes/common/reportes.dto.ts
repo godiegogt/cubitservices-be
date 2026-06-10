@@ -1,3 +1,15 @@
+export interface AplicacionPagoDto {
+    cargoId: string;
+    concepto: string;
+    tipoCargo: string;
+    periodoReferencia: string | null;
+    montoOriginalCargo: number;
+    montoAplicado: number;
+    fechaEmisionCargo: string;
+    fechaVencimientoCargo: string | null;
+    estadoCargo: string;
+}
+
 export interface ReportePagoItemDto {
     id: string;
     fechaPago: string;
@@ -9,6 +21,7 @@ export interface ReportePagoItemDto {
     montoAplicado: number;
     montoNoAplicado: number;
     registradoPor: { id: string; nombre: string };
+    aplicaciones: AplicacionPagoDto[];
 }
 
 export interface ReportePagosPorMetodoPagoDto {

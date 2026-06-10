@@ -12,7 +12,21 @@ const pagoReporteInclude = {
     select: { id: true, nombres: true, apellidos: true },
     },
     aplicaciones: {
-    select: { montoAplicado: true },
+    select: {
+        montoAplicado: true,
+        cargo: {
+        select: {
+            id: true,
+            concepto: true,
+            tipoCargo: true,
+            periodoReferencia: true,
+            monto: true,
+            fechaEmision: true,
+            fechaVencimiento: true,
+            estado: true,
+        },
+        },
+    },
     },
 } satisfies Prisma.PagoInclude;
 

@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import {
+    AplicacionPagoDto,
     ReportePagoItemDto,
     ReportePagosFiltrosDto,
     ReportePagosPorMetodoPagoDto,
@@ -22,6 +23,20 @@ function mapToItemDto(pago: PagoReporteItem): ReportePagoItemDto {
     const montoTotal = decimalToNumber(pago.montoTotal);
     const montoAplicado = +sumAplicaciones(pago.aplicaciones).toFixed(2);
     const montoNoAplicado = +(montoTotal - montoAplicado).toFixed(2);
+
+    const aplicaciones: AplicacionPagoDto[] = pago.aplicaciones.map((a) => ({
+    cargoId: a.cargo.id,
+    concepto: a.cargo.concepto,
+    tipoCargo: a.cargo.tipoCargo,
+    periodoReferencia: a.cargo.periodoReferencia ?? null,
+    montoOriginalCargo: decimalToNumber(a.cargo.monto),
+    montoAplicado: decimalToNumber(a.montoAplicado),
+    fechaEmisionCargo: formatDateOnly(a.cargo.fechaEmision),
+    fechaVencimientoCargo: a.cargo.fechaVencimiento
+        ? formatDateOnly(a.cargo.fechaVencimiento)
+        : null,
+    estadoCargo: a.cargo.estado,
+    }));
 
     return {
     id: pago.id,
@@ -46,6 +61,7 @@ function mapToItemDto(pago: PagoReporteItem): ReportePagoItemDto {
         .filter(Boolean)
         .join(" "),
     },
+    aplicaciones,
     };
 }
 
