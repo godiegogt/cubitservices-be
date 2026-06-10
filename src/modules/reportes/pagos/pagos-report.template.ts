@@ -162,7 +162,7 @@ export function buildPagosReportHtml(report: ReportePagosResultDto): string {
           </div>
 
           <div class="card">
-            <div class="card-label">No aplicado</div>
+            <div class="card-label">Monto disponible</div>
             <div class="card-value">${money(report.resumen.totalNoAplicado)}</div>
           </div>
         </div>
@@ -195,7 +195,7 @@ export function buildPagosReportHtml(report: ReportePagosResultDto): string {
               <th>Estado</th>
               <th class="text-right">Monto</th>
               <th class="text-right">Aplicado</th>
-              <th class="text-right">No aplicado</th>
+              <th class="text-right">Monto disponible</th>
               <th>Registrado por</th>
             </tr>
           </thead>

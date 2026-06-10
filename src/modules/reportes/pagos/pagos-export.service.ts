@@ -52,7 +52,7 @@ export async function exportPagosExcel(
     { header: "Estado", key: "estado", width: 14 },
     { header: "Monto total", key: "montoTotal", width: 14 },
     { header: "Aplicado", key: "montoAplicado",  width: 14 },
-    { header: "No aplicado", key: "montoNoAplicado",width: 14 },
+    { header: "Monto diponible", key: "montoNoAplicado",width: 14 },
     { header: "Registrado por", key: "registradoPor",  width: 24 },
     ];
 
@@ -87,7 +87,7 @@ export async function exportPagosExcel(
     ["Cantidad de pagos", report.resumen.totalPagos, false],
     ["Total cobrado", report.resumen.totalCobrado, true],
     ["Total aplicado", report.resumen.totalAplicado, true],
-    ["No aplicado", report.resumen.totalNoAplicado, true],
+    ["Monto disponible", report.resumen.totalNoAplicado, true],
     ];
 
     for (const [label, value, isMoneda] of indicadores) {
