@@ -10,6 +10,8 @@ export const reportePagosQuerySchema = z.object({
   fechaInicio: dateStringSchema.default(todayISO),
   fechaFin: dateStringSchema.default(todayISO),
   clienteId: z.string().uuid().optional(),
+  codigoCliente: z.string().min(1).max(50).optional(),
+  nombreCliente: z.string().min(1).max(150).optional(),
   metodoPagoId: z.string().uuid().optional(),
   estado: z.enum(["REGISTRADO", "CONFIRMADO", "ANULADO"]).optional(),
   usuarioRegistradorId: z.string().uuid().optional(),

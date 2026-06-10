@@ -84,10 +84,10 @@ export async function exportPagosExcel(
     indicadoresHeader.eachCell((cell) => { cell.font = { bold: true }; });
 
     const indicadores: [string, number, boolean][] = [
-    ["Cantidad de pagos", report.resumen.totalPagos,      false],
-    ["Total cobrado",     report.resumen.totalCobrado,    true],
-    ["Total aplicado",    report.resumen.totalAplicado,   true],
-    ["No aplicado",       report.resumen.totalNoAplicado, true],
+    ["Cantidad de pagos", report.resumen.totalPagos, false],
+    ["Total cobrado", report.resumen.totalCobrado, true],
+    ["Total aplicado", report.resumen.totalAplicado, true],
+    ["No aplicado", report.resumen.totalNoAplicado, true],
     ];
 
     for (const [label, value, isMoneda] of indicadores) {

@@ -15,6 +15,8 @@ export async function generarReportePagos(
     fechaInicio: new Date(`${filters.fechaInicio}T00:00:00.000Z`),
     fechaFin: new Date(`${filters.fechaFin}T23:59:59.999Z`),
     clienteId: filters.clienteId,
+    codigoCliente: filters.codigoCliente,
+    nombreCliente: filters.nombreCliente,
     metodoPagoId: filters.metodoPagoId,
     estado: filters.estado as EstadoPago | undefined,
     usuarioRegistradorId: filters.usuarioRegistradorId,

@@ -14,6 +14,8 @@ export async function reportePagosHandler(req: Request, res: Response) {
         fechaInicio: query.fechaInicio,
         fechaFin: query.fechaFin,
         clienteId: query.clienteId,
+        codigoCliente: query.codigoCliente,
+        nombreCliente: query.nombreCliente,
         metodoPagoId: query.metodoPagoId,
         estado: query.estado,
         usuarioRegistradorId: query.usuarioRegistradorId,

@@ -26,6 +26,8 @@ export async function queryPagosReporte(
     fechaInicio: Date;
     fechaFin: Date;
     clienteId?: string;
+    codigoCliente?: string;
+    nombreCliente?: string;
     metodoPagoId?: string;
     estado?: EstadoPago;
     usuarioRegistradorId?: string;
@@ -39,6 +41,18 @@ export async function queryPagosReporte(
         lte: filters.fechaFin,
     },
     ...(filters.clienteId ? { clienteId: filters.clienteId } : {}),
+    ...(filters.codigoCliente || filters.nombreCliente
+        ? {
+            cliente: {
+            ...(filters.codigoCliente
+                ? { codigo: { contains: filters.codigoCliente, mode: "insensitive" as const } }
+                : {}),
+            ...(filters.nombreCliente
+                ? { nombreRazonSocial: { contains: filters.nombreCliente, mode: "insensitive" as const } }
+                : {}),
+            },
+        }
+        : {}),
     ...(filters.metodoPagoId ? { metodoPagoId: filters.metodoPagoId } : {}),
     ...(filters.estado ? { estado: filters.estado } : {}),
     ...(filters.usuarioRegistradorId
