@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../../common/middleware/auth.middleware";
 import { reporteOrdenesHandler } from "./ordenes/ordenes-report.controller";
 import { reportePagosHandler } from "./reportes.controller";
+import { reporteClientesHandler } from "./clientes/clientes-report.controller";
 
 const router = Router();
 
@@ -9,5 +10,6 @@ router.use(requireAuth);
 
 router.get("/pagos", reportePagosHandler);
 router.get("/ordenes", reporteOrdenesHandler);
+router.get("/clientes", reporteClientesHandler);
 
 export default router;
