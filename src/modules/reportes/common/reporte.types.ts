@@ -10,4 +10,16 @@ export interface ReportePagosFilters {
     pageSize?: number;
 }
 
+export interface ClientesReportFilters {
+    estado?: string;
+    zonaId?: number;
+    servicioId?: string;
+    fechaInicio?: string;
+    fechaFin?: string;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+    fetchAll?: boolean;
+}
+
 export type ReporteFormato = "json" | "pdf" | "xlsx";
