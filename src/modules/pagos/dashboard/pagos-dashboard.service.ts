@@ -1,0 +1,45 @@
+import { sumCobrado, contarPagos, getPagosRecientes, TODOS, REGISTRADO, ANULADO } from './pagos-dashboard.query';
+import { toKpis, toPagoRow, toResponse } from './pagos-dashboard.mapper';
+import { PagoDashboardResponse } from './pagos-dashboard.dto';
+import { DashboardQuery } from './pagos-dashboard.schema';
+
+export async function getPagosDashboard(
+    empresaId: string,
+    query: DashboardQuery,
+): Promise<PagoDashboardResponse> {
+    const hoy = new Date().toISOString().split('T')[0];
+    const fechaDesde = query.fechaDesde ?? hoy;
+    const fechaHasta = query.fechaHasta ?? fechaDesde;
+    const desde = new Date(`${fechaDesde}T00:00:00.000Z`);
+    const hasta = new Date(`${fechaHasta}T23:59:59.999Z`);
+
+    const baseFilters = {
+        empresaId,
+        desde,
+        hasta,
+        clienteId: query.clienteId,
+        metodoPagoId: query.metodoPagoId,
+    };
+
+    const [totalCobrado, pagosRegistrados, pagosPendientes, pagosAnulados, rawRecientes] =
+        await Promise.all([
+            sumCobrado(baseFilters),
+            contarPagos(baseFilters, TODOS),
+            contarPagos(baseFilters, REGISTRADO),
+            contarPagos(baseFilters, ANULADO),
+            getPagosRecientes(baseFilters, query.estado),
+        ]);
+
+    const filters = {
+        fechaDesde,
+        fechaHasta,
+        clienteId: query.clienteId,
+        metodoPagoId: query.metodoPagoId,
+        estado: query.estado,
+    };
+
+    const kpis = toKpis(totalCobrado, pagosRegistrados, pagosPendientes, pagosAnulados);
+    const pagosRecientes = rawRecientes.map(toPagoRow);
+
+    return toResponse(filters, kpis, pagosRecientes);
+}

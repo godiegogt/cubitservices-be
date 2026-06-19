@@ -1,12 +1,9 @@
-export interface MetodoPagoTotal {
-    metodo: string;
-    total: number;
-}
-
-export interface RawPagoDia {
+export interface RawPagoReciente {
     id: string;
-    fechaPago: Date;
+    fechaRegistro: Date;
     montoTotal: { toString(): string };
+    referencia: string | null;
+    estado: string;
     metodoPago: { nombre: string };
     cliente: { nombreRazonSocial: string };
     registradoBy: { nombres: string; apellidos: string | null };
