@@ -1,11 +1,11 @@
-import { ReportePagosResultDto } from "../common/reportes.dto";
+import { ReportePagosResponse } from "./pagos-report.dto";
 
 function money(value: number): string {
   return `Q ${value.toFixed(2)}`;
 }
 
-export function buildPagosReportHtml(report: ReportePagosResultDto): string {
-  const rows = report.items
+export function buildPagosReportHtml(report: ReportePagosResponse): string {
+  const rows = report.data
     .map(
       (item) => `
     <tr>
@@ -15,24 +15,12 @@ export function buildPagosReportHtml(report: ReportePagosResultDto): string {
       <td>${item.metodoPago.nombre}</td>
       <td>${item.referencia ?? "-"}</td>
       <td>${item.estado}</td>
-      <td class="text-right">${money(item.montoTotal)}</td>
+      <td class="text-right">${money(item.montoRecibido)}</td>
       <td class="text-right">${money(item.montoAplicado)}</td>
-      <td class="text-right">${money(item.montoNoAplicado)}</td>
+      <td class="text-right">${money(item.montoDisponible)}</td>
       <td>${item.registradoPor.nombre}</td>
     </tr>
-  `
-    )
-    .join("");
-
-  const metodoRows = report.porMetodoPago
-    .map(
-      (item) => `
-    <tr>
-      <td>${item.metodoPago}</td>
-      <td class="text-right">${item.cantidad}</td>
-      <td class="text-right">${money(item.total)}</td>
-    </tr>
-  `
+  `,
     )
     .join("");
 
@@ -70,7 +58,7 @@ export function buildPagosReportHtml(report: ReportePagosResultDto): string {
 
           .summary {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 12px;
             margin-bottom: 24px;
           }
@@ -135,7 +123,7 @@ export function buildPagosReportHtml(report: ReportePagosResultDto): string {
           <div>
             <div class="title">Reporte de Pagos</div>
             <div class="subtitle">
-              Del ${report.filtros.fechaInicio} al ${report.filtros.fechaFin}
+              Del ${report.filters.fechaInicio} al ${report.filters.fechaFin}
             </div>
           </div>
 
@@ -148,39 +136,29 @@ export function buildPagosReportHtml(report: ReportePagosResultDto): string {
         <div class="summary">
           <div class="card">
             <div class="card-label">Cantidad de pagos</div>
-            <div class="card-value">${report.resumen.totalPagos}</div>
+            <div class="card-value">${report.summary.cantidadPagos}</div>
           </div>
 
           <div class="card">
-            <div class="card-label">Total cobrado</div>
-            <div class="card-value">${money(report.resumen.totalCobrado)}</div>
+            <div class="card-label">Pagos anulados</div>
+            <div class="card-value">${report.summary.pagosAnulados}</div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Total recibido</div>
+            <div class="card-value">${money(report.summary.totalRecibido)}</div>
           </div>
 
           <div class="card">
             <div class="card-label">Total aplicado</div>
-            <div class="card-value">${money(report.resumen.totalAplicado)}</div>
+            <div class="card-value">${money(report.summary.totalAplicado)}</div>
           </div>
 
           <div class="card">
-            <div class="card-label">Monto disponible</div>
-            <div class="card-value">${money(report.resumen.totalNoAplicado)}</div>
+            <div class="card-label">Total disponible</div>
+            <div class="card-value">${money(report.summary.totalDisponible)}</div>
           </div>
         </div>
-
-        <div class="section-title">Resumen por método de pago</div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Método</th>
-              <th class="text-right">Cantidad</th>
-              <th class="text-right">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${metodoRows}
-          </tbody>
-        </table>
 
         <div class="section-title">Detalle de pagos</div>
 
@@ -193,9 +171,9 @@ export function buildPagosReportHtml(report: ReportePagosResultDto): string {
               <th>Método</th>
               <th>Referencia</th>
               <th>Estado</th>
-              <th class="text-right">Monto</th>
+              <th class="text-right">Recibido</th>
               <th class="text-right">Aplicado</th>
-              <th class="text-right">Monto disponible</th>
+              <th class="text-right">Disponible</th>
               <th>Registrado por</th>
             </tr>
           </thead>

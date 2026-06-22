@@ -1,160 +1,141 @@
 import { Prisma } from "@prisma/client";
 import {
-    AplicacionPagoDto,
-    ReportePagoItemDto,
-    ReportePagosFiltrosDto,
-    ReportePagosPorMetodoPagoDto,
-    ReportePagosResumenDto,
-    ReportePagosResultDto,
-} from "../common/reportes.dto";
-import { decimalToNumber, formatDateOnly } from "../common/reportes.mapper";
-import { ReportePagosFilters } from "../common/reporte.types";
+  AplicacionPagoDto,
+  ReportePagoRow,
+  ReportePagosSummary,
+  ReportePagosFilters,
+  ReportePagosResponse,
+} from "./pagos-report.dto";
 import { PagoReporteItem } from "./pagos-report.query";
 
+function decimalToNumber(value: Prisma.Decimal): number {
+  return value.toNumber();
+}
+
 function sumAplicaciones(
-    aplicaciones: { montoAplicado: Prisma.Decimal }[]
+  aplicaciones: { montoAplicado: Prisma.Decimal }[],
 ): number {
-    return aplicaciones
+  return aplicaciones
     .reduce((acc, a) => acc.plus(a.montoAplicado), new Prisma.Decimal(0))
     .toNumber();
 }
 
-function mapToItemDto(pago: PagoReporteItem): ReportePagoItemDto {
-    const montoTotal = decimalToNumber(pago.montoTotal);
-    const montoAplicado = +sumAplicaciones(pago.aplicaciones).toFixed(2);
-    const montoNoAplicado = +(montoTotal - montoAplicado).toFixed(2);
+function mapToRow(pago: PagoReporteItem): ReportePagoRow {
+  const montoRecibido = decimalToNumber(pago.montoTotal);
+  const montoAplicado = +sumAplicaciones(pago.aplicaciones).toFixed(2);
+  const montoDisponible = +(montoRecibido - montoAplicado).toFixed(2);
 
-    const aplicaciones: AplicacionPagoDto[] = pago.aplicaciones.map((a) => ({
+  const aplicaciones: AplicacionPagoDto[] = pago.aplicaciones.map((a) => ({
     cargoId: a.cargo.id,
     concepto: a.cargo.concepto,
     tipoCargo: a.cargo.tipoCargo,
     periodoReferencia: a.cargo.periodoReferencia ?? null,
     montoOriginalCargo: decimalToNumber(a.cargo.monto),
     montoAplicado: decimalToNumber(a.montoAplicado),
-    fechaEmisionCargo: formatDateOnly(a.cargo.fechaEmision),
+    fechaEmisionCargo: a.cargo.fechaEmision.toISOString().slice(0, 10),
     fechaVencimientoCargo: a.cargo.fechaVencimiento
-        ? formatDateOnly(a.cargo.fechaVencimiento)
-        : null,
+      ? a.cargo.fechaVencimiento.toISOString().slice(0, 10)
+      : null,
     estadoCargo: a.cargo.estado,
-    }));
+  }));
 
-    return {
+  return {
     id: pago.id,
-    fechaPago: formatDateOnly(pago.fechaPago),
+    fechaPago: pago.fechaPago.toISOString().slice(0, 10),
     cliente: {
-        id: pago.cliente.id,
-        codigo: pago.cliente.codigo,
-        nombre: pago.cliente.nombreRazonSocial,
+      id: pago.cliente.id,
+      codigo: pago.cliente.codigo,
+      nombre: pago.cliente.nombreRazonSocial,
     },
     metodoPago: {
-        id: pago.metodoPago.id,
-        nombre: pago.metodoPago.nombre,
+      id: pago.metodoPago.id,
+      nombre: pago.metodoPago.nombre,
     },
-    referencia: pago.referencia,
-    estado: pago.estado,
-    montoTotal,
+    montoRecibido,
     montoAplicado,
-    montoNoAplicado,
+    montoDisponible,
+    referencia: pago.referencia,
+    estado: pago.estado as ReportePagoRow["estado"],
     registradoPor: {
-        id: pago.registradoBy.id,
-        nombre: [pago.registradoBy.nombres, pago.registradoBy.apellidos]
+      id: pago.registradoBy.id,
+      nombre: [pago.registradoBy.nombres, pago.registradoBy.apellidos]
         .filter(Boolean)
         .join(" "),
     },
     aplicaciones,
-    };
+  };
 }
 
-function calcularResumen(items: ReportePagoItemDto[]): ReportePagosResumenDto {
-    return items.reduce(
-    (acc, item) => ({
-        totalPagos: acc.totalPagos + 1,
-        totalCobrado: +(acc.totalCobrado + item.montoTotal).toFixed(2),
-        totalAplicado: +(acc.totalAplicado + item.montoAplicado).toFixed(2),
-        totalNoAplicado: +(acc.totalNoAplicado + item.montoNoAplicado).toFixed(2),
-    }),
-    { totalPagos: 0, totalCobrado: 0, totalAplicado: 0, totalNoAplicado: 0 }
-    );
+function calcularSummary(
+  rows: ReportePagoRow[],
+  estadoFilter?: string,
+): ReportePagosSummary {
+  const includeAnuladosEnTotal = estadoFilter === "ANULADO";
+
+  const rowsParaTotal = includeAnuladosEnTotal
+    ? rows
+    : rows.filter((r) => r.estado !== "ANULADO");
+
+  const totalRecibido = +rowsParaTotal
+    .reduce((acc, r) => acc + r.montoRecibido, 0)
+    .toFixed(2);
+
+  const totalAplicado = +rowsParaTotal
+    .reduce((acc, r) => acc + r.montoAplicado, 0)
+    .toFixed(2);
+
+  return {
+    totalRecibido,
+    totalAplicado,
+    totalDisponible: +(totalRecibido - totalAplicado).toFixed(2),
+    cantidadPagos: rows.length,
+    pagosAnulados: rows.filter((r) => r.estado === "ANULADO").length,
+  };
 }
 
-function agruparPorMetodoPago(
-    items: ReportePagoItemDto[]
-): ReportePagosPorMetodoPagoDto[] {
-    const map = new Map<string, { cantidad: number; total: number }>();
+export function buildReportePagosResponse(
+  pagos: PagoReporteItem[],
+  filters: ReportePagosFilters,
+  page: number,
+  pageSize: number,
+): ReportePagosResponse {
+  const allRows = pagos.map(mapToRow);
+  const summary = calcularSummary(allRows, filters.estado);
 
-    for (const item of items) {
-    const key = item.metodoPago.nombre;
-    const prev = map.get(key) ?? { cantidad: 0, total: 0 };
-    map.set(key, {
-        cantidad: prev.cantidad + 1,
-        total: +(prev.total + item.montoTotal).toFixed(2),
-    });
-    }
+  const total = allRows.length;
+  const start = (page - 1) * pageSize;
+  const pagedData = allRows.slice(start, start + pageSize);
 
-    return Array.from(map.entries()).map(([metodoPago, { cantidad, total }]) => ({
-    metodoPago,
-    cantidad,
-    total,
-    }));
-}
-
-function buildFiltrosDto(filters: ReportePagosFilters): ReportePagosFiltrosDto {
-    return {
-    fechaInicio: filters.fechaInicio,
-    fechaFin: filters.fechaFin,
-    clienteId: filters.clienteId,
-    metodoPagoId: filters.metodoPagoId,
-    estado: filters.estado,
-    };
-}
-
-export function buildReportePagosResult(
-    pagos: PagoReporteItem[],
-    filters: ReportePagosFilters,
-    page: number,
-    pageSize: number
-): ReportePagosResultDto {
-    const allItems = pagos.map(mapToItemDto);
-    const resumen = calcularResumen(allItems);
-    const porMetodoPago = agruparPorMetodoPago(allItems);
-
-    const total = allItems.length;
-    const start = (page - 1) * pageSize;
-    const pagedItems = allItems.slice(start, start + pageSize);
-
-    return {
-    filtros: buildFiltrosDto(filters),
-    resumen,
-    porMetodoPago,
-    items: pagedItems,
-    meta: {
-        total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize),
+  return {
+    filters,
+    summary,
+    data: pagedData,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize) || 1,
     },
-    };
+  };
 }
 
-export function buildReportePagosResultFull(
-    pagos: PagoReporteItem[],
-    filters: ReportePagosFilters
-): ReportePagosResultDto {
-    const allItems = pagos.map(mapToItemDto);
-    const resumen = calcularResumen(allItems);
-    const porMetodoPago = agruparPorMetodoPago(allItems);
-    const total = allItems.length;
+export function buildReportePagosResponseFull(
+  pagos: PagoReporteItem[],
+  filters: ReportePagosFilters,
+): ReportePagosResponse {
+  const allRows = pagos.map(mapToRow);
+  const summary = calcularSummary(allRows, filters.estado);
+  const total = allRows.length;
 
-    return {
-    filtros: buildFiltrosDto(filters),
-    resumen,
-    porMetodoPago,
-    items: allItems,
-    meta: {
-        total,
-        page: 1,
-        pageSize: total || 1,
-        totalPages: 1,
+  return {
+    filters,
+    summary,
+    data: allRows,
+    pagination: {
+      page: 1,
+      pageSize: total || 1,
+      total,
+      totalPages: 1,
     },
-    };
+  };
 }
