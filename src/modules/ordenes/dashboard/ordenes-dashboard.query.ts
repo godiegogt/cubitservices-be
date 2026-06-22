@@ -76,7 +76,15 @@ function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado'
 
 export async function contarPendientes(f: KpiFilters): Promise<number> {
     return prisma.ordenServicio.count({
-        where: whereKpi(f, EstadoOrdenServicio.PENDIENTE),
+        where: {
+            empresaId: f.empresaId,
+            estado: EstadoOrdenServicio.PENDIENTE,
+            OR: [
+                { fechaProgramada: null },
+                { fechaProgramada: { gte: f.desde, lte: f.hasta } },
+            ],
+            ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
+        },
     });
 }
 
