@@ -67,6 +67,9 @@ export async function findOrdenesByEmpresa(
     tipoServicioId?: string;
     prioridad?: PrioridadOrden;
     origen?: OrigenOrden;
+    fechaDesde?: string;
+    fechaHasta?: string;
+    zona?: number;
     search?: string;
   }
 ) {
@@ -85,6 +88,15 @@ export async function findOrdenesByEmpresa(
   }),
   ...(filters?.prioridad && { prioridad: filters.prioridad }),
   ...(filters?.origen && { origen: filters.origen }),
+
+  ...(filters?.fechaDesde && {
+    fechaProgramada: {
+      gte: new Date(`${filters.fechaDesde}T00:00:00.000Z`),
+      ...(filters.fechaHasta && { lte: new Date(`${filters.fechaHasta}T23:59:59.999Z`) }),
+    },
+  }),
+
+  ...(filters?.zona !== undefined && { ubicacion: { zona: filters.zona } }),
 
   ...(filters?.search && {
     OR: [

@@ -1,6 +1,6 @@
 import {
     contarPendientes,
-    contarProgramadasHoy,
+    contarProgramadas,
     contarEnProceso,
     contarVencidas,
     getOrdenesPorEstado,
@@ -21,15 +21,15 @@ export async function getOrdenesDashboard(
     const fechaHasta = query.fechaHasta ?? fechaDesde;
     const desde = new Date(`${fechaDesde}T00:00:00.000Z`);
     const hasta = new Date(`${fechaHasta}T23:59:59.999Z`);
+    const ahora = new Date(`${hoy}T00:00:00.000Z`);
 
-    const inicioDiaHoy = new Date(`${hoy}T00:00:00.000Z`);
-    const finDiaHoy = new Date(`${hoy}T23:59:59.999Z`);
+    const kpiFilters = { empresaId, desde, hasta, ahora, zona: query.zona };
 
     const dataFilters = {
         empresaId,
         desde,
         hasta,
-        ahora: inicioDiaHoy,
+        ahora,
         estado: query.estado,
         prioridad: query.prioridad,
         clienteId: query.clienteId,
@@ -49,10 +49,10 @@ export async function getOrdenesDashboard(
         rawData,
         total,
     ] = await Promise.all([
-        contarPendientes(empresaId),
-        contarProgramadasHoy(empresaId, inicioDiaHoy, finDiaHoy),
-        contarEnProceso(empresaId),
-        contarVencidas(empresaId, inicioDiaHoy),
+        contarPendientes(kpiFilters),
+        contarProgramadas(kpiFilters),
+        contarEnProceso(kpiFilters),
+        contarVencidas(kpiFilters),
         getOrdenesPorEstado(dataFilters),
         getProximasAEjecutar(empresaId),
         getOrdenes(dataFilters, skip, query.pageSize),

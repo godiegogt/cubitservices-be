@@ -19,6 +19,7 @@ export interface OrdenProximaRow {
     numeroOrden: string;
     titulo: string;
     cliente: string;
+    servicio: string;
     fechaProgramada: string | null;
     prioridad: string;
     responsable: string | null;
@@ -29,6 +30,7 @@ export interface OrdenDashboardRow {
     numeroOrden: string;
     titulo: string;
     cliente: string;
+    servicio: string;
     estado: string;
     prioridad: string;
     fechaProgramada: string | null;

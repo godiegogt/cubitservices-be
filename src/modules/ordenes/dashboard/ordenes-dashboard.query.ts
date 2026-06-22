@@ -10,6 +10,7 @@ const ORDEN_SELECT = {
     prioridad: true,
     fechaProgramada: true,
     cliente: { select: { nombreRazonSocial: true } },
+    tipoServicio: { select: { nombre: true } },
     ubicacion: { select: { zona: true } },
     asignaciones: {
         where: { estado: 'ACTIVA' as const },
@@ -56,34 +57,48 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
     };
 }
 
-export async function contarPendientes(empresaId: string): Promise<number> {
+interface KpiFilters {
+    empresaId: string;
+    desde: Date;
+    hasta: Date;
+    ahora: Date;
+    zona?: number;
+}
+
+function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado']): Prisma.OrdenServicioWhereInput {
+    return {
+        empresaId: f.empresaId,
+        estado,
+        fechaProgramada: { gte: f.desde, lte: f.hasta },
+        ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
+    };
+}
+
+export async function contarPendientes(f: KpiFilters): Promise<number> {
     return prisma.ordenServicio.count({
-        where: { empresaId, estado: EstadoOrdenServicio.PENDIENTE },
+        where: whereKpi(f, EstadoOrdenServicio.PENDIENTE),
     });
 }
 
-export async function contarProgramadasHoy(empresaId: string, inicioDia: Date, finDia: Date): Promise<number> {
+export async function contarProgramadas(f: KpiFilters): Promise<number> {
+    return prisma.ordenServicio.count({
+        where: whereKpi(f, EstadoOrdenServicio.PROGRAMADA),
+    });
+}
+
+export async function contarEnProceso(f: KpiFilters): Promise<number> {
+    return prisma.ordenServicio.count({
+        where: whereKpi(f, EstadoOrdenServicio.EN_PROCESO),
+    });
+}
+
+export async function contarVencidas(f: KpiFilters): Promise<number> {
     return prisma.ordenServicio.count({
         where: {
-            empresaId,
-            estado: EstadoOrdenServicio.PROGRAMADA,
-            fechaProgramada: { gte: inicioDia, lte: finDia },
-        },
-    });
-}
-
-export async function contarEnProceso(empresaId: string): Promise<number> {
-    return prisma.ordenServicio.count({
-        where: { empresaId, estado: EstadoOrdenServicio.EN_PROCESO },
-    });
-}
-
-export async function contarVencidas(empresaId: string, ahora: Date): Promise<number> {
-    return prisma.ordenServicio.count({
-        where: {
-            empresaId,
+            empresaId: f.empresaId,
             estado: { notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA] },
-            fechaProgramada: { lt: ahora },
+            fechaProgramada: { gte: f.desde, lt: f.ahora },
+            ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
         },
     });
 }
@@ -96,6 +111,7 @@ export async function getOrdenesPorEstado(
         where: {
             empresaId: filters.empresaId,
             fechaProgramada: { gte: filters.desde, lte: filters.hasta },
+            ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
         },
         _count: { _all: true },
         orderBy: { estado: 'asc' },

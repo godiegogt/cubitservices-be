@@ -44,5 +44,8 @@ export const listOrdenesQuerySchema = z.object({
   tipoServicioId: z.string().uuid().optional(),
   prioridad: z.nativeEnum(PrioridadOrden).optional(),
   origen: z.nativeEnum(OrigenOrden).optional(),
+  fechaDesde: z.string().date().optional(),
+  fechaHasta: z.string().date().optional(),
+  zona: z.coerce.number().int().optional(),
   search: z.string().min(1).optional(),
 });

@@ -6,6 +6,7 @@ export interface RawOrdenRow {
     prioridad: string;
     fechaProgramada: Date | null;
     cliente: { nombreRazonSocial: string };
+    tipoServicio: { nombre: string };
     ubicacion: { zona: number | null };
     asignaciones: {
         usuario: { nombres: string; apellidos: string | null };
