@@ -1,15 +1,38 @@
-import { z } from "zod";
+import { Prisma, EstadoRegistroBasico } from "@prisma/client";
+import { ClientesReportFilters } from "./clientes-report.dto";
 
-export const clientesReportQuerySchema = z.object({
-    estado: z.enum(["ACTIVO", "INACTIVO"]).optional(),
-    zonaId: z.coerce.number().int().min(1).optional(),
-    servicioId: z.string().uuid().optional(),
-    search: z.string().min(1).max(120).optional(),
-    fechaInicio: z.string().date().optional(),
-    fechaFin: z.string().date().optional(),
-    page: z.coerce.number().int().min(1).default(1),
-    pageSize: z.coerce.number().int().min(1).max(500).default(50),
-    formato: z.enum(["json", "pdf", "xlsx"]).default("json"),
-});
+export function buildClientesWhereClause(
+  empresaId: string,
+  filters: ClientesReportFilters,
+): { where: Prisma.ClienteWhereInput; whereBase: Prisma.ClienteWhereInput } {
+  const { estado, zonaId, servicioId, search, fechaInicio, fechaFin } =
+    filters;
 
-export type ClientesReportQuery = z.infer<typeof clientesReportQuerySchema>;
+  const createdAtFilter: { gte?: Date; lte?: Date } = {};
+  if (fechaInicio)
+    createdAtFilter.gte = new Date(`${fechaInicio}T00:00:00.000Z`);
+  if (fechaFin) createdAtFilter.lte = new Date(`${fechaFin}T23:59:59.999Z`);
+
+  const whereBase: Prisma.ClienteWhereInput = {
+    empresaId,
+    ...(Object.keys(createdAtFilter).length && { createdAt: createdAtFilter }),
+    ...(zonaId !== undefined && { ubicaciones: { some: { zona: zonaId } } }),
+    ...(servicioId && {
+      cuentasServicio: { some: { tipoServicioId: servicioId } },
+    }),
+    ...(search && {
+      OR: [
+        { nombreRazonSocial: { contains: search, mode: "insensitive" } },
+        { codigo: { contains: search, mode: "insensitive" } },
+        { telefono: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  const where: Prisma.ClienteWhereInput = {
+    ...whereBase,
+    ...(estado && { estado: estado as EstadoRegistroBasico }),
+  };
+
+  return { where, whereBase };
+}

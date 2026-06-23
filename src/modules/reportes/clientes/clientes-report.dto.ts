@@ -37,3 +37,15 @@ export interface ClientesReportResultDto {
         totalPages: number;
     };
 }
+
+export interface ClientesReportFilters {
+    estado?: string;
+    zonaId?: number;
+    servicioId?: string;
+    fechaInicio?: string;
+    fechaFin?: string;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+    fetchAll?: boolean;
+}
