@@ -32,6 +32,7 @@ export interface OrdenesReportSummaryDto {
     pendientes: number;
     enProceso: number;
     completadas: number;
+    vencidas: number;
 }
 
 export interface OrdenesReportResultDto {

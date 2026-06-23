@@ -104,7 +104,7 @@ export async function queryOrdenesReport(
         }),
     };
 
-    const [totalOrdenes, pendientes, enProceso, completadas, data, total] =
+    const [totalOrdenes, pendientes, enProceso, completadas, vencidas, data, total] =
         await Promise.all([
             prisma.ordenServicio.count({ where: baseWhere }),
             prisma.ordenServicio.count({
@@ -115,6 +115,18 @@ export async function queryOrdenesReport(
             }),
             prisma.ordenServicio.count({
                 where: { ...baseWhere, estado: EstadoOrdenServicio.FINALIZADA },
+            }),
+            prisma.ordenServicio.count({
+                where: {
+                    ...baseWhere,
+                    fechaProgramada: { lt: new Date() },
+                    estado: {
+                        notIn: [
+                            EstadoOrdenServicio.FINALIZADA,
+                            EstadoOrdenServicio.CANCELADA,
+                        ],
+                    },
+                },
             }),
             prisma.ordenServicio.findMany({
                 where: filteredWhere,
@@ -127,7 +139,7 @@ export async function queryOrdenesReport(
         ]);
 
     return {
-        summary: { totalOrdenes, pendientes, enProceso, completadas },
+        summary: { totalOrdenes, pendientes, enProceso, completadas, vencidas },
         data,
         pagination: pageSize
             ? {

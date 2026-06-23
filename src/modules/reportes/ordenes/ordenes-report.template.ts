@@ -80,7 +80,7 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
 
           .summary {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 12px;
             margin-bottom: 24px;
           }
@@ -168,6 +168,10 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
           <div class="card">
             <div class="card-label">Completadas</div>
             <div class="card-value">${summary.completadas}</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Vencidas</div>
+            <div class="card-value danger">${summary.vencidas}</div>
           </div>
         </div>
 

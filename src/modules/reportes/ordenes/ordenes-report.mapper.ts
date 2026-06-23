@@ -56,6 +56,7 @@ export function mapOrdenesReportResult(
             pendientes: number;
             enProceso: number;
             completadas: number;
+            vencidas: number;
         };
         data: OrdenReportRaw[];
         pagination: {
