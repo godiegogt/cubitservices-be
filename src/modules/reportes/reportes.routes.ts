@@ -1,15 +1,13 @@
 import { Router } from "express";
 import { requireAuth } from "../../common/middleware/auth.middleware";
-import { reporteOrdenesHandler } from "./ordenes/ordenes-report.controller";
-import { reportePagosHandler } from "./reportes.controller";
-import { reporteClientesHandler } from "./clientes/clientes-report.controller";
+import ordenesReportRoutes from "./ordenes/ordenes-report.routes";
+import pagosReportRoutes from "./pagos/pagos-report.routes";
 
 const router = Router();
 
 router.use(requireAuth);
 
-router.get("/pagos", reportePagosHandler);
-router.get("/ordenes", reporteOrdenesHandler);
-router.get("/clientes", reporteClientesHandler);
+router.use("/pagos", pagosReportRoutes);
+router.use("/ordenes", ordenesReportRoutes);
 
 export default router;
