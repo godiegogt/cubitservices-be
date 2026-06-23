@@ -37,8 +37,8 @@ export type PagoReporteItem = Prisma.PagoGetPayload<{
 export async function queryPagosReporte(
     empresaId: string,
     filters: {
-    fechaInicio: Date;
-    fechaFin: Date;
+    fechaInicio?: Date;
+    fechaFin?: Date;
     clienteId?: string;
     codigoCliente?: string;
     nombreCliente?: string;
@@ -51,10 +51,14 @@ export async function queryPagosReporte(
 ): Promise<PagoReporteItem[]> {
     const where: Prisma.PagoWhereInput = {
     empresaId,
-    fechaPago: {
-        gte: filters.fechaInicio,
-        lte: filters.fechaFin,
-    },
+    ...(filters.fechaInicio || filters.fechaFin
+        ? {
+            fechaPago: {
+            ...(filters.fechaInicio ? { gte: filters.fechaInicio } : {}),
+            ...(filters.fechaFin ? { lte: filters.fechaFin } : {}),
+            },
+        }
+        : {}),
     ...(filters.clienteId ? { clienteId: filters.clienteId } : {}),
     ...(filters.codigoCliente || filters.nombreCliente || filters.zona !== undefined
         ? {

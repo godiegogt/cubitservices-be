@@ -33,8 +33,12 @@ export async function generarReportePagosCompleto(
 
 function buildQueryFilters(filters: ReportePagosFilters) {
   return {
-    fechaInicio: new Date(`${filters.fechaInicio}T00:00:00.000Z`),
-    fechaFin: new Date(`${filters.fechaFin}T23:59:59.999Z`),
+    fechaInicio: filters.fechaInicio
+      ? new Date(`${filters.fechaInicio}T00:00:00.000Z`)
+      : undefined,
+    fechaFin: filters.fechaFin
+      ? new Date(`${filters.fechaFin}T23:59:59.999Z`)
+      : undefined,
     clienteId: filters.clienteId,
     codigoCliente: filters.codigoCliente,
     nombreCliente: filters.nombreCliente,

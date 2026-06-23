@@ -1,12 +1,8 @@
 import { z } from "zod";
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-
 const filtersSchema = z.object({
-  fechaInicio: z.string().date().default(todayISO),
-  fechaFin: z.string().date().default(todayISO),
+  fechaInicio: z.string().date().optional(),
+  fechaFin: z.string().date().optional(),
   clienteId: z.string().uuid().optional(),
   codigoCliente: z.string().min(1).max(50).optional(),
   nombreCliente: z.string().min(1).max(150).optional(),

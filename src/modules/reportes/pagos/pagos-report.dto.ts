@@ -1,6 +1,6 @@
 export interface ReportePagosFilters {
-  fechaInicio: string;
-  fechaFin: string;
+  fechaInicio?: string;
+  fechaFin?: string;
   clienteId?: string;
   codigoCliente?: string;
   nombreCliente?: string;
