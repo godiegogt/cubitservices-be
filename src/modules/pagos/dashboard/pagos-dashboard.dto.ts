@@ -3,7 +3,7 @@ export interface PagoDashboardFilters {
     fechaHasta: string;
     clienteId?: string;
     metodoPagoId?: string;
-    estado?: string;
+    estado?: "REGISTRADO" | "CONFIRMADO" | "ANULADO";
 }
 
 export interface PagoDashboardRow {
@@ -14,7 +14,7 @@ export interface PagoDashboardRow {
     metodoPago: string;
     monto: number;
     referencia: string | null;
-    estado: string;
+    estado: "REGISTRADO" | "CONFIRMADO" | "ANULADO";
     registradoPor: string;
 }
 
