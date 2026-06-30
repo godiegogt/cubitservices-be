@@ -12,7 +12,8 @@ export async function getPagosDashboard(
     const fechaDesde = query.fechaDesde ?? hoy;
     const fechaHasta = query.fechaHasta ?? fechaDesde;
     const desde = new Date(`${fechaDesde}T00:00:00.000Z`);
-    const hasta = new Date(`${fechaHasta}T23:59:59.999Z`);
+    const hasta = new Date(`${fechaHasta}T00:00:00.000Z`);
+    hasta.setUTCDate(hasta.getUTCDate() + 1);
 
     const baseFilters = {
         empresaId,

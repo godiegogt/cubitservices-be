@@ -20,7 +20,7 @@ interface BaseFilters {
 function whereBase(filters: BaseFilters, estados: EstadoPago[]): Prisma.PagoWhereInput {
     return {
         empresaId: filters.empresaId,
-        fechaPago: { gte: filters.desde, lte: filters.hasta },
+        fechaPago: { gte: filters.desde, lt: filters.hasta },
         estado: { in: estados },
         ...(filters.clienteId && { clienteId: filters.clienteId }),
         ...(filters.metodoPagoId && { metodoPagoId: filters.metodoPagoId }),
