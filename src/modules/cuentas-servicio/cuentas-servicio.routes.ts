@@ -10,6 +10,7 @@ import {
 } from "./cuentas-servicio.controller";
 import cuentasArchivoRouter from "../cuentas-servicio-archivo/cuentas-servicio-archivo.routes";
 import observacionesRouter from "../cuentas-servicio-observaciones/cuentas-servicio-observaciones.routes";
+import estadoCuentaRouter from "./estado-cuenta/estado-cuenta.routes";
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.patch("/:id", updateCuentaServicioHandler);
 router.patch("/:id/estado", updateCuentaServicioStatusHandler);
 router.use("/:cuentaServicioId/cuentas-servicio-archivo", cuentasArchivoRouter);
 router.use("/:cuentaServicioId/observaciones", observacionesRouter);
+router.use("/:cuentaServicioId/estado-cuenta", estadoCuentaRouter);
 
 export default router;
