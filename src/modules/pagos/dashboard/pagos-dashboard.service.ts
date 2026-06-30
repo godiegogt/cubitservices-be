@@ -2,12 +2,13 @@ import { sumCobrado, contarPagos, getPagosRecientes, TODOS, REGISTRADO, ANULADO 
 import { toKpis, toPagoRow, toResponse } from './pagos-dashboard.mapper';
 import { PagoDashboardResponse } from './pagos-dashboard.dto';
 import { DashboardQuery } from './pagos-dashboard.schema';
+import { formatDate } from '../../../common/utils/datetime';
 
 export async function getPagosDashboard(
     empresaId: string,
     query: DashboardQuery,
 ): Promise<PagoDashboardResponse> {
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = formatDate(new Date());
     const fechaDesde = query.fechaDesde ?? hoy;
     const fechaHasta = query.fechaHasta ?? fechaDesde;
     const desde = new Date(`${fechaDesde}T00:00:00.000Z`);

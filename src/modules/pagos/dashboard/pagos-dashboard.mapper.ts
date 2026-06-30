@@ -4,6 +4,7 @@ import {
     PagoDashboardFilters,
 } from './pagos-dashboard.dto';
 import { RawPagoReciente } from './pagos-dashboard.types';
+import { formatDate, formatTime } from "../../../common/utils/datetime";
 
 export function toKpis(
     totalCobrado: number,
@@ -17,8 +18,8 @@ export function toKpis(
 export function toPagoRow(raw: RawPagoReciente): PagoDashboardRow {
     return {
         id: raw.id,
-        fecha: raw.fechaRegistro.toISOString().split('T')[0],
-        hora: raw.fechaRegistro.toISOString().split('T')[1].replace('Z', ''),
+        fecha: formatDate(raw.fechaRegistro),
+        hora: formatTime(raw.fechaRegistro),
         cliente: raw.cliente.nombreRazonSocial,
         metodoPago: raw.metodoPago.nombre,
         monto: parseFloat(raw.montoTotal.toString()),
