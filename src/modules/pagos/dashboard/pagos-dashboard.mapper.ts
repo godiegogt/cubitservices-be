@@ -27,7 +27,7 @@ export function toPagoRow(raw: RawPagoReciente): PagoDashboardRow {
         estado: raw.estado,
         registradoPor: [raw.registradoBy.nombres, raw.registradoBy.apellidos]
             .filter(Boolean)
-            .join(' '),
+            .join(' ') || "Sin usuario",
     };
 }
 
