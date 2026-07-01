@@ -6,25 +6,39 @@ import {
     OrdenesDashboardFilters,
 } from './dashboard.dto';
 import { RawOrdenRow } from './ordenes-dashboard.types';
+import { formatDate } from '../../../common/utils/datetime';
 
 function formatFecha(date: Date | null): string | null {
-    return date ? date.toISOString().split('T')[0] : null;
+    return date ? formatDate(date) : null;
 }
 
-function extraerResponsable(asignaciones: RawOrdenRow['asignaciones']): string | null {
-    if (!asignaciones.length) return null;
+function extraerResponsable(asignaciones: RawOrdenRow['asignaciones']): string {
+    if (!asignaciones.length) return 'Sin asignar';
     const { nombres, apellidos } = asignaciones[0].usuario;
     return [nombres, apellidos].filter(Boolean).join(' ');
 }
 
-export function toOrdenRow(raw: RawOrdenRow): OrdenDashboardRow {
+function esVencida(estado: RawOrdenRow['estado'], fechaProgramada: Date | null, ahora: Date): boolean {
+    return (
+        fechaProgramada !== null &&
+        fechaProgramada < ahora &&
+        estado !== 'FINALIZADA' &&
+        estado !== 'CANCELADA'
+    );
+}
+
+function calcularEstado(raw: RawOrdenRow, ahora: Date): OrdenDashboardRow['estado'] {
+    return esVencida(raw.estado, raw.fechaProgramada, ahora) ? 'VENCIDA' : raw.estado;
+}
+
+export function toOrdenRow(raw: RawOrdenRow, ahora: Date): OrdenDashboardRow {
     return {
         id: raw.id,
         numeroOrden: raw.numeroOrden,
         titulo: raw.titulo,
         cliente: raw.cliente.nombreRazonSocial,
         servicio: raw.tipoServicio.nombre,
-        estado: raw.estado,
+        estado: calcularEstado(raw, ahora),
         prioridad: raw.prioridad,
         fechaProgramada: formatFecha(raw.fechaProgramada),
         zona: raw.ubicacion.zona,

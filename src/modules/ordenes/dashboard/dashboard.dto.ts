@@ -22,7 +22,7 @@ export interface OrdenProximaRow {
     servicio: string;
     fechaProgramada: string | null;
     prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
-    responsable: string | null;
+    responsable: string;
 }
 
 export interface OrdenDashboardRow {
@@ -31,11 +31,11 @@ export interface OrdenDashboardRow {
     titulo: string;
     cliente: string;
     servicio: string;
-    estado: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA";
+    estado: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA" | "VENCIDA";
     prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
     fechaProgramada: string | null;
     zona: number | null;
-    responsable: string | null;
+    responsable: string;
 }
 
 export interface OrdenesDashboardResponse {

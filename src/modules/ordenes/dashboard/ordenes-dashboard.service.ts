@@ -72,7 +72,7 @@ export async function getOrdenesDashboard(
     const kpis = { ordenesPendientes, programadasHoy, enProceso, vencidas };
     const ordenesPorEstado = toChartRows(rawPorEstado);
     const proximasAEjecutar = rawProximas.map(toProximaRow);
-    const data = rawData.map(toOrdenRow);
+    const data = rawData.map((raw) => toOrdenRow(raw, ahora));
     const totalPages = Math.ceil(total / query.pageSize);
 
     return toResponse(filters, kpis, ordenesPorEstado, proximasAEjecutar, data, {
