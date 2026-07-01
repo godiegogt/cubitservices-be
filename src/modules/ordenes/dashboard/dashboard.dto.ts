@@ -1,8 +1,8 @@
 export interface OrdenesDashboardFilters {
     fechaDesde: string;
     fechaHasta: string;
-    estado?: string;
-    prioridad?: string;
+    estado?: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA" | "VENCIDA";
+    prioridad?: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
     clienteId?: string;
     tipoServicioId?: string;
     zona?: number;
@@ -21,7 +21,7 @@ export interface OrdenProximaRow {
     cliente: string;
     servicio: string;
     fechaProgramada: string | null;
-    prioridad: string;
+    prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
     responsable: string | null;
 }
 
@@ -31,8 +31,8 @@ export interface OrdenDashboardRow {
     titulo: string;
     cliente: string;
     servicio: string;
-    estado: string;
-    prioridad: string;
+    estado: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA";
+    prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
     fechaProgramada: string | null;
     zona: number | null;
     responsable: string | null;
