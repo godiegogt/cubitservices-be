@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { formatDate } from "../../../common/utils/datetime";
 import {
   AplicacionPagoDto,
   ReportePagoRow,
@@ -32,16 +33,16 @@ function mapToRow(pago: PagoReporteItem): ReportePagoRow {
     periodoReferencia: a.cargo.periodoReferencia ?? null,
     montoOriginalCargo: decimalToNumber(a.cargo.monto),
     montoAplicado: decimalToNumber(a.montoAplicado),
-    fechaEmisionCargo: a.cargo.fechaEmision.toISOString().slice(0, 10),
+    fechaEmisionCargo: formatDate(a.cargo.fechaEmision),
     fechaVencimientoCargo: a.cargo.fechaVencimiento
-      ? a.cargo.fechaVencimiento.toISOString().slice(0, 10)
+      ? formatDate(a.cargo.fechaVencimiento)
       : null,
     estadoCargo: a.cargo.estado,
   }));
 
   return {
     id: pago.id,
-    fechaPago: pago.fechaPago.toISOString().slice(0, 10),
+    fechaPago: formatDate(pago.fechaPago),
     cliente: {
       id: pago.cliente.id,
       codigo: pago.cliente.codigo,

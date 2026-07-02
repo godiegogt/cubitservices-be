@@ -1,4 +1,5 @@
 import { EstadoPago } from "@prisma/client";
+import { startOfDay, endOfDay } from "../../../common/utils/datetime";
 import { ReportePagosFilters, ReportePagosResponse } from "./pagos-report.dto";
 import { queryPagosReporte } from "./pagos-report.query";
 import {
@@ -34,11 +35,8 @@ export async function generarReportePagosCompleto(
 function buildQueryFilters(filters: ReportePagosFilters) {
   return {
     fechaInicio: filters.fechaInicio
-      ? new Date(`${filters.fechaInicio}T00:00:00.000Z`)
-      : undefined,
-    fechaFin: filters.fechaFin
-      ? new Date(`${filters.fechaFin}T23:59:59.999Z`)
-      : undefined,
+      ? startOfDay(filters.fechaInicio) : undefined,
+    fechaFin: filters.fechaFin ? endOfDay(filters.fechaFin) : undefined,
     clienteId: filters.clienteId,
     codigoCliente: filters.codigoCliente,
     nombreCliente: filters.nombreCliente,
