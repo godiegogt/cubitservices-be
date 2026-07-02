@@ -68,10 +68,21 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
             fechaProgramada: { lt: f.ahora },
         };
     }
+    
+    const incluyePendientesSinFecha = !f.estado || f.estado === EstadoOrdenServicio.PENDIENTE;
 
     return {
         ...base,
-        fechaProgramada: { gte: f.desde, lte: f.hasta },
+        AND: [
+            {
+                OR: [
+                    { fechaProgramada: { gte: f.desde, lte: f.hasta } },
+                    ...(incluyePendientesSinFecha
+                        ? [{ estado: EstadoOrdenServicio.PENDIENTE, fechaProgramada: null } as Prisma.OrdenServicioWhereInput]
+                        : []),
+                ],
+            },
+        ],
         ...(f.estado && { estado: f.estado }),
     };
 }
@@ -137,7 +148,10 @@ export async function getOrdenesPorEstado(
         by: ['estado'],
         where: {
             empresaId: filters.empresaId,
-            fechaProgramada: { gte: filters.desde, lte: filters.hasta },
+            OR: [
+                { fechaProgramada: { gte: filters.desde, lte: filters.hasta } },
+                { estado: EstadoOrdenServicio.PENDIENTE, fechaProgramada: null },
+            ],
             ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
         },
         _count: { _all: true },
