@@ -145,7 +145,7 @@ export async function getProximasAEjecutar(filters: {
     return prisma.ordenServicio.findMany({
         where: {
             empresaId: filters.empresaId,
-            estado: { in: [EstadoOrdenServicio.PENDIENTE, EstadoOrdenServicio.PROGRAMADA] },
+            estado: EstadoOrdenServicio.PROGRAMADA,
             fechaProgramada: { gte: filters.ahora },
             ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
         },
