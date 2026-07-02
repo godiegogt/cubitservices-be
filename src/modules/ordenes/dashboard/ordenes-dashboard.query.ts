@@ -127,11 +127,17 @@ export async function getOrdenesPorEstado(
     return grouped.map((g) => ({ estado: g.estado, cantidad: g._count._all }));
 }
 
-export async function getProximasAEjecutar(empresaId: string): Promise<RawOrdenRow[]> {
+export async function getProximasAEjecutar(filters: {
+    empresaId: string;
+    ahora: Date;
+    zona?: number;
+}): Promise<RawOrdenRow[]> {
     return prisma.ordenServicio.findMany({
         where: {
-            empresaId,
+            empresaId: filters.empresaId,
             estado: { in: [EstadoOrdenServicio.PENDIENTE, EstadoOrdenServicio.PROGRAMADA] },
+            fechaProgramada: { gte: filters.ahora },
+            ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
         },
         orderBy: [{ fechaProgramada: { sort: 'asc', nulls: 'last' } }, { createdAt: 'desc' }],
         take: 5,

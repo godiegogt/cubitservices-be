@@ -11,17 +11,18 @@ import {
 import { toOrdenRow, toProximaRow, toChartRows, toResponse } from './ordenes-dashboard.mapper';
 import { OrdenesDashboardResponse } from './dashboard.dto';
 import { OrdenesDashboardQuery } from './ordenes-dashboard.schema';
+import { formatDate, startOfDay, endOfDay } from '../../../common/utils/datetime';
 
 export async function getOrdenesDashboard(
     empresaId: string,
     query: OrdenesDashboardQuery,
 ): Promise<OrdenesDashboardResponse> {
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = formatDate(new Date());
     const fechaDesde = query.fechaDesde ?? hoy;
     const fechaHasta = query.fechaHasta ?? fechaDesde;
-    const desde = new Date(`${fechaDesde}T00:00:00.000Z`);
-    const hasta = new Date(`${fechaHasta}T23:59:59.999Z`);
-    const ahora = new Date(`${hoy}T00:00:00.000Z`);
+    const desde = startOfDay(fechaDesde);
+    const hasta = endOfDay(fechaHasta);
+    const ahora = new Date();
 
     const kpiFilters = { empresaId, desde, hasta, ahora, zona: query.zona };
 
@@ -54,7 +55,7 @@ export async function getOrdenesDashboard(
         contarEnProceso(kpiFilters),
         contarVencidas(kpiFilters),
         getOrdenesPorEstado(dataFilters),
-        getProximasAEjecutar(empresaId),
+        getProximasAEjecutar({ empresaId, ahora, zona: query.zona }),
         getOrdenes(dataFilters, skip, query.pageSize),
         contarOrdenes(dataFilters),
     ]);
