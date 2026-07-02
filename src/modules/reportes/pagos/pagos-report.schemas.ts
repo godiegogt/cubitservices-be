@@ -13,12 +13,24 @@ const filtersSchema = z.object({
   referencia: z.string().min(1).max(120).optional(),
 });
 
+const rangoFechasRefineOptions = {
+  message: "fechaInicio no puede ser mayor que fechaFin",
+  path: ["fechaInicio"] as string[],
+};
+
+function validarRangoFechas(d: { fechaInicio?: string; fechaFin?: string }) {
+  return !(d.fechaInicio && d.fechaFin && d.fechaInicio > d.fechaFin);
+}
+
 export const reportePagosQuerySchema = filtersSchema.extend({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(10),
-});
+}).refine(validarRangoFechas, rangoFechasRefineOptions);
 
-export const reportePagosExportSchema = filtersSchema;
+export const reportePagosExportSchema = filtersSchema.refine(
+  validarRangoFechas,
+  rangoFechasRefineOptions,
+);
 
 export type ReportePagosQuery = z.infer<typeof reportePagosQuerySchema>;
 export type ReportePagosExportQuery = z.infer<typeof reportePagosExportSchema>;
