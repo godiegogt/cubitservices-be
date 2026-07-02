@@ -36,6 +36,7 @@ export async function getOrdenesDashboard(
         clienteId: query.clienteId,
         tipoServicioId: query.tipoServicioId,
         responsableId: query.responsableId,
+        search: query.search,
         zona: query.zona,
     };
 
@@ -69,7 +70,10 @@ export async function getOrdenesDashboard(
         clienteId: query.clienteId,
         tipoServicioId: query.tipoServicioId,
         responsableId: query.responsableId,
+        search: query.search,
         zona: query.zona,
+        page: query.page,
+        pageSize: query.pageSize,
     };
 
     const kpis = { ordenesPendientes, programadasHoy, enProceso, vencidas };

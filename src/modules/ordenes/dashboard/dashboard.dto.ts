@@ -6,7 +6,10 @@ export interface OrdenesDashboardFilters {
     clienteId?: string;
     tipoServicioId?: string;
     responsableId?: string;
+    search?: string;
     zona?: number;
+    page: number;
+    pageSize: number;
 }
 
 export interface OrdenEstadoChartRow {
