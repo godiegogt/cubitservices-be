@@ -8,6 +8,7 @@ export const ordenesDashboardQuerySchema = z.object({
     prioridad: z.nativeEnum(PrioridadOrden).optional(),
     clienteId: z.string().uuid().optional(),
     tipoServicioId: z.string().uuid().optional(),
+    responsableId: z.string().uuid().optional(),
     zona: z.coerce.number().int().optional(),
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(20),

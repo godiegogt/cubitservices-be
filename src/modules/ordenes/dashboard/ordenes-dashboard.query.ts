@@ -30,6 +30,7 @@ interface DataFilters {
     prioridad?: PrioridadOrden;
     clienteId?: string;
     tipoServicioId?: string;
+    responsableId?: string;
     zona?: number;
 }
 
@@ -40,6 +41,15 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
         ...(f.clienteId && { clienteId: f.clienteId }),
         ...(f.tipoServicioId && { tipoServicioId: f.tipoServicioId }),
         ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
+        ...(f.responsableId && {
+            asignaciones: {
+                some: {
+                    estado: 'ACTIVA',
+                    usuarioId: f.responsableId,
+                    rolEnOrden: 'responsable',
+                },
+            },
+        }),
     };
 
     if (f.estado === 'VENCIDA') {

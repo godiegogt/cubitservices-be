@@ -35,6 +35,7 @@ export async function getOrdenesDashboard(
         prioridad: query.prioridad,
         clienteId: query.clienteId,
         tipoServicioId: query.tipoServicioId,
+        responsableId: query.responsableId,
         zona: query.zona,
     };
 
@@ -67,6 +68,7 @@ export async function getOrdenesDashboard(
         prioridad: query.prioridad,
         clienteId: query.clienteId,
         tipoServicioId: query.tipoServicioId,
+        responsableId: query.responsableId,
         zona: query.zona,
     };
 

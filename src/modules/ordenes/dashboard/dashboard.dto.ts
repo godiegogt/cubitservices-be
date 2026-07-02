@@ -5,6 +5,7 @@ export interface OrdenesDashboardFilters {
     prioridad?: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
     clienteId?: string;
     tipoServicioId?: string;
+    responsableId?: string;
     zona?: number;
 }
 
