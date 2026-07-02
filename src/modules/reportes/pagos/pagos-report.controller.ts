@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { ZodError } from "zod";
 import {
   reportePagosQuerySchema,
   reportePagosExportSchema,
@@ -11,6 +12,27 @@ import {
   generarReportePagosCompleto,
 } from "./pagos-report.service";
 import { exportPagosPdf, exportPagosExcel } from "./pagos-report.exporter";
+
+function handleReportePagosError(
+  error: unknown,
+  res: Response,
+  logTag: string,
+  fallbackMessage: string,
+) {
+  console.error(logTag, error);
+
+  if (error instanceof ZodError) {
+    return res.status(400).json({
+      success: false,
+      message: error.issues.map((issue) => issue.message).join(", "),
+    });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message: fallbackMessage,
+  });
+}
 
 function toReportePagosFilters(
   parsed: ReportePagosQuery | ReportePagosExportQuery,
@@ -48,14 +70,12 @@ export async function reportePagosHandler(req: Request, res: Response) {
       data: report,
     });
   } catch (error) {
-    console.error("[reportePagos]", error);
-    return res.status(400).json({
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Error generando reporte de pagos",
-    });
+    return handleReportePagosError(
+      error,
+      res,
+      "[reportePagos]",
+      "Error generando reporte de pagos",
+    );
   }
 }
 
@@ -77,14 +97,12 @@ export async function exportPdfHandler(req: Request, res: Response) {
 
     return res.send(pdfBuffer);
   } catch (error) {
-    console.error("[exportPagosPdf]", error);
-    return res.status(400).json({
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Error exportando reporte de pagos a PDF",
-    });
+    return handleReportePagosError(
+      error,
+      res,
+      "[exportPagosPdf]",
+      "Error exportando reporte de pagos a PDF",
+    );
   }
 }
 
@@ -109,13 +127,11 @@ export async function exportExcelHandler(req: Request, res: Response) {
 
     return res.send(excelBuffer);
   } catch (error) {
-    console.error("[exportPagosExcel]", error);
-    return res.status(400).json({
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Error exportando reporte de pagos a Excel",
-    });
+    return handleReportePagosError(
+      error,
+      res,
+      "[exportPagosExcel]",
+      "Error exportando reporte de pagos a Excel",
+    );
   }
 }
