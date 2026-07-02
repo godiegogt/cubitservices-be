@@ -115,7 +115,7 @@ export async function contarVencidas(f: KpiFilters): Promise<number> {
         where: {
             empresaId: f.empresaId,
             estado: { notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA] },
-            fechaProgramada: { gte: f.desde, lt: f.ahora },
+            fechaProgramada: { lt: f.ahora },
             ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
         },
     });
