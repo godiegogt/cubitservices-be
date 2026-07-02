@@ -14,28 +14,44 @@ export interface OrdenEstadoChartRow {
     porcentaje: number;
 }
 
+export interface OrdenClienteDto {
+    id: string;
+    nombre: string;
+    telefono?: string;
+}
+
+export interface OrdenServicioDto {
+    id: string;
+    nombre: string;
+}
+
+export interface OrdenResponsableDto {
+    id: string;
+    nombre: string;
+}
+
 export interface OrdenProximaRow {
     id: string;
     numeroOrden: string;
     titulo: string;
-    cliente: string;
-    servicio: string;
+    cliente: OrdenClienteDto;
+    servicio: OrdenServicioDto;
     fechaProgramada: string | null;
     prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
-    responsable: string;
+    responsable: OrdenResponsableDto;
 }
 
 export interface OrdenDashboardRow {
     id: string;
     numeroOrden: string;
     titulo: string;
-    cliente: string;
-    servicio: string;
+    cliente: OrdenClienteDto;
+    servicio: OrdenServicioDto;
     estado: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA" | "VENCIDA";
     prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
     fechaProgramada: string | null;
     zona: number | null;
-    responsable: string;
+    responsable: OrdenResponsableDto;
 }
 
 export interface OrdenesDashboardResponse {

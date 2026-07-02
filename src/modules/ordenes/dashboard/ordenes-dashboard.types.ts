@@ -5,10 +5,10 @@ export interface RawOrdenRow {
     estado: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA";
     prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
     fechaProgramada: Date | null;
-    cliente: { nombreRazonSocial: string };
-    tipoServicio: { nombre: string };
+    cliente: { id: string; nombreRazonSocial: string; telefono: string | null };
+    tipoServicio: { id: string; nombre: string };
     ubicacion: { zona: number | null };
     asignaciones: {
-        usuario: { nombres: string; apellidos: string | null };
+        usuario: { id: string; nombres: string; apellidos: string | null };
     }[];
 }

@@ -9,14 +9,14 @@ const ORDEN_SELECT = {
     estado: true,
     prioridad: true,
     fechaProgramada: true,
-    cliente: { select: { nombreRazonSocial: true } },
-    tipoServicio: { select: { nombre: true } },
+    cliente: { select: { id: true, nombreRazonSocial: true, telefono: true } },
+    tipoServicio: { select: { id: true, nombre: true } },
     ubicacion: { select: { zona: true } },
     asignaciones: {
         where: { estado: 'ACTIVA' as const },
         take: 1,
         select: {
-            usuario: { select: { nombres: true, apellidos: true } },
+            usuario: { select: { id: true, nombres: true, apellidos: true } },
         },
     },
 } satisfies Prisma.OrdenServicioSelect;

@@ -4,6 +4,9 @@ import {
     OrdenEstadoChartRow,
     OrdenesDashboardResponse,
     OrdenesDashboardFilters,
+    OrdenClienteDto,
+    OrdenServicioDto,
+    OrdenResponsableDto,
 } from './dashboard.dto';
 import { RawOrdenRow } from './ordenes-dashboard.types';
 import { formatDate } from '../../../common/utils/datetime';
@@ -12,10 +15,22 @@ function formatFecha(date: Date | null): string | null {
     return date ? formatDate(date) : null;
 }
 
-function extraerResponsable(asignaciones: RawOrdenRow['asignaciones']): string {
-    if (!asignaciones.length) return 'Sin asignar';
-    const { nombres, apellidos } = asignaciones[0].usuario;
-    return [nombres, apellidos].filter(Boolean).join(' ');
+function extraerCliente(cliente: RawOrdenRow['cliente']): OrdenClienteDto {
+    return {
+        id: cliente.id,
+        nombre: cliente.nombreRazonSocial,
+        telefono: cliente.telefono ?? undefined,
+    };
+}
+
+function extraerServicio(tipoServicio: RawOrdenRow['tipoServicio']): OrdenServicioDto {
+    return { id: tipoServicio.id, nombre: tipoServicio.nombre };
+}
+
+function extraerResponsable(asignaciones: RawOrdenRow['asignaciones']): OrdenResponsableDto {
+    if (!asignaciones.length) return { id: '', nombre: 'Sin asignar' };
+    const { id, nombres, apellidos } = asignaciones[0].usuario;
+    return { id, nombre: [nombres, apellidos].filter(Boolean).join(' ') };
 }
 
 function esVencida(estado: RawOrdenRow['estado'], fechaProgramada: Date | null, ahora: Date): boolean {
@@ -36,8 +51,8 @@ export function toOrdenRow(raw: RawOrdenRow, ahora: Date): OrdenDashboardRow {
         id: raw.id,
         numeroOrden: raw.numeroOrden,
         titulo: raw.titulo,
-        cliente: raw.cliente.nombreRazonSocial,
-        servicio: raw.tipoServicio.nombre,
+        cliente: extraerCliente(raw.cliente),
+        servicio: extraerServicio(raw.tipoServicio),
         estado: calcularEstado(raw, ahora),
         prioridad: raw.prioridad,
         fechaProgramada: formatFecha(raw.fechaProgramada),
@@ -51,8 +66,8 @@ export function toProximaRow(raw: RawOrdenRow): OrdenProximaRow {
         id: raw.id,
         numeroOrden: raw.numeroOrden,
         titulo: raw.titulo,
-        cliente: raw.cliente.nombreRazonSocial,
-        servicio: raw.tipoServicio.nombre,
+        cliente: extraerCliente(raw.cliente),
+        servicio: extraerServicio(raw.tipoServicio),
         fechaProgramada: formatFecha(raw.fechaProgramada),
         prioridad: raw.prioridad,
         responsable: extraerResponsable(raw.asignaciones),
