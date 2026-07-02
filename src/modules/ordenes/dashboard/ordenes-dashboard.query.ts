@@ -54,22 +54,9 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
         ...(f.search && {
             OR: [
                 { numeroOrden: { contains: f.search, mode: 'insensitive' } },
-                { titulo: { contains: f.search, mode: 'insensitive' } },
                 { cliente: { nombreRazonSocial: { contains: f.search, mode: 'insensitive' } } },
-                {
-                    asignaciones: {
-                        some: {
-                            estado: 'ACTIVA',
-                            rolEnOrden: 'responsable',
-                            usuario: {
-                                OR: [
-                                    { nombres: { contains: f.search, mode: 'insensitive' } },
-                                    { apellidos: { contains: f.search, mode: 'insensitive' } },
-                                ],
-                            },
-                        },
-                    },
-                },
+                { cliente: { telefono: { contains: f.search, mode: 'insensitive' } } },
+                { tipoServicio: { nombre: { contains: f.search, mode: 'insensitive' } } },
             ],
         }),
     };
