@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import {
   reportePagosQuerySchema,
   reportePagosExportSchema,
+  ReportePagosQuery,
+  ReportePagosExportQuery,
 } from "./pagos-report.schemas";
 import { ReportePagosFilters } from "./pagos-report.dto";
 import {
@@ -10,23 +12,28 @@ import {
 } from "./pagos-report.service";
 import { exportPagosPdf, exportPagosExcel } from "./pagos-report.exporter";
 
+function toReportePagosFilters(
+  parsed: ReportePagosQuery | ReportePagosExportQuery,
+): ReportePagosFilters {
+  return {
+    fechaInicio: parsed.fechaInicio,
+    fechaFin: parsed.fechaFin,
+    clienteId: parsed.clienteId,
+    codigoCliente: parsed.codigoCliente,
+    nombreCliente: parsed.nombreCliente,
+    zona: parsed.zona,
+    metodoPagoId: parsed.metodoPagoId,
+    estado: parsed.estado,
+    usuarioRegistradorId: parsed.usuarioRegistradorId,
+    referencia: parsed.referencia,
+  };
+}
+
 export async function reportePagosHandler(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
     const query = reportePagosQuerySchema.parse(req.query);
-
-    const filters: ReportePagosFilters = {
-      fechaInicio: query.fechaInicio,
-      fechaFin: query.fechaFin,
-      clienteId: query.clienteId,
-      codigoCliente: query.codigoCliente,
-      nombreCliente: query.nombreCliente,
-      zona: query.zona,
-      metodoPagoId: query.metodoPagoId,
-      estado: query.estado,
-      usuarioRegistradorId: query.usuarioRegistradorId,
-      referencia: query.referencia,
-    };
+    const filters = toReportePagosFilters(query);
 
     const report = await generarReportePagos(
       empresaId,
@@ -52,26 +59,12 @@ export async function reportePagosHandler(req: Request, res: Response) {
   }
 }
 
-function parseExportFilters(query: unknown): ReportePagosFilters {
-  const parsed = reportePagosExportSchema.parse(query);
-  return {
-    fechaInicio: parsed.fechaInicio,
-    fechaFin: parsed.fechaFin,
-    clienteId: parsed.clienteId,
-    codigoCliente: parsed.codigoCliente,
-    nombreCliente: parsed.nombreCliente,
-    zona: parsed.zona,
-    metodoPagoId: parsed.metodoPagoId,
-    estado: parsed.estado,
-    usuarioRegistradorId: parsed.usuarioRegistradorId,
-    referencia: parsed.referencia,
-  };
-}
-
 export async function exportPdfHandler(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
-    const filters = parseExportFilters(req.query);
+    const filters = toReportePagosFilters(
+      reportePagosExportSchema.parse(req.query),
+    );
 
     const report = await generarReportePagosCompleto(empresaId, filters);
     const pdfBuffer = await exportPagosPdf(report);
@@ -98,7 +91,9 @@ export async function exportPdfHandler(req: Request, res: Response) {
 export async function exportExcelHandler(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
-    const filters = parseExportFilters(req.query);
+    const filters = toReportePagosFilters(
+      reportePagosExportSchema.parse(req.query),
+    );
 
     const report = await generarReportePagosCompleto(empresaId, filters);
     const excelBuffer = await exportPagosExcel(report);
