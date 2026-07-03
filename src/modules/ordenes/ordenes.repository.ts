@@ -5,6 +5,7 @@ import {
   PrioridadOrden,
 } from "@prisma/client";
 import prisma from "../../config/prisma";
+import { startOfDay, endOfDay } from "../../common/utils/datetime";
 
 const ordenServicioInclude = {
   cuentaServicio: {
@@ -91,8 +92,8 @@ export async function findOrdenesByEmpresa(
 
   ...(filters?.fechaDesde && {
     fechaProgramada: {
-      gte: new Date(`${filters.fechaDesde}T00:00:00.000Z`),
-      ...(filters.fechaHasta && { lte: new Date(`${filters.fechaHasta}T23:59:59.999Z`) }),
+      gte: startOfDay(filters.fechaDesde),
+      ...(filters.fechaHasta && { lte: endOfDay(filters.fechaHasta) }),
     },
   }),
 
