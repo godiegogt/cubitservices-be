@@ -1,9 +1,11 @@
+import { EstadoPago } from "@prisma/client";
+
 export interface PagoDashboardFilters {
     fechaDesde: string;
     fechaHasta: string;
     clienteId?: string;
     metodoPagoId?: string;
-    estado?: "REGISTRADO" | "CONFIRMADO" | "ANULADO";
+    estado?: EstadoPago;
 }
 
 export interface PagoDashboardRow {
@@ -14,7 +16,7 @@ export interface PagoDashboardRow {
     metodoPago: string;
     monto: number;
     referencia: string | null;
-    estado: "REGISTRADO" | "CONFIRMADO" | "ANULADO";
+    estado: EstadoPago;
     registradoPor: string;
 }
 
