@@ -131,7 +131,7 @@ export async function queryOrdenesReport(
             prisma.ordenServicio.findMany({
                 where: filteredWhere,
                 include: ordenReportInclude,
-                orderBy: { fechaProgramada: "asc" },
+                orderBy: [{ fechaProgramada: "asc" }, { numeroOrden: "asc" }],
                 ...(skip !== undefined && { skip }),
                 ...(pageSize !== undefined && { take: pageSize }),
             }),
