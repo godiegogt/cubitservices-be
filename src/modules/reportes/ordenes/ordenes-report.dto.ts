@@ -38,7 +38,7 @@ export interface OrdenesReportSummaryDto {
 }
 
 export interface OrdenesReportResultDto {
-    filters: Omit<OrdenesReportFilters, "page" | "pageSize" | "search">;
+    filters: Omit<OrdenesReportFilters, "page" | "pageSize">;
     summary: OrdenesReportSummaryDto;
     data: OrdenReportItemDto[];
     pagination: {
