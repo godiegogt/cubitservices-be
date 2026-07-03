@@ -4,21 +4,37 @@ function money(value: number): string {
   return `Q ${value.toFixed(2)}`;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatRangoFechas(fechaInicio?: string, fechaFin?: string): string {
+  if (fechaInicio && fechaFin) return `Del ${fechaInicio} al ${fechaFin}`;
+  if (fechaInicio) return `Desde ${fechaInicio}`;
+  if (fechaFin) return `Hasta ${fechaFin}`;
+  return "Todas las fechas";
+}
+
 export function buildPagosReportHtml(report: ReportePagosResponse): string {
   const rows = report.data
     .map(
       (item) => `
     <tr>
       <td>${item.fechaPago}</td>
-      <td>${item.cliente.codigo}</td>
-      <td>${item.cliente.nombre}</td>
-      <td>${item.metodoPago.nombre}</td>
-      <td>${item.referencia ?? "-"}</td>
-      <td>${item.estado}</td>
+      <td>${escapeHtml(item.cliente.codigo)}</td>
+      <td>${escapeHtml(item.cliente.nombre)}</td>
+      <td>${escapeHtml(item.metodoPago.nombre)}</td>
+      <td>${item.referencia ? escapeHtml(item.referencia) : "-"}</td>
+      <td>${escapeHtml(item.estado)}</td>
       <td class="text-right">${money(item.montoRecibido)}</td>
       <td class="text-right">${money(item.montoAplicado)}</td>
       <td class="text-right">${money(item.montoDisponible)}</td>
-      <td>${item.registradoPor.nombre}</td>
+      <td>${escapeHtml(item.registradoPor.nombre)}</td>
     </tr>
   `,
     )
@@ -123,7 +139,7 @@ export function buildPagosReportHtml(report: ReportePagosResponse): string {
           <div>
             <div class="title">Reporte de Pagos</div>
             <div class="subtitle">
-              Del ${report.filters.fechaInicio} al ${report.filters.fechaFin}
+              ${formatRangoFechas(report.filters.fechaInicio, report.filters.fechaFin)}
             </div>
           </div>
 
