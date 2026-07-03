@@ -100,7 +100,7 @@ export async function queryOrdenesReport(
     const filteredWhere: Prisma.OrdenServicioWhereInput = {
         ...baseWhere,
         ...(filters.estado && {
-            estado: filters.estado as EstadoOrdenServicio,
+            estado: filters.estado,
         }),
     };
 

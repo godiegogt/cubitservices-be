@@ -1,5 +1,7 @@
+import { EstadoOrdenServicio, PrioridadOrden, OrigenOrden } from "@prisma/client";
+
 export interface OrdenesReportFilters {
-    estado?: string;
+    estado?: EstadoOrdenServicio;
     tipoOrden?: string;
     tecnicoId?: string;
     zonaId?: number;
@@ -14,9 +16,9 @@ export interface OrdenReportItemDto {
     id: string;
     numeroOrden: string;
     titulo: string;
-    estado: string;
-    prioridad: string;
-    origen: string;
+    estado: EstadoOrdenServicio;
+    prioridad: PrioridadOrden;
+    origen: OrigenOrden;
     fechaProgramada: string | null;
     fechaInicio: string | null;
     fechaCierre: string | null;
