@@ -1,9 +1,14 @@
 import { EstadoPago } from "@prisma/client";
 import { startOfDay, endOfDay } from "../../../common/utils/datetime";
 import { ReportePagosFilters, ReportePagosResponse } from "./pagos-report.dto";
-import { queryPagosReporte } from "./pagos-report.query";
 import {
-  buildReportePagosResponse,
+  queryPagosReporte,
+  queryPagosReportePage,
+  countPagosReporte,
+  queryPagosReporteSummary,
+} from "./pagos-report.query";
+import {
+  buildReportePagosResponsePage,
   buildReportePagosResponseFull,
 } from "./pagos-report.mapper";
 
@@ -13,13 +18,24 @@ export async function generarReportePagos(
   page: number,
   pageSize: number,
 ): Promise<ReportePagosResponse> {
-  const pagos = await queryPagosReporte(empresaId, buildQueryFilters(filters));
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.min(100, Math.max(1, pageSize));
+  const queryFilters = buildQueryFilters(filters);
+  const skip = (safePage - 1) * safePageSize;
 
-  return buildReportePagosResponse(
+  const [pagos, total, summary] = await Promise.all([
+    queryPagosReportePage(empresaId, queryFilters, skip, safePageSize),
+    countPagosReporte(empresaId, queryFilters),
+    queryPagosReporteSummary(empresaId, queryFilters),
+  ]);
+
+  return buildReportePagosResponsePage(
     pagos,
     filters,
-    Math.max(1, page),
-    Math.min(100, Math.max(1, pageSize)),
+    summary,
+    safePage,
+    safePageSize,
+    total,
   );
 }
 

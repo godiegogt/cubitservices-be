@@ -1,5 +1,6 @@
 import { EstadoPago, Prisma } from "@prisma/client";
 import prisma from "../../../config/prisma";
+import { ReportePagosSummary } from "./pagos-report.dto";
 
 const pagoReporteInclude = {
     cliente: {
@@ -34,9 +35,7 @@ export type PagoReporteItem = Prisma.PagoGetPayload<{
     include: typeof pagoReporteInclude;
 }>;
 
-export async function queryPagosReporte(
-    empresaId: string,
-    filters: {
+export interface PagosReporteFilters {
     fechaInicio?: Date;
     fechaFin?: Date;
     clienteId?: string;
@@ -47,9 +46,18 @@ export async function queryPagosReporte(
     estado?: EstadoPago;
     usuarioRegistradorId?: string;
     referencia?: string;
-    }
-): Promise<PagoReporteItem[]> {
-    const where: Prisma.PagoWhereInput = {
+}
+
+const pagoReporteOrderBy: Prisma.PagoOrderByWithRelationInput[] = [
+    { fechaPago: "desc" },
+    { createdAt: "desc" },
+];
+
+function buildPagoWhere(
+    empresaId: string,
+    filters: PagosReporteFilters,
+): Prisma.PagoWhereInput {
+    return {
     empresaId,
     ...(filters.fechaInicio || filters.fechaFin
         ? {
@@ -84,10 +92,79 @@ export async function queryPagosReporte(
         ? { referencia: { contains: filters.referencia, mode: "insensitive" } }
         : {}),
     };
+}
 
+export async function queryPagosReporte(
+    empresaId: string,
+    filters: PagosReporteFilters,
+): Promise<PagoReporteItem[]> {
     return prisma.pago.findMany({
-    where,
+    where: buildPagoWhere(empresaId, filters),
     include: pagoReporteInclude,
-    orderBy: [{ fechaPago: "desc" }, { createdAt: "desc" }],
+    orderBy: pagoReporteOrderBy,
     });
+}
+
+export async function queryPagosReportePage(
+    empresaId: string,
+    filters: PagosReporteFilters,
+    skip: number,
+    take: number,
+): Promise<PagoReporteItem[]> {
+    return prisma.pago.findMany({
+    where: buildPagoWhere(empresaId, filters),
+    include: pagoReporteInclude,
+    orderBy: pagoReporteOrderBy,
+    skip,
+    take,
+    });
+}
+
+export async function countPagosReporte(
+    empresaId: string,
+    filters: PagosReporteFilters,
+): Promise<number> {
+    return prisma.pago.count({ where: buildPagoWhere(empresaId, filters) });
+}
+
+export async function queryPagosReporteSummary(
+    empresaId: string,
+    filters: PagosReporteFilters,
+): Promise<ReportePagosSummary> {
+    const where = buildPagoWhere(empresaId, filters);
+    const confirmadoWhere: Prisma.PagoWhereInput = {
+    AND: [where, { estado: EstadoPago.CONFIRMADO }],
+    };
+    const anuladoWhere: Prisma.PagoWhereInput = {
+    AND: [where, { estado: EstadoPago.ANULADO }],
+    };
+
+    const [cantidadPagos, pagosAnulados, montoRecibidoAgg, montoAplicadoAgg] =
+    await Promise.all([
+        prisma.pago.count({ where }),
+        prisma.pago.count({ where: anuladoWhere }),
+        prisma.pago.aggregate({
+        where: confirmadoWhere,
+        _sum: { montoTotal: true },
+        }),
+        prisma.aplicacionPago.aggregate({
+        where: { pago: confirmadoWhere },
+        _sum: { montoAplicado: true },
+        }),
+    ]);
+
+    const totalRecibido = +(
+    montoRecibidoAgg._sum.montoTotal?.toNumber() ?? 0
+    ).toFixed(2);
+    const totalAplicado = +(
+    montoAplicadoAgg._sum.montoAplicado?.toNumber() ?? 0
+    ).toFixed(2);
+
+    return {
+    totalRecibido,
+    totalAplicado,
+    totalDisponible: +(totalRecibido - totalAplicado).toFixed(2),
+    cantidadPagos,
+    pagosAnulados,
+    };
 }

@@ -21,7 +21,7 @@ function sumAplicaciones(
     .toNumber();
 }
 
-function mapToRow(pago: PagoReporteItem): ReportePagoRow {
+export function mapToRow(pago: PagoReporteItem): ReportePagoRow {
   const montoRecibido = decimalToNumber(pago.montoTotal);
   const montoAplicado = +sumAplicaciones(pago.aplicaciones).toFixed(2);
   const montoDisponible = +(montoRecibido - montoAplicado).toFixed(2);
@@ -87,23 +87,18 @@ function calcularSummary(rows: ReportePagoRow[]): ReportePagosSummary {
   };
 }
 
-export function buildReportePagosResponse(
+export function buildReportePagosResponsePage(
   pagos: PagoReporteItem[],
   filters: ReportePagosFilters,
+  summary: ReportePagosSummary,
   page: number,
   pageSize: number,
+  total: number,
 ): ReportePagosResponse {
-  const allRows = pagos.map(mapToRow);
-  const summary = calcularSummary(allRows);
-
-  const total = allRows.length;
-  const start = (page - 1) * pageSize;
-  const pagedData = allRows.slice(start, start + pageSize);
-
   return {
     filters,
     summary,
-    data: pagedData,
+    data: pagos.map(mapToRow),
     pagination: {
       page,
       pageSize,
