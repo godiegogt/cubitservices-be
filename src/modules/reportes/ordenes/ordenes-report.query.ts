@@ -4,6 +4,7 @@ import {
     Prisma,
 } from "@prisma/client";
 import prisma from "../../../config/prisma";
+import { startOfDay, endOfDay } from "../../../common/utils/datetime";
 import { OrdenesReportFilters } from "./ordenes-report.dto";
 
 const ordenReportInclude = {
@@ -52,10 +53,8 @@ function buildBaseWhere(
 
     if (filters.fechaInicio || filters.fechaFin) {
         where.fechaProgramada = {
-            ...(filters.fechaInicio && { gte: new Date(filters.fechaInicio) }),
-            ...(filters.fechaFin && {
-                lte: new Date(`${filters.fechaFin}T23:59:59.999Z`),
-            }),
+            ...(filters.fechaInicio && { gte: startOfDay(filters.fechaInicio) }),
+            ...(filters.fechaFin && { lte: endOfDay(filters.fechaFin) }),
         };
     }
 

@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 import ExcelJS from "exceljs";
 import { OrdenesReportResultDto } from "./ordenes-report.dto";
 import { buildOrdenesReportHtml } from "./ordenes-report.template";
+import { formatDate } from "../../../common/utils/datetime";
 
 export async function exportOrdenesExcel(
     report: OrdenesReportResultDto
@@ -97,15 +98,9 @@ export async function exportOrdenesExcel(
             item.ubicacion.nombre,
             item.ubicacion.zona ?? "",
             item.tecnico?.nombre ?? "",
-            item.fechaProgramada
-                ? new Date(item.fechaProgramada).toLocaleDateString("es-HN")
-                : "",
-            item.fechaInicio
-                ? new Date(item.fechaInicio).toLocaleDateString("es-HN")
-                : "",
-            item.fechaCierre
-                ? new Date(item.fechaCierre).toLocaleDateString("es-HN")
-                : "",
+            item.fechaProgramada ? formatDate(new Date(item.fechaProgramada)) : "",
+            item.fechaInicio ? formatDate(new Date(item.fechaInicio)) : "",
+            item.fechaCierre ? formatDate(new Date(item.fechaCierre)) : "",
         ]);
     }
 

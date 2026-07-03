@@ -1,9 +1,5 @@
 import { OrdenesReportResultDto } from "./ordenes-report.dto";
-
-function formatDate(iso: string | null): string {
-    if (!iso) return "-";
-    return new Date(iso).toLocaleDateString("es-HN");
-}
+import { formatDate } from "../../../common/utils/datetime";
 
 function escapeHtml(str: string): string {
     return str
@@ -40,9 +36,9 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
             <td>${escapeHtml(item.ubicacion.nombre)}</td>
             <td>${item.ubicacion.zona ?? "-"}</td>
             <td>${item.tecnico ? escapeHtml(item.tecnico.nombre) : "-"}</td>
-            <td>${formatDate(item.fechaProgramada)}</td>
-            <td>${formatDate(item.fechaInicio)}</td>
-            <td>${formatDate(item.fechaCierre)}</td>
+            <td>${item.fechaProgramada ? formatDate(new Date(item.fechaProgramada)) : "-"}</td>
+            <td>${item.fechaInicio ? formatDate(new Date(item.fechaInicio)) : "-"}</td>
+            <td>${item.fechaCierre ? formatDate(new Date(item.fechaCierre)) : "-"}</td>
         </tr>`
         )
         .join("");
