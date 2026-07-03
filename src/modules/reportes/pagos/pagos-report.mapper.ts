@@ -67,21 +67,14 @@ function mapToRow(pago: PagoReporteItem): ReportePagoRow {
   };
 }
 
-function calcularSummary(
-  rows: ReportePagoRow[],
-  estadoFilter?: string,
-): ReportePagosSummary {
-  const includeAnuladosEnTotal = estadoFilter === "ANULADO";
+function calcularSummary(rows: ReportePagoRow[]): ReportePagosSummary {
+  const rowsConfirmados = rows.filter((r) => r.estado === "CONFIRMADO");
 
-  const rowsParaTotal = includeAnuladosEnTotal
-    ? rows
-    : rows.filter((r) => r.estado !== "ANULADO");
-
-  const totalRecibido = +rowsParaTotal
+  const totalRecibido = +rowsConfirmados
     .reduce((acc, r) => acc + r.montoRecibido, 0)
     .toFixed(2);
 
-  const totalAplicado = +rowsParaTotal
+  const totalAplicado = +rowsConfirmados
     .reduce((acc, r) => acc + r.montoAplicado, 0)
     .toFixed(2);
 
@@ -101,7 +94,7 @@ export function buildReportePagosResponse(
   pageSize: number,
 ): ReportePagosResponse {
   const allRows = pagos.map(mapToRow);
-  const summary = calcularSummary(allRows, filters.estado);
+  const summary = calcularSummary(allRows);
 
   const total = allRows.length;
   const start = (page - 1) * pageSize;
@@ -125,7 +118,7 @@ export function buildReportePagosResponseFull(
   filters: ReportePagosFilters,
 ): ReportePagosResponse {
   const allRows = pagos.map(mapToRow);
-  const summary = calcularSummary(allRows, filters.estado);
+  const summary = calcularSummary(allRows);
   const total = allRows.length;
 
   return {
