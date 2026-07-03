@@ -1,7 +1,25 @@
 import { Request, Response } from "express";
+import { ZodError } from "zod";
 import { reporteOrdenesQuerySchema, reporteOrdenesExportQuerySchema } from "./ordenes-report.schemas";
 import { generarReporteOrdenes } from "./ordenes-report.service";
 import { exportOrdenesPdf, exportOrdenesExcel } from "./ordenes-report.exporter";
+
+function handleReporteOrdenesError(error: unknown, res: Response, context: string, defaultMessage: string) {
+    console.error(`[${context}]`, error);
+
+    if (error instanceof ZodError) {
+        return res.status(400).json({
+            success: false,
+            message: "Parámetros de consulta inválidos",
+            errors: error.issues,
+        });
+    }
+
+    return res.status(500).json({
+        success: false,
+        message: defaultMessage,
+    });
+}
 
 export async function reporteOrdenesHandler(req: Request, res: Response) {
     try {
@@ -26,14 +44,7 @@ export async function reporteOrdenesHandler(req: Request, res: Response) {
             data: report,
         });
     } catch (error) {
-        console.error("[reporteOrdenes]", error);
-        return res.status(400).json({
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Error generando reporte de órdenes",
-        });
+        return handleReporteOrdenesError(error, res, "reporteOrdenes", "Error generando reporte de órdenes");
     }
 }
 
@@ -64,14 +75,7 @@ export async function exportOrdenesExcelHandler(req: Request, res: Response) {
         );
         return res.send(buffer);
     } catch (error) {
-        console.error("[exportOrdenesExcel]", error);
-        return res.status(400).json({
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Error exportando reporte de órdenes a Excel",
-        });
+        return handleReporteOrdenesError(error, res, "exportOrdenesExcel", "Error exportando reporte de órdenes a Excel");
     }
 }
 
@@ -99,13 +103,6 @@ export async function exportOrdenesPdfHandler(req: Request, res: Response) {
         );
         return res.send(buffer);
     } catch (error) {
-        console.error("[exportOrdenesPdf]", error);
-        return res.status(400).json({
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Error exportando reporte de órdenes a PDF",
-        });
+        return handleReporteOrdenesError(error, res, "exportOrdenesPdf", "Error exportando reporte de órdenes a PDF");
     }
 }
