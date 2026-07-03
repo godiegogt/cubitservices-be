@@ -1,5 +1,5 @@
 import prisma from '../../../config/prisma';
-import { EstadoOrdenServicio, PrioridadOrden, Prisma } from '@prisma/client';
+import { EstadoAsignacionOrden, EstadoOrdenServicio, PrioridadOrden, Prisma } from '@prisma/client';
 import { RawOrdenRow } from './ordenes-dashboard.types';
 
 const ORDEN_SELECT = {
@@ -13,7 +13,7 @@ const ORDEN_SELECT = {
     tipoServicio: { select: { id: true, nombre: true } },
     ubicacion: { select: { zona: true } },
     asignaciones: {
-        where: { estado: 'ACTIVA' as const },
+        where: { estado: EstadoAsignacionOrden.ACTIVA },
         take: 1,
         select: {
             usuario: { select: { id: true, nombres: true, apellidos: true } },
@@ -45,7 +45,7 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
         ...(f.responsableId && {
             asignaciones: {
                 some: {
-                    estado: 'ACTIVA',
+                    estado: EstadoAsignacionOrden.ACTIVA,
                     usuarioId: f.responsableId,
                     rolEnOrden: 'responsable',
                 },
@@ -143,7 +143,7 @@ export async function contarVencidas(f: KpiFilters): Promise<number> {
 
 export async function getOrdenesPorEstado(
     filters: DataFilters,
-): Promise<{ estado: string; cantidad: number }[]> {
+): Promise<{ estado: EstadoOrdenServicio; cantidad: number }[]> {
     const grouped = await prisma.ordenServicio.groupBy({
         by: ['estado'],
         where: {

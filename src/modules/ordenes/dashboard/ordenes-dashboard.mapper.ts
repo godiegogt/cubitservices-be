@@ -1,3 +1,4 @@
+import { EstadoOrdenServicio } from '@prisma/client';
 import {
     OrdenDashboardRow,
     OrdenProximaRow,
@@ -37,8 +38,8 @@ function esVencida(estado: RawOrdenRow['estado'], fechaProgramada: Date | null, 
     return (
         fechaProgramada !== null &&
         fechaProgramada < ahora &&
-        estado !== 'FINALIZADA' &&
-        estado !== 'CANCELADA'
+        estado !== EstadoOrdenServicio.FINALIZADA &&
+        estado !== EstadoOrdenServicio.CANCELADA
     );
 }
 
@@ -75,7 +76,7 @@ export function toProximaRow(raw: RawOrdenRow): OrdenProximaRow {
 }
 
 export function toChartRows(
-    porEstado: { estado: string; cantidad: number }[],
+    porEstado: { estado: EstadoOrdenServicio; cantidad: number }[],
 ): OrdenEstadoChartRow[] {
     const total = porEstado.reduce((acc, e) => acc + e.cantidad, 0);
     return porEstado.map((e) => ({

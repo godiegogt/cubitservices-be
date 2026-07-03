@@ -1,8 +1,10 @@
+import { EstadoOrdenServicio, PrioridadOrden } from "@prisma/client";
+
 export interface OrdenesDashboardFilters {
     fechaDesde: string;
     fechaHasta: string;
-    estado?: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA" | "VENCIDA";
-    prioridad?: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
+    estado?: EstadoOrdenServicio | "VENCIDA";
+    prioridad?: PrioridadOrden;
     clienteId?: string;
     tipoServicioId?: string;
     responsableId?: string;
@@ -13,7 +15,7 @@ export interface OrdenesDashboardFilters {
 }
 
 export interface OrdenEstadoChartRow {
-    estado: string;
+    estado: EstadoOrdenServicio;
     cantidad: number;
     porcentaje: number;
 }
@@ -41,7 +43,7 @@ export interface OrdenProximaRow {
     cliente: OrdenClienteDto;
     servicio: OrdenServicioDto;
     fechaProgramada: string | null;
-    prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
+    prioridad: PrioridadOrden;
     responsable: OrdenResponsableDto;
 }
 
@@ -51,8 +53,8 @@ export interface OrdenDashboardRow {
     titulo: string;
     cliente: OrdenClienteDto;
     servicio: OrdenServicioDto;
-    estado: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA" | "VENCIDA";
-    prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
+    estado: EstadoOrdenServicio | "VENCIDA";
+    prioridad: PrioridadOrden;
     fechaProgramada: string | null;
     zona: number | null;
     responsable: OrdenResponsableDto;

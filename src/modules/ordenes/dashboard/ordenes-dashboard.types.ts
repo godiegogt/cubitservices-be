@@ -1,9 +1,11 @@
+import { EstadoOrdenServicio, PrioridadOrden } from "@prisma/client";
+
 export interface RawOrdenRow {
     id: string;
     numeroOrden: string;
     titulo: string;
-    estado: "PENDIENTE" | "PROGRAMADA" | "EN_PROCESO" | "PAUSADA" | "FINALIZADA" | "CANCELADA";
-    prioridad: "BAJA" | "MEDIA" | "ALTA" | "URGENTE";
+    estado: EstadoOrdenServicio;
+    prioridad: PrioridadOrden;
     fechaProgramada: Date | null;
     cliente: { id: string; nombreRazonSocial: string; telefono: string | null };
     tipoServicio: { id: string; nombre: string };
