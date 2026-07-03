@@ -28,7 +28,7 @@ export async function reporteOrdenesHandler(req: Request, res: Response) {
 
         const report = await generarReporteOrdenes(empresaId, {
             estado: query.estado,
-            tipoOrden: query.tipoOrden,
+            tipoServicioId: query.tipoServicioId,
             tecnicoId: query.tecnicoId,
             zonaId: query.zonaId,
             fechaInicio: query.fechaInicio,
@@ -55,7 +55,7 @@ export async function exportOrdenesExcelHandler(req: Request, res: Response) {
 
         const report = await generarReporteOrdenes(empresaId, {
             estado: query.estado,
-            tipoOrden: query.tipoOrden,
+            tipoServicioId: query.tipoServicioId,
             tecnicoId: query.tecnicoId,
             zonaId: query.zonaId,
             fechaInicio: query.fechaInicio,
@@ -86,7 +86,7 @@ export async function exportOrdenesPdfHandler(req: Request, res: Response) {
 
         const report = await generarReporteOrdenes(empresaId, {
             estado: query.estado,
-            tipoOrden: query.tipoOrden,
+            tipoServicioId: query.tipoServicioId,
             tecnicoId: query.tecnicoId,
             zonaId: query.zonaId,
             fechaInicio: query.fechaInicio,

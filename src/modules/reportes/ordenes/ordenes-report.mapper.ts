@@ -67,10 +67,10 @@ export function mapOrdenesReportResult(
         };
     }
 ): OrdenesReportResultDto {
-    const { estado, tipoOrden, tecnicoId, zonaId, fechaInicio, fechaFin, search } =
+    const { estado, tipoServicioId, tecnicoId, zonaId, fechaInicio, fechaFin, search } =
         filters;
     return {
-        filters: { estado, tipoOrden, tecnicoId, zonaId, fechaInicio, fechaFin, search },
+        filters: { estado, tipoServicioId, tecnicoId, zonaId, fechaInicio, fechaFin, search },
         summary: queryResult.summary,
         data: queryResult.data.map(mapOrdenToDto),
         pagination: queryResult.pagination,

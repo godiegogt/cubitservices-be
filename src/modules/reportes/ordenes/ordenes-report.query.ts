@@ -33,8 +33,8 @@ function buildBaseWhere(
 ): Prisma.OrdenServicioWhereInput {
     const where: Prisma.OrdenServicioWhereInput = { empresaId };
 
-    if (filters.tipoOrden) {
-        where.tipoServicioId = filters.tipoOrden;
+    if (filters.tipoServicioId) {
+        where.tipoServicioId = filters.tipoServicioId;
     }
 
     if (filters.tecnicoId) {

@@ -5,7 +5,7 @@ const dateStringSchema = z.string().date();
 
 const baseFiltersSchema = {
     estado: z.nativeEnum(EstadoOrdenServicio).optional(),
-    tipoOrden: z.string().uuid().optional(),
+    tipoServicioId: z.string().uuid().optional(),
     tecnicoId: z.string().uuid().optional(),
     zonaId: z.coerce.number().int().min(1).optional(),
     fechaInicio: dateStringSchema.optional(),
