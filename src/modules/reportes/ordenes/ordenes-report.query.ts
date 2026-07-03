@@ -104,28 +104,31 @@ export async function queryOrdenesReport(
         }),
     };
 
-    const [totalOrdenes, pendientes, enProceso, completadas, vencidas, data, total] =
+    const [pendientes, enProceso, completadas, vencidas, data, total] =
         await Promise.all([
-            prisma.ordenServicio.count({ where: baseWhere }),
             prisma.ordenServicio.count({
-                where: { ...baseWhere, estado: EstadoOrdenServicio.PENDIENTE },
+                where: { AND: [filteredWhere, { estado: EstadoOrdenServicio.PENDIENTE }] },
             }),
             prisma.ordenServicio.count({
-                where: { ...baseWhere, estado: EstadoOrdenServicio.EN_PROCESO },
+                where: { AND: [filteredWhere, { estado: EstadoOrdenServicio.EN_PROCESO }] },
             }),
             prisma.ordenServicio.count({
-                where: { ...baseWhere, estado: EstadoOrdenServicio.FINALIZADA },
+                where: { AND: [filteredWhere, { estado: EstadoOrdenServicio.FINALIZADA }] },
             }),
             prisma.ordenServicio.count({
                 where: {
-                    ...baseWhere,
-                    fechaProgramada: { lt: new Date() },
-                    estado: {
-                        notIn: [
-                            EstadoOrdenServicio.FINALIZADA,
-                            EstadoOrdenServicio.CANCELADA,
-                        ],
-                    },
+                    AND: [
+                        filteredWhere,
+                        { fechaProgramada: { lt: new Date() } },
+                        {
+                            estado: {
+                                notIn: [
+                                    EstadoOrdenServicio.FINALIZADA,
+                                    EstadoOrdenServicio.CANCELADA,
+                                ],
+                            },
+                        },
+                    ],
                 },
             }),
             prisma.ordenServicio.findMany({
@@ -139,7 +142,7 @@ export async function queryOrdenesReport(
         ]);
 
     return {
-        summary: { totalOrdenes, pendientes, enProceso, completadas, vencidas },
+        summary: { totalOrdenes: total, pendientes, enProceso, completadas, vencidas },
         data,
         pagination: pageSize
             ? {
