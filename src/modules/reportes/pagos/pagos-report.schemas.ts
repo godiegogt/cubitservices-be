@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EstadoPago } from "@prisma/client";
 
 const filtersSchema = z.object({
   fechaInicio: z.string().date().optional(),
@@ -8,7 +9,7 @@ const filtersSchema = z.object({
   nombreCliente: z.string().min(1).max(150).optional(),
   zona: z.coerce.number().int().min(0).optional(),
   metodoPagoId: z.string().uuid().optional(),
-  estado: z.enum(["REGISTRADO", "CONFIRMADO", "ANULADO"]).optional(),
+  estado: z.nativeEnum(EstadoPago).optional(),
   usuarioRegistradorId: z.string().uuid().optional(),
   referencia: z.string().min(1).max(120).optional(),
 });

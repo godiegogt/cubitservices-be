@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { EstadoPago, Prisma } from "@prisma/client";
 import { formatDate } from "../../../common/utils/datetime";
 import {
   AplicacionPagoDto,
@@ -56,7 +56,7 @@ export function mapToRow(pago: PagoReporteItem): ReportePagoRow {
     montoAplicado,
     montoDisponible,
     referencia: pago.referencia,
-    estado: pago.estado as ReportePagoRow["estado"],
+    estado: pago.estado,
     registradoPor: {
       id: pago.registradoBy.id,
       nombre: [pago.registradoBy.nombres, pago.registradoBy.apellidos]
@@ -68,7 +68,9 @@ export function mapToRow(pago: PagoReporteItem): ReportePagoRow {
 }
 
 function calcularSummary(rows: ReportePagoRow[]): ReportePagosSummary {
-  const rowsConfirmados = rows.filter((r) => r.estado === "CONFIRMADO");
+  const rowsConfirmados = rows.filter(
+    (r) => r.estado === EstadoPago.CONFIRMADO,
+  );
 
   const totalRecibido = +rowsConfirmados
     .reduce((acc, r) => acc + r.montoRecibido, 0)
@@ -83,7 +85,7 @@ function calcularSummary(rows: ReportePagoRow[]): ReportePagosSummary {
     totalAplicado,
     totalDisponible: +(totalRecibido - totalAplicado).toFixed(2),
     cantidadPagos: rows.length,
-    pagosAnulados: rows.filter((r) => r.estado === "ANULADO").length,
+    pagosAnulados: rows.filter((r) => r.estado === EstadoPago.ANULADO).length,
   };
 }
 

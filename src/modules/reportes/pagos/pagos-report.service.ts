@@ -1,4 +1,3 @@
-import { EstadoPago } from "@prisma/client";
 import { startOfDay, endOfDay } from "../../../common/utils/datetime";
 import { ReportePagosFilters, ReportePagosResponse } from "./pagos-report.dto";
 import {
@@ -58,7 +57,7 @@ function buildQueryFilters(filters: ReportePagosFilters) {
     nombreCliente: filters.nombreCliente,
     zona: filters.zona,
     metodoPagoId: filters.metodoPagoId,
-    estado: filters.estado as EstadoPago | undefined,
+    estado: filters.estado,
     usuarioRegistradorId: filters.usuarioRegistradorId,
     referencia: filters.referencia,
   };

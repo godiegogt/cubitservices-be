@@ -1,3 +1,5 @@
+import { EstadoCargo, EstadoPago } from "@prisma/client";
+
 export interface ReportePagosFilters {
   fechaInicio?: string;
   fechaFin?: string;
@@ -6,7 +8,7 @@ export interface ReportePagosFilters {
   nombreCliente?: string;
   zona?: number;
   metodoPagoId?: string;
-  estado?: string;
+  estado?: EstadoPago;
   usuarioRegistradorId?: string;
   referencia?: string;
 }
@@ -20,7 +22,7 @@ export interface AplicacionPagoDto {
   montoAplicado: number;
   fechaEmisionCargo: string;
   fechaVencimientoCargo: string | null;
-  estadoCargo: string;
+  estadoCargo: EstadoCargo;
 }
 
 export interface ReportePagoRow {
@@ -39,7 +41,7 @@ export interface ReportePagoRow {
   montoAplicado: number;
   montoDisponible: number;
   referencia: string | null;
-  estado: "REGISTRADO" | "CONFIRMADO" | "ANULADO";
+  estado: EstadoPago;
   registradoPor: {
     id: string;
     nombre: string;
