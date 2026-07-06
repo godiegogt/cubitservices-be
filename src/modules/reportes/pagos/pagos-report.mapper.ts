@@ -24,7 +24,7 @@ function sumAplicaciones(
 export function mapToRow(pago: PagoReporteItem): ReportePagoRow {
   const montoRecibido = decimalToNumber(pago.montoTotal);
   const montoAplicado = +sumAplicaciones(pago.aplicaciones).toFixed(2);
-  const montoDisponible = +(montoRecibido - montoAplicado).toFixed(2);
+  const montoDisponible = pago.estado === EstadoPago.ANULADO ? 0 : +(montoRecibido - montoAplicado).toFixed(2);
 
   const aplicaciones: AplicacionPagoDto[] = pago.aplicaciones.map((a) => ({
     cargoId: a.cargo.id,
