@@ -91,7 +91,7 @@ export async function findOrdenesByEmpresa(
   ...(filters?.origen && { origen: filters.origen }),
 
   ...(filters?.fechaDesde && {
-    fechaProgramada: {
+    createdAt: {
       gte: startOfDay(filters.fechaDesde),
       ...(filters.fechaHasta && { lte: endOfDay(filters.fechaHasta) }),
     },
