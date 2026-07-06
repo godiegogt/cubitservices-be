@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { formatDate } from "../../../common/utils/datetime";
 import { ClienteReportItemDto } from "./clientes-report.dto";
 
 const clienteInclude = Prisma.validator<Prisma.ClienteDefaultArgs>()({
@@ -8,10 +9,6 @@ const clienteInclude = Prisma.validator<Prisma.ClienteDefaultArgs>()({
 });
 
 export type ClienteReportRow = Prisma.ClienteGetPayload<typeof clienteInclude>;
-
-function formatDateOnly(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
 
 export function mapClienteToItem(
   cliente: ClienteReportRow,
@@ -26,6 +23,6 @@ export function mapClienteToItem(
     email: cliente.email ?? null,
     estado: cliente.estado,
     totalCuentas: cliente._count.cuentasServicio,
-    fechaRegistro: formatDateOnly(cliente.createdAt),
+    fechaRegistro: formatDate(cliente.createdAt),
   };
 }

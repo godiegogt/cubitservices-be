@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { formatDate } from "../../../common/utils/datetime";
 import {
     clientesReportQuerySchema,
     clientesExportQuerySchema,
@@ -57,7 +58,7 @@ export async function exportClientesPdfHandler(req: Request, res: Response) {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
-            `attachment; filename="reporte-clientes-${new Date().toISOString().slice(0, 10)}.pdf"`,
+            `attachment; filename="reporte-clientes-${formatDate(new Date())}.pdf"`,
         );
 
         return res.send(pdfBuffer);
@@ -91,7 +92,7 @@ export async function exportClientesExcelHandler(req: Request, res: Response) {
         );
         res.setHeader(
             "Content-Disposition",
-            `attachment; filename="reporte-clientes-${new Date().toISOString().slice(0, 10)}.xlsx"`,
+            `attachment; filename="reporte-clientes-${formatDate(new Date())}.xlsx"`,
         );
 
         return res.send(excelBuffer);
