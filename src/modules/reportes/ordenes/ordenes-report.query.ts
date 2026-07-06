@@ -52,7 +52,7 @@ function buildBaseWhere(
     }
 
     if (filters.fechaInicio || filters.fechaFin) {
-        where.fechaProgramada = {
+        where.createdAt = {
             ...(filters.fechaInicio && { gte: startOfDay(filters.fechaInicio) }),
             ...(filters.fechaFin && { lte: endOfDay(filters.fechaFin) }),
         };
@@ -133,7 +133,7 @@ export async function queryOrdenesReport(
             prisma.ordenServicio.findMany({
                 where: filteredWhere,
                 include: ordenReportInclude,
-                orderBy: [{ fechaProgramada: "asc" }, { numeroOrden: "asc" }],
+                orderBy: [{ createdAt: "desc" }, { numeroOrden: "desc" }],
                 ...(skip !== undefined && { skip }),
                 ...(pageSize !== undefined && { take: pageSize }),
             }),
