@@ -1,14 +1,6 @@
 import { ClientesReportResultDto } from "./clientes-report.dto";
 import { formatZonasServicios } from "./clientes-report.mapper";
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+import { escapeHtml } from "../../../common/utils/utils";
 
 export function buildClientesReportHtml(report: ClientesReportResultDto): string {
   const rows = report.items
