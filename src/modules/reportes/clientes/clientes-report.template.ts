@@ -1,25 +1,37 @@
 import { ClientesReportResultDto } from "./clientes-report.dto";
 import { formatZonasServicios } from "./clientes-report.mapper";
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function buildClientesReportHtml(report: ClientesReportResultDto): string {
   const rows = report.items
-    .map(
-      (item) => `
+    .map((item) => {
+      const zonaServicio = formatZonasServicios(item.zonas);
+      const cuentas = item.cuentas.join(", ");
+
+      return `
     <tr>
-      <td>${item.codigo}</td>
-      <td>${item.nombre}</td>
-      <td>${item.tipoCliente}</td>
-      <td>${item.identificacion ?? "-"}</td>
-      <td>${item.telefono ?? "-"}</td>
-      <td>${formatZonasServicios(item.zonas) || "-"}</td>
-      <td>${item.email ?? "-"}</td>
-      <td>${item.estado}</td>
+      <td>${escapeHtml(item.codigo)}</td>
+      <td>${escapeHtml(item.nombre)}</td>
+      <td>${escapeHtml(item.tipoCliente)}</td>
+      <td>${item.identificacion ? escapeHtml(item.identificacion) : "-"}</td>
+      <td>${item.telefono ? escapeHtml(item.telefono) : "-"}</td>
+      <td>${zonaServicio ? escapeHtml(zonaServicio) : "-"}</td>
+      <td>${item.email ? escapeHtml(item.email) : "-"}</td>
+      <td>${escapeHtml(item.estado)}</td>
       <td class="text-right">${item.totalCuentas}</td>
-      <td>${item.cuentas.join(", ") || "-"}</td>
+      <td>${cuentas ? escapeHtml(cuentas) : "-"}</td>
       <td>${item.fechaRegistro}</td>
     </tr>
-  `
-    )
+  `;
+    })
     .join("");
 
   const filtroTexto = [
