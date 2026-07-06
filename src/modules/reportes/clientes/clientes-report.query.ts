@@ -1,4 +1,4 @@
-import { Prisma, EstadoRegistroBasico } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { startOfDay, endOfDay } from "../../../common/utils/datetime";
 import { ClientesReportFilters } from "./clientes-report.dto";
 
@@ -33,7 +33,7 @@ export function buildClientesWhereClause(
 
   const where: Prisma.ClienteWhereInput = {
     ...whereBase,
-    ...(estado && { estado: estado as EstadoRegistroBasico }),
+    ...(estado && { estado }),
   };
 
   return { where, whereBase };

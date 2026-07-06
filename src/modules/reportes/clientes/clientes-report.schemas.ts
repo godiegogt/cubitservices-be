@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { EstadoRegistroBasico } from "@prisma/client";
 
 const filtersSchema = z.object({
-    estado: z.enum(["ACTIVO", "INACTIVO"]).optional(),
+    estado: z.nativeEnum(EstadoRegistroBasico).optional(),
     zonaId: z.coerce.number().int().min(0).optional(),
     servicio: z.string().min(1).optional(),
     search: z.string().min(1).max(120).optional(),
