@@ -1,20 +1,7 @@
 import { Request, Response } from 'express';
-import { z } from 'zod';
 import { getEstadoCuenta } from './estado-cuenta.service';
 import { generarExcel, generarPdf } from './estado-cuenta-export.service';
-
-const filtrosSchema = z.object({
-    fechaInicio: z.string().date().optional(),
-    fechaFin: z.string().date().optional(),
-    tipoMovimiento: z
-        .enum(['TODOS', 'CARGO', 'APLICACION_PAGO', 'MORA', 'AJUSTE', 'ANULACION'])
-        .optional(),
-});
-
-const estadoCuentaQuerySchema = filtrosSchema.extend({
-    page: z.coerce.number().int().min(1).optional(),
-    limit: z.coerce.number().int().min(1).max(200).optional(),
-});
+import { estadoCuentaQuerySchema, filtrosSchema } from './estado-cuenta.schemas';
 
 export async function getEstadoCuentaHandler(req: Request, res: Response) {
     try {
