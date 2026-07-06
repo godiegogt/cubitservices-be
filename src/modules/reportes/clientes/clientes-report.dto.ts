@@ -1,3 +1,8 @@
+export interface ZonaServiciosDto {
+    zona: number | null;
+    servicios: string[];
+}
+
 export interface ClienteReportItemDto {
     id: string;
     codigo: string;
@@ -6,6 +11,8 @@ export interface ClienteReportItemDto {
     identificacion: string | null;
     telefono: string | null;
     email: string | null;
+    zonas: ZonaServiciosDto[];
+    cuentas: string[];
     estado: string;
     totalCuentas: number;
     fechaRegistro: string;
@@ -20,7 +27,7 @@ export interface ClientesResumenDto {
 export interface ClientesFiltrosDto {
     estado?: string;
     zonaId?: number;
-    servicioId?: string;
+    servicio?: string;
     search?: string;
     fechaInicio?: string;
     fechaFin?: string;
@@ -41,7 +48,7 @@ export interface ClientesReportResultDto {
 export interface ClientesReportFilters {
     estado?: string;
     zonaId?: number;
-    servicioId?: string;
+    servicio?: string;
     fechaInicio?: string;
     fechaFin?: string;
     search?: string;

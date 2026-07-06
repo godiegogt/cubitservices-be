@@ -18,7 +18,17 @@ export async function generarReporteClientes(
   const [clientes, total, activos, inactivos] = await Promise.all([
     prisma.cliente.findMany({
       where,
-      include: { _count: { select: { cuentasServicio: true } } },
+      include: {
+        _count: { select: { cuentasServicio: true } },
+        ubicaciones: { select: { zona: true } },
+        cuentasServicio: {
+          select: {
+            nombre: true,
+            tipoServicio: { select: { nombre: true } },
+            ubicacion: { select: { zona: true } },
+          },
+        },
+      },
       orderBy: { nombreRazonSocial: "asc" },
       ...(!fetchAll && { skip: (page - 1) * pageSize, take: pageSize }),
     }),
@@ -34,7 +44,7 @@ export async function generarReporteClientes(
   const filtros: ClientesFiltrosDto = {
     ...(filters.estado && { estado: filters.estado }),
     ...(filters.zonaId !== undefined && { zonaId: filters.zonaId }),
-    ...(filters.servicioId && { servicioId: filters.servicioId }),
+    ...(filters.servicio && { servicio: filters.servicio }),
     ...(filters.search && { search: filters.search }),
     ...(filters.fechaInicio && { fechaInicio: filters.fechaInicio }),
     ...(filters.fechaFin && { fechaFin: filters.fechaFin }),

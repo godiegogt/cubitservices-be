@@ -1,4 +1,5 @@
 import { ClientesReportResultDto } from "./clientes-report.dto";
+import { formatZonasServicios } from "./clientes-report.mapper";
 
 export function buildClientesReportHtml(report: ClientesReportResultDto): string {
   const rows = report.items
@@ -10,9 +11,11 @@ export function buildClientesReportHtml(report: ClientesReportResultDto): string
       <td>${item.tipoCliente}</td>
       <td>${item.identificacion ?? "-"}</td>
       <td>${item.telefono ?? "-"}</td>
+      <td>${formatZonasServicios(item.zonas) || "-"}</td>
       <td>${item.email ?? "-"}</td>
       <td>${item.estado}</td>
       <td class="text-right">${item.totalCuentas}</td>
+      <td>${item.cuentas.join(", ") || "-"}</td>
       <td>${item.fechaRegistro}</td>
     </tr>
   `
@@ -164,14 +167,16 @@ export function buildClientesReportHtml(report: ClientesReportResultDto): string
               <th>Tipo</th>
               <th>Identificación</th>
               <th>Teléfono</th>
+              <th>Zona / Servicio</th>
               <th>Email</th>
               <th>Estado</th>
               <th class="text-right">Cuentas</th>
+              <th>Nombres de Cuentas</th>
               <th>Registro</th>
             </tr>
           </thead>
           <tbody>
-            ${rows || "<tr><td colspan='9' style='text-align:center;color:#9ca3af;padding:16px'>Sin resultados</td></tr>"}
+            ${rows || "<tr><td colspan='11' style='text-align:center;color:#9ca3af;padding:16px'>Sin resultados</td></tr>"}
           </tbody>
         </table>
 

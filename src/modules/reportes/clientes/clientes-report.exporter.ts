@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 import ExcelJS from "exceljs";
 import { ClientesReportResultDto } from "./clientes-report.dto";
 import { buildClientesReportHtml } from "./clientes-report.template";
+import { formatZonasServicios } from "./clientes-report.mapper";
 
 export async function exportClientesPdf(
     report: ClientesReportResultDto,
@@ -37,7 +38,7 @@ export async function exportClientesExcel(
 
     const sheet = workbook.addWorksheet("Reporte de Clientes");
 
-    const COL_COUNT = 9;
+    const COL_COUNT = 11;
 
     const titleRow = sheet.addRow(["Reporte de Clientes"]);
     titleRow.font = { bold: true, size: 14 };
@@ -47,6 +48,9 @@ export async function exportClientesExcel(
     report.filtros.estado ? `Estado: ${report.filtros.estado}` : null,
     report.filtros.zonaId !== undefined
         ? `Zona: ${report.filtros.zonaId}`
+        : null,
+    report.filtros.servicio
+        ? `Servicio: ${report.filtros.servicio}`
         : null,
     report.filtros.search ? `Búsqueda: ${report.filtros.search}` : null,
     report.filtros.fechaInicio ? `Desde: ${report.filtros.fechaInicio}` : null,
@@ -80,9 +84,11 @@ export async function exportClientesExcel(
     "Tipo Cliente",
     "Identificación",
     "Teléfono",
+    "Zona / Servicio",
     "Email",
     "Estado",
     "Cuentas Servicio",
+    "Nombres de Cuentas",
     "Fecha Registro",
     ];
 
@@ -106,14 +112,16 @@ export async function exportClientesExcel(
         item.tipoCliente,
         item.identificacion ?? "",
         item.telefono ?? "",
+        formatZonasServicios(item.zonas),
         item.email ?? "",
         item.estado,
         item.totalCuentas,
+        item.cuentas.join(", "),
         item.fechaRegistro,
     ]);
     }
 
-    [14, 38, 16, 18, 16, 28, 12, 16, 16].forEach((width, i) => {
+    [14, 38, 16, 18, 16, 40, 28, 12, 16, 32, 16].forEach((width, i) => {
     sheet.getColumn(i + 1).width = width;
     });
 
