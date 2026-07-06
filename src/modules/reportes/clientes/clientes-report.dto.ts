@@ -18,31 +18,10 @@ export interface ClienteReportItemDto {
     fechaRegistro: string;
 }
 
-export interface ClientesResumenDto {
+export interface ClientesSummaryDto {
     totalClientes: number;
     activos: number;
     inactivos: number;
-}
-
-export interface ClientesFiltrosDto {
-    estado?: string;
-    zonaId?: number;
-    servicio?: string;
-    search?: string;
-    fechaInicio?: string;
-    fechaFin?: string;
-}
-
-export interface ClientesReportResultDto {
-    filtros: ClientesFiltrosDto;
-    resumen: ClientesResumenDto;
-    items: ClienteReportItemDto[];
-    meta: {
-        total: number;
-        page: number;
-        pageSize: number;
-        totalPages: number;
-    };
 }
 
 export interface ClientesReportFilters {
@@ -55,4 +34,16 @@ export interface ClientesReportFilters {
     page?: number;
     pageSize?: number;
     fetchAll?: boolean;
+}
+
+export interface ClientesReportResultDto {
+    filters: Omit<ClientesReportFilters, "page" | "pageSize" | "fetchAll">;
+    summary: ClientesSummaryDto;
+    data: ClienteReportItemDto[];
+    pagination: {
+        total: number;
+        page: number;
+        pageSize: number;
+        totalPages: number;
+    };
 }

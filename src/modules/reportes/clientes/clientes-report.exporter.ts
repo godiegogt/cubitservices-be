@@ -45,16 +45,16 @@ export async function exportClientesExcel(
     sheet.mergeCells(titleRow.number, 1, titleRow.number, COL_COUNT);
 
     const filtroTexto = [
-    report.filtros.estado ? `Estado: ${report.filtros.estado}` : null,
-    report.filtros.zonaId !== undefined
-        ? `Zona: ${report.filtros.zonaId}`
+    report.filters.estado ? `Estado: ${report.filters.estado}` : null,
+    report.filters.zonaId !== undefined
+        ? `Zona: ${report.filters.zonaId}`
         : null,
-    report.filtros.servicio
-        ? `Servicio: ${report.filtros.servicio}`
+    report.filters.servicio
+        ? `Servicio: ${report.filters.servicio}`
         : null,
-    report.filtros.search ? `Búsqueda: ${report.filtros.search}` : null,
-    report.filtros.fechaInicio ? `Desde: ${report.filtros.fechaInicio}` : null,
-    report.filtros.fechaFin ? `Hasta: ${report.filtros.fechaFin}` : null,
+    report.filters.search ? `Búsqueda: ${report.filters.search}` : null,
+    report.filters.fechaInicio ? `Desde: ${report.filters.fechaInicio}` : null,
+    report.filters.fechaFin ? `Hasta: ${report.filters.fechaFin}` : null,
     ]
     .filter(Boolean)
     .join("  |  ");
@@ -69,9 +69,9 @@ export async function exportClientesExcel(
     kpiHeaderRow.font = { bold: true, size: 10, color: { argb: "FF6B7280" } };
 
     const kpiValueRow = sheet.addRow([
-    report.resumen.totalClientes,
-    report.resumen.activos,
-    report.resumen.inactivos,
+    report.summary.totalClientes,
+    report.summary.activos,
+    report.summary.inactivos,
     ]);
     kpiValueRow.font = { bold: true, size: 14 };
 
@@ -105,7 +105,7 @@ export async function exportClientesExcel(
     };
     });
 
-    for (const item of report.items) {
+    for (const item of report.data) {
     sheet.addRow([
         item.codigo,
         item.nombre,

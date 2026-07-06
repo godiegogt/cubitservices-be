@@ -3,7 +3,6 @@ import prisma from "../../../config/prisma";
 import {
   ClientesReportFilters,
   ClientesReportResultDto,
-  ClientesFiltrosDto,
 } from "./clientes-report.dto";
 import { mapClienteToItem } from "./clientes-report.mapper";
 import { buildClientesWhereClause } from "./clientes-report.query";
@@ -41,7 +40,7 @@ export async function generarReporteClientes(
     }),
   ]);
 
-  const filtros: ClientesFiltrosDto = {
+  const filtersDto: ClientesReportResultDto["filters"] = {
     ...(filters.estado && { estado: filters.estado }),
     ...(filters.zonaId !== undefined && { zonaId: filters.zonaId }),
     ...(filters.servicio && { servicio: filters.servicio }),
@@ -54,10 +53,10 @@ export async function generarReporteClientes(
   const effectivePageSize = fetchAll ? total : pageSize;
 
   return {
-    filtros,
-    resumen: { totalClientes: activos + inactivos, activos, inactivos },
-    items: clientes.map(mapClienteToItem),
-    meta: {
+    filters: filtersDto,
+    summary: { totalClientes: activos + inactivos, activos, inactivos },
+    data: clientes.map(mapClienteToItem),
+    pagination: {
       total,
       page: effectivePage,
       pageSize: effectivePageSize,

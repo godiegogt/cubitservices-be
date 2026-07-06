@@ -3,7 +3,7 @@ import { formatZonasServicios } from "./clientes-report.mapper";
 import { escapeHtml } from "../../../common/utils/utils";
 
 export function buildClientesReportHtml(report: ClientesReportResultDto): string {
-  const rows = report.items
+  const rows = report.data
     .map((item) => {
       const zonaServicio = formatZonasServicios(item.zonas);
       const cuentas = item.cuentas.join(", ");
@@ -27,10 +27,10 @@ export function buildClientesReportHtml(report: ClientesReportResultDto): string
     .join("");
 
   const filtroTexto = [
-    report.filtros.estado ? `Estado: ${report.filtros.estado}` : null,
-    report.filtros.zonaId !== undefined ? `Zona: ${report.filtros.zonaId}` : null,
-    report.filtros.fechaInicio ? `Desde: ${report.filtros.fechaInicio}` : null,
-    report.filtros.fechaFin ? `Hasta: ${report.filtros.fechaFin}` : null,
+    report.filters.estado ? `Estado: ${report.filters.estado}` : null,
+    report.filters.zonaId !== undefined ? `Zona: ${report.filters.zonaId}` : null,
+    report.filters.fechaInicio ? `Desde: ${report.filters.fechaInicio}` : null,
+    report.filters.fechaFin ? `Hasta: ${report.filters.fechaFin}` : null,
   ]
     .filter(Boolean)
     .join(" &nbsp;|&nbsp; ");
@@ -147,17 +147,17 @@ export function buildClientesReportHtml(report: ClientesReportResultDto): string
         <div class="summary">
           <div class="card">
             <div class="card-label">Total clientes</div>
-            <div class="card-value">${report.resumen.totalClientes}</div>
+            <div class="card-value">${report.summary.totalClientes}</div>
           </div>
 
           <div class="card">
             <div class="card-label">Activos</div>
-            <div class="card-value">${report.resumen.activos}</div>
+            <div class="card-value">${report.summary.activos}</div>
           </div>
 
           <div class="card">
             <div class="card-label">Inactivos</div>
-            <div class="card-value">${report.resumen.inactivos}</div>
+            <div class="card-value">${report.summary.inactivos}</div>
           </div>
         </div>
 
@@ -185,7 +185,7 @@ export function buildClientesReportHtml(report: ClientesReportResultDto): string
         </table>
 
         <div class="footer">
-          ${report.meta.total} registros en total.
+          ${report.pagination.total} registros en total.
           Reporte generado desde Cubitservices. Documento para control administrativo.
         </div>
       </body>
