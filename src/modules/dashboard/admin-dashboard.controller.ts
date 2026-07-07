@@ -1,10 +1,18 @@
 import { Request, Response } from "express";
+import { ZodError } from "zod";
 import { dashboardQuerySchema } from "./admin-dashboard.schema";
 import { getAdminDashboard } from "./admin-dashboard.service";
 
 export async function getAdminDashboardHandler(req: Request, res: Response) {
     try {
-    const empresaId = req.auth!.empresaId;
+    if (!req.auth) {
+        return res.status(401).json({
+            success: false,
+            message: "No autenticado",
+        });
+    }
+
+    const empresaId = req.auth.empresaId;
     const parsedQuery = dashboardQuerySchema.parse(req.query);
     const result = await getAdminDashboard(empresaId, parsedQuery);
 
@@ -14,7 +22,18 @@ export async function getAdminDashboardHandler(req: Request, res: Response) {
         data: result,
     });
     } catch (error) {
-    return res.status(400).json({
+    if (error instanceof ZodError) {
+        return res.status(400).json({
+            success: false,
+            message: "Parámetros de consulta inválidos",
+            errors: error.issues.map((issue) => ({
+                path: issue.path.join("."),
+                message: issue.message,
+            })),
+        });
+    }
+
+    return res.status(500).json({
         success: false,
         message:
         error instanceof Error
