@@ -1,9 +1,14 @@
-export type TipoMovimientoEstadoCuenta =
-    | 'CARGO'
-    | 'APLICACION_PAGO'
-    | 'MORA'
-    | 'AJUSTE'
-    | 'ANULACION';
+import { TipoCargo } from '@prisma/client';
+
+export const TIPOS_MOVIMIENTO_ESTADO_CUENTA = [
+    'CARGO',
+    'APLICACION_PAGO',
+    TipoCargo.MORA,
+    TipoCargo.AJUSTE,
+    'ANULACION',
+] as const;
+
+export type TipoMovimientoEstadoCuenta = (typeof TIPOS_MOVIMIENTO_ESTADO_CUENTA)[number];
 
 export const TIPO_MOVIMIENTO_PRIORIDAD: Record<TipoMovimientoEstadoCuenta, number> = {
     CARGO: 1,

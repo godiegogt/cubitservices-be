@@ -1,5 +1,4 @@
 import { EstadoCargo, TipoCargo } from '@prisma/client';
-import { formatDate } from '../../../common/utils/datetime';
 import type {
     EstadoCuentaHeaderDto,
     EstadoCuentaMovimientoDto,
@@ -60,6 +59,10 @@ function toNum(val: { toNumber(): number } | number): number {
     return typeof val === 'number' ? val : val.toNumber();
 }
 
+function formatDateOnly(value: Date): string {
+    return value.toISOString().slice(0, 10);
+}
+
 export function mapHeader(cuenta: CuentaConRelaciones): EstadoCuentaHeaderDto {
     return {
     cliente: {
@@ -75,7 +78,7 @@ export function mapHeader(cuenta: CuentaConRelaciones): EstadoCuentaHeaderDto {
         codigo: cuenta.codigo,
         nombre: cuenta.nombre,
         estado: cuenta.estado,
-        fechaInicio: cuenta.fechaInicio ? formatDate(cuenta.fechaInicio) : null,
+        fechaInicio: cuenta.fechaInicio ? formatDateOnly(cuenta.fechaInicio) : null,
         montoBase: toNum(cuenta.montoBase),
     },
     servicio: {
@@ -224,7 +227,7 @@ export function construirMovimientos(
 
     return {
         id: m.id,
-        fecha: formatDate(m.fecha),
+        fecha: formatDateOnly(m.fecha),
         tipo: m.tipo,
         descripcion: m.descripcion,
         debito: round2(m.debito),
