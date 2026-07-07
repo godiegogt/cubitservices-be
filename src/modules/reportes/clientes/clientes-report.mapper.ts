@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { formatDate } from "../../../common/utils/datetime";
+import { formatDate, formatDateOnly } from "../../../common/utils/datetime";
 import { ClienteReportItemDto, ZonaServiciosDto } from "./clientes-report.dto";
 
 const clienteInclude = Prisma.validator<Prisma.ClienteDefaultArgs>()({
@@ -80,6 +80,6 @@ export function mapClienteToItem(
     cuentas: resolveCuentas(cliente.cuentasServicio),
     estado: cliente.estado,
     totalCuentas: cliente._count.cuentasServicio,
-    fechaRegistro: formatDate(cliente.createdAt),
+    fechaRegistro: formatDateOnly(cliente.createdAt),
   };
 }
