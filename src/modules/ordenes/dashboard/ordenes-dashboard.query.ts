@@ -99,7 +99,7 @@ function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado'
     return {
         empresaId: f.empresaId,
         estado,
-        fechaProgramada: { gte: f.desde, lte: f.hasta },
+        createdAt: { gte: f.desde, lte: f.hasta },
         ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
     };
 }
@@ -107,13 +107,8 @@ function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado'
 export async function contarPendientes(f: KpiFilters): Promise<number> {
     return prisma.ordenServicio.count({
         where: {
-            empresaId: f.empresaId,
-            estado: EstadoOrdenServicio.PENDIENTE,
-            OR: [
-                { fechaProgramada: null },
-                { fechaProgramada: { gte: f.desde, lte: f.hasta } },
-            ],
-            ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
+            ...whereKpi(f, EstadoOrdenServicio.PENDIENTE),
+            fechaProgramada: null,
         },
     });
 }
@@ -144,20 +139,25 @@ export async function contarVencidas(f: KpiFilters): Promise<number> {
 export async function getOrdenesPorEstado(
     filters: DataFilters,
 ): Promise<{ estado: EstadoOrdenServicio; cantidad: number }[]> {
-    const grouped = await prisma.ordenServicio.groupBy({
-        by: ['estado'],
-        where: {
-            empresaId: filters.empresaId,
-            OR: [
-                { fechaProgramada: { gte: filters.desde, lte: filters.hasta } },
-                { estado: EstadoOrdenServicio.PENDIENTE, fechaProgramada: null },
-            ],
-            ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
-        },
-        _count: { _all: true },
-        orderBy: { estado: 'asc' },
-    });
-    return grouped.map((g) => ({ estado: g.estado, cantidad: g._count._all }));
+    const [grouped, pendientes] = await Promise.all([
+        prisma.ordenServicio.groupBy({
+            by: ['estado'],
+            where: {
+                empresaId: filters.empresaId,
+                estado: { not: EstadoOrdenServicio.PENDIENTE },
+                createdAt: { gte: filters.desde, lte: filters.hasta },
+                ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
+            },
+            _count: { _all: true },
+            orderBy: { estado: 'asc' },
+        }),
+        contarPendientes(filters),
+    ]);
+    const resultado = grouped.map((g) => ({ estado: g.estado, cantidad: g._count._all }));
+    if (pendientes > 0) {
+        resultado.push({ estado: EstadoOrdenServicio.PENDIENTE, cantidad: pendientes });
+    }
+    return resultado.sort((a, b) => a.estado.localeCompare(b.estado));
 }
 
 export async function getProximasAEjecutar(filters: {
