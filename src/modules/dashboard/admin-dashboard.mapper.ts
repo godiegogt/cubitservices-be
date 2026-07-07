@@ -7,7 +7,8 @@ import type {
     IngresoZonaRow,
     OrdenEstadoRow,
 } from "./admin-dashboard.types";
-import { formatDateOnly, toNumber } from "../../utils/utils";
+import { toNumber } from "../../utils/utils";
+import { formatDateOnly } from "../../common/utils/datetime";
 
 export function mapFilters(
     fechaDesde: string,

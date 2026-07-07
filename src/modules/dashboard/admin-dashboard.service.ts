@@ -21,15 +21,16 @@ import {
 } from "./admin-dashboard.mapper";
 import type { DashboardAdminResponse } from "./admin-dashboard.types";
 import type { DashboardQueryInput } from "./admin-dashboard.schema";
-import { getDefaultDateRange, parseDateOnly, formatDateOnly } from "../../utils/utils";
+import { getDefaultDateRange } from "../../utils/utils";
+import { startOfDay, endOfDay, formatDateOnly } from "../../common/utils/datetime";
 
 export async function getAdminDashboard(
     empresaId: string,
     input: DashboardQueryInput
 ): Promise<DashboardAdminResponse> {
     const defaults = getDefaultDateRange();
-    const fechaDesde = input.fechaDesde ? parseDateOnly(input.fechaDesde) : defaults.desde;
-    const fechaHasta = input.fechaHasta ? parseDateOnly(input.fechaHasta) : defaults.hasta;
+    const fechaDesde = input.fechaDesde ? startOfDay(input.fechaDesde) : defaults.desde;
+    const fechaHasta = input.fechaHasta ? endOfDay(input.fechaHasta) : defaults.hasta;
     const zona = input.zona;
     const fechaDesdeStr = input.fechaDesde ?? formatDateOnly(defaults.desde);
     const fechaHastaStr = input.fechaHasta ?? formatDateOnly(defaults.hasta);
