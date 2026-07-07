@@ -10,6 +10,10 @@ export function formatDate(date: Date): string {
   }).format(date);
 }
 
+export function formatDateOnly(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 export function formatTime(date: Date): string {
   return new Intl.DateTimeFormat("en-GB", {
     timeZone: GUATEMALA_TIME_ZONE,
