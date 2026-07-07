@@ -1,4 +1,5 @@
 import { EstadoCargo, TipoCargo } from '@prisma/client';
+import { formatDate } from '../../../common/utils/datetime';
 import type {
     EstadoCuentaHeaderDto,
     EstadoCuentaMovimientoDto,
@@ -57,10 +58,6 @@ type AplicacionPagoRaw = {
 
 function toNum(val: { toNumber(): number } | number): number {
     return typeof val === 'number' ? val : val.toNumber();
-}
-
-function formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
 }
 
 export function mapHeader(cuenta: CuentaConRelaciones): EstadoCuentaHeaderDto {
