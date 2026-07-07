@@ -1,5 +1,4 @@
 const GUATEMALA_TIME_ZONE = "America/Guatemala";
-const GUATEMALA_UTC_OFFSET = "-06:00";
 
 export function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -8,6 +7,10 @@ export function formatDate(date: Date): string {
     month: "2-digit",
     day: "2-digit",
   }).format(date);
+}
+
+export function formatDateOnly(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 export function formatTime(date: Date): string {
@@ -21,9 +24,9 @@ export function formatTime(date: Date): string {
 }
 
 export function startOfDay(dateStr: string): Date {
-  return new Date(`${dateStr}T00:00:00.000${GUATEMALA_UTC_OFFSET}`);
+  return new Date(`${dateStr}T00:00:00.000Z`);
 }
 
 export function endOfDay(dateStr: string): Date {
-  return new Date(`${dateStr}T23:59:59.999${GUATEMALA_UTC_OFFSET}`);
+  return new Date(`${dateStr}T23:59:59.999Z`);
 }
