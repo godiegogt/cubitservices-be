@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { ZodError } from "zod";
 import { formatDate } from "../../../common/utils/datetime";
 import {
     clientesReportQuerySchema,
@@ -9,6 +10,25 @@ import {
     exportClientesPdf,
     exportClientesExcel,
 } from "./clientes-report.exporter";
+
+function handleReportError(error: unknown, res: Response, fallbackMessage: string) {
+    if (error instanceof ZodError) {
+        return res.status(400).json({
+            success: false,
+            message: "Parámetros de consulta inválidos",
+            errors: error.issues.map((issue) => ({
+                path: issue.path.join("."),
+                message: issue.message,
+            })),
+        });
+    }
+
+    console.error(fallbackMessage, error);
+    return res.status(500).json({
+        success: false,
+        message: fallbackMessage,
+    });
+}
 
 export async function reporteClientesHandler(req: Request, res: Response) {
     try {
@@ -32,14 +52,7 @@ export async function reporteClientesHandler(req: Request, res: Response) {
             data: report,
         });
     } catch (error) {
-        console.error("[reporteClientes]", error);
-        return res.status(400).json({
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Error generando reporte de clientes",
-        });
+        return handleReportError(error, res, "Error generando reporte de clientes");
     }
 }
 
@@ -63,14 +76,7 @@ export async function exportClientesPdfHandler(req: Request, res: Response) {
 
         return res.send(pdfBuffer);
     } catch (error) {
-        console.error("[exportClientesPdf]", error);
-        return res.status(400).json({
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Error exportando reporte de clientes a PDF",
-        });
+        return handleReportError(error, res, "Error exportando reporte de clientes a PDF");
     }
 }
 
@@ -97,13 +103,6 @@ export async function exportClientesExcelHandler(req: Request, res: Response) {
 
         return res.send(excelBuffer);
     } catch (error) {
-        console.error("[exportClientesExcel]", error);
-        return res.status(400).json({
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Error exportando reporte de clientes a Excel",
-        });
+        return handleReportError(error, res, "Error exportando reporte de clientes a Excel");
     }
 }
