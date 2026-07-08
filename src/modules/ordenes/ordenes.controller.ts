@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
 import {
   createOrdenSchema,
   listOrdenesQuerySchema,
@@ -16,9 +17,23 @@ import {
 } from "./ordenes.service";
 import { z } from "zod";
 
+function handleCommonErrors(error: unknown, res: Response): boolean {
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    res.status(503).json({
+      success: false,
+      message: "Servicio no disponible, intente más tarde",
+    });
+    return true;
+  }
+  return false;
+}
+
 export async function listOrdenes(req: Request, res: Response) {
   try {
-    const empresaId = req.auth!.empresaId;
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
     const page  = Math.max(1, parseInt(req.query.page  as string) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
     const parsedQuery = listOrdenesQuerySchema.parse(req.query);
@@ -31,6 +46,7 @@ export async function listOrdenes(req: Request, res: Response) {
       meta: result.meta,
     });
   } catch (error) {
+    if (handleCommonErrors(error, res)) return;
     return res.status(400).json({
       success: false,
       message:
@@ -43,7 +59,10 @@ export async function listOrdenes(req: Request, res: Response) {
 
 export async function getOrdenHandler(req: Request, res: Response) {
   try {
-    const empresaId = req.auth!.empresaId;
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
     const { id } = req.params;
 
     const orden = await getOrdenByIdService(id, empresaId);
@@ -54,6 +73,7 @@ export async function getOrdenHandler(req: Request, res: Response) {
       data: orden,
     });
   } catch (error) {
+    if (handleCommonErrors(error, res)) return;
     return res.status(404).json({
       success: false,
       message:
@@ -66,8 +86,11 @@ export async function getOrdenHandler(req: Request, res: Response) {
 
 export async function createOrdenHandler(req: Request, res: Response) {
   try {
-    const empresaId = req.auth!.empresaId;
-    const usuarioId = req.auth!.userId;
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
+    const usuarioId = req.auth.userId;
     const parsed = createOrdenSchema.parse(req.body);
 
     const orden = await createOrdenService({
@@ -82,6 +105,7 @@ export async function createOrdenHandler(req: Request, res: Response) {
       data: orden,
     });
   } catch (error) {
+    if (handleCommonErrors(error, res)) return;
     return res.status(400).json({
       success: false,
       message:
@@ -92,7 +116,10 @@ export async function createOrdenHandler(req: Request, res: Response) {
 
 export async function updateOrdenHandler(req: Request, res: Response) {
   try {
-    const empresaId = req.auth!.empresaId;
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
     const { id } = req.params;
     const parsed = updateOrdenSchema.parse(req.body);
 
@@ -104,6 +131,7 @@ export async function updateOrdenHandler(req: Request, res: Response) {
       data: orden,
     });
   } catch (error) {
+    if (handleCommonErrors(error, res)) return;
     return res.status(400).json({
       success: false,
       message:
@@ -116,8 +144,11 @@ export async function updateOrdenHandler(req: Request, res: Response) {
 
 export async function updateOrdenStatusHandler(req: Request, res: Response) {
   try {
-    const empresaId = req.auth!.empresaId;
-    const usuarioId = req.auth!.userId;
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
+    const usuarioId = req.auth.userId;
     const { id } = req.params;
     const parsed = updateOrdenStatusSchema.parse(req.body);
 
@@ -129,6 +160,7 @@ export async function updateOrdenStatusHandler(req: Request, res: Response) {
       data: orden,
     });
   } catch (error) {
+    if (handleCommonErrors(error, res)) return;
     return res.status(400).json({
       success: false,
       message:
@@ -141,7 +173,10 @@ export async function updateOrdenStatusHandler(req: Request, res: Response) {
 
 export async function listOrdenEstados(req: Request, res: Response) {
   try {
-    const empresaId = req.auth!.empresaId;
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
     const { id } = req.params;
 
     const estados = await getOrdenEstadosService(id, empresaId);
@@ -152,6 +187,7 @@ export async function listOrdenEstados(req: Request, res: Response) {
       data: estados,
     });
   } catch (error) {
+    if (handleCommonErrors(error, res)) return;
     return res.status(404).json({
       success: false,
       message:
@@ -168,7 +204,10 @@ const listOrdenesSelectQuerySchema = z.object({
 
 export async function listOrdenesSelectHandler(req: Request, res: Response) {
   try {
-    const empresaId = req.auth!.empresaId;
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
     const { cuentaServicioId } = req.params;
     const { search } = listOrdenesSelectQuerySchema.parse(req.query);
 
@@ -180,6 +219,7 @@ export async function listOrdenesSelectHandler(req: Request, res: Response) {
       data: ordenes,
     });
   } catch (error) {
+    if (handleCommonErrors(error, res)) return;
     return res.status(400).json({
       success: false,
       message:
