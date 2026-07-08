@@ -5,6 +5,7 @@ import {
   PrioridadOrden,
 } from "@prisma/client";
 import prisma from "../../config/prisma";
+import { startOfDay, endOfDay } from "../../common/utils/datetime";
 
 const ordenServicioInclude = {
   cuentaServicio: {
@@ -67,6 +68,9 @@ export async function findOrdenesByEmpresa(
     tipoServicioId?: string;
     prioridad?: PrioridadOrden;
     origen?: OrigenOrden;
+    fechaDesde?: string;
+    fechaHasta?: string;
+    zona?: number;
     search?: string;
   }
 ) {
@@ -85,6 +89,15 @@ export async function findOrdenesByEmpresa(
   }),
   ...(filters?.prioridad && { prioridad: filters.prioridad }),
   ...(filters?.origen && { origen: filters.origen }),
+
+  ...(filters?.fechaDesde && {
+    createdAt: {
+      gte: startOfDay(filters.fechaDesde),
+      ...(filters.fechaHasta && { lte: endOfDay(filters.fechaHasta) }),
+    },
+  }),
+
+  ...(filters?.zona !== undefined && { ubicacion: { zona: filters.zona } }),
 
   ...(filters?.search && {
     OR: [
