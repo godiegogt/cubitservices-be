@@ -12,10 +12,6 @@ import {
 import { RawOrdenRow } from './ordenes-dashboard.types';
 import { formatDate } from '../../../common/utils/datetime';
 
-function formatFecha(date: Date | null): string | null {
-    return date ? formatDate(date) : null;
-}
-
 function extraerCliente(cliente: RawOrdenRow['cliente']): OrdenClienteDto {
     return {
         id: cliente.id,
@@ -56,7 +52,7 @@ export function toOrdenRow(raw: RawOrdenRow, ahora: Date): OrdenDashboardRow {
         servicio: extraerServicio(raw.tipoServicio),
         estado: calcularEstado(raw, ahora),
         prioridad: raw.prioridad,
-        fechaProgramada: formatFecha(raw.fechaProgramada),
+        fechaProgramada: raw.fechaProgramada ? formatDate(raw.fechaProgramada) : null,
         zona: raw.ubicacion.zona,
         responsable: extraerResponsable(raw.asignaciones),
     };
@@ -69,7 +65,7 @@ export function toProximaRow(raw: RawOrdenRow): OrdenProximaRow {
         titulo: raw.titulo,
         cliente: extraerCliente(raw.cliente),
         servicio: extraerServicio(raw.tipoServicio),
-        fechaProgramada: formatFecha(raw.fechaProgramada),
+        fechaProgramada: raw.fechaProgramada ? formatDate(raw.fechaProgramada) : null,
         prioridad: raw.prioridad,
         responsable: extraerResponsable(raw.asignaciones),
     };
