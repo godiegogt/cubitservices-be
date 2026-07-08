@@ -10,12 +10,14 @@ import {
   updateOrdenStatusHandler,
 } from "./ordenes.controller";
 import ordenServicioArchivosRouter from "../ordenes-archivos/orden-archivo.routes"
+import { dashboardOrdenesController } from "./dashboard/dashboard.controller";
 
 const router = Router();
 
 router.use(requireAuth);
 
 router.get("/", listOrdenes);
+router.get("/dashboard", dashboardOrdenesController);
 router.get("/select/:cuentaServicioId", listOrdenesSelectHandler);
 router.get("/:id", getOrdenHandler);
 router.get("/:id/estados", listOrdenEstados);
