@@ -35,9 +35,9 @@ export async function getEstadoCuenta(
     }
 
     const [cargos, aplicaciones, saldoDisponibleCliente] = await Promise.all([
-    findCargosDeCuenta(cuentaServicioId),
-    findAplicacionesPagoDeCuenta(cuentaServicioId),
-    calcularSaldoDisponibleCliente(cuenta.clienteId),
+    findCargosDeCuenta(cuentaServicioId, empresaId),
+    findAplicacionesPagoDeCuenta(cuentaServicioId, empresaId),
+    calcularSaldoDisponibleCliente(cuenta.clienteId, empresaId),
     ]);
 
     const header = mapHeader(cuenta);

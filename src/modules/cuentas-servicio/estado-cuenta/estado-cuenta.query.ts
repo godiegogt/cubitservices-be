@@ -39,17 +39,17 @@ export async function findCuentaServicioConRelaciones(cuentaServicioId: string) 
     });
 }
 
-export async function findCargosDeCuenta(cuentaServicioId: string) {
+export async function findCargosDeCuenta(cuentaServicioId: string, empresaId: string) {
     return prisma.cargo.findMany({
-    where: { cuentaServicioId },
+    where: { cuentaServicioId, empresaId },
     orderBy: [{ fechaEmision: 'asc' }, { createdAt: 'asc' }],
     });
 }
 
-export async function findAplicacionesPagoDeCuenta(cuentaServicioId: string) {
+export async function findAplicacionesPagoDeCuenta(cuentaServicioId: string, empresaId: string) {
     return prisma.aplicacionPago.findMany({
     where: {
-        cargo: { cuentaServicioId },
+        cargo: { cuentaServicioId, empresaId },
     },
     include: {
         pago: {
@@ -64,18 +64,19 @@ export async function findAplicacionesPagoDeCuenta(cuentaServicioId: string) {
     });
 }
 
-export async function calcularSaldoDisponibleCliente(clienteId: string) {
+export async function calcularSaldoDisponibleCliente(clienteId: string, empresaId: string) {
     const [totalPagosResult, totalAplicadoResult] = await Promise.all([
     prisma.pago.aggregate({
         where: {
         clienteId,
+        empresaId,
         estado: EstadoPago.CONFIRMADO,
         },
         _sum: { montoTotal: true },
     }),
     prisma.aplicacionPago.aggregate({
         where: {
-        pago: { clienteId },
+        pago: { clienteId, empresaId },
         },
         _sum: { montoAplicado: true },
     }),
