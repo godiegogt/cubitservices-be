@@ -19,7 +19,7 @@ export function buildClientesWhereClause(
     ...(zonaId !== undefined && { ubicaciones: { some: { zona: zonaId } } }),
     ...(servicio && {
       cuentasServicio: {
-        some: { tipoServicio: { nombre: { contains: servicio, mode: "insensitive" } } },
+        some: { codigo: { contains: servicio, mode: "insensitive" } },
       },
     }),
     ...(search && {

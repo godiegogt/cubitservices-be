@@ -50,7 +50,7 @@ export async function exportClientesExcel(
         ? `Zona: ${report.filters.zonaId}`
         : null,
     report.filters.servicio
-        ? `Servicio: ${report.filters.servicio}`
+        ? `Código de servicio: ${report.filters.servicio}`
         : null,
     report.filters.search ? `Búsqueda: ${report.filters.search}` : null,
     report.filters.fechaInicio ? `Desde: ${report.filters.fechaInicio}` : null,
