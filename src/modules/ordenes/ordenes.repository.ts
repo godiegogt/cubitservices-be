@@ -33,6 +33,10 @@ const ordenServicioInclude = {
       direccion: true,
       referencia: true,
       estado: true,
+      zona: true,
+      avenida: true,
+      calle: true,
+      numeroCasa: true,
     },
   },
   tipoServicio: {
