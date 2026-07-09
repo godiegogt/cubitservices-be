@@ -11,6 +11,7 @@ import {
 } from "./ordenes.controller";
 import ordenServicioArchivosRouter from "../ordenes-archivos/orden-archivo.routes"
 import { dashboardOrdenesController } from "./dashboard/dashboard.controller";
+import ordenServicioAsignacionesRouter from "../ordenes-asignaciones/orden-asignacion.routes"
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.post("/", createOrdenHandler);
 router.patch("/:id", updateOrdenHandler);
 router.patch("/:id/estado", updateOrdenStatusHandler);
 router.use("/:ordenServicioId/archivos", ordenServicioArchivosRouter)
+router.use("/:ordenServicioId/asignaciones", ordenServicioAsignacionesRouter)
 
 export default router;

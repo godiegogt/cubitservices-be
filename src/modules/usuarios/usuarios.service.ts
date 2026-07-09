@@ -5,11 +5,21 @@ import {
   findUserByEmail,
   findUserById,
   findUsersByEmpresa,
+  searchUsersByNombreCompleto,
   updateUser,
 } from "./usuarios.repository";
 
 export async function getUsers(empresaId: string) {
   return findUsersByEmpresa(empresaId);
+}
+
+export async function searchUsersService(
+  empresaId: string,
+  filters?: {
+    search?: string;
+  }
+) {
+  return searchUsersByNombreCompleto(empresaId, filters);
 }
 
 export async function createUserService(input: {
