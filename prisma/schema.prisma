@@ -171,6 +171,11 @@ enum TipoIdentificacion {
   OTRO
 }
 
+enum CategoriaServicio {
+  MANTENIMIENTO
+  SERVICIO
+}
+
 /// ===========================
 /// ORGANIZACION
 /// ===========================
@@ -361,6 +366,7 @@ model TipoServicio {
   empresa            Empresa           @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   cuentasServicio    CuentaServicio[]
   ordenesServicio    OrdenServicio[]
+  categoriaServicio  CategoriaServicio @map("categoria_servicio")
 
   @@unique([empresaId, nombre])
   @@index([empresaId])

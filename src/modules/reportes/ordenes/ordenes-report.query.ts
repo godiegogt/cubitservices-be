@@ -15,7 +15,14 @@ const ordenReportInclude = {
         select: { id: true, nombre: true },
     },
     ubicacion: {
-        select: { id: true, nombre: true, zona: true },
+        select: {
+            id: true,
+            nombre: true,
+            zona: true,
+            avenida: true,
+            calle: true,
+            numeroCasa: true,
+        },
     },
     asignaciones: {
         where: { estado: EstadoAsignacionOrden.ACTIVA },

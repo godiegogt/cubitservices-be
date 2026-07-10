@@ -14,6 +14,7 @@ import {
   findCuentasServicioSelectByCliente,
   findPoliticaCobroById,
   findTipoServicioById,
+  findTiposServicioDisponibles,
   findUbicacionById,
   updateCuentaServicio,
   updateCuentaServicioStatus,
@@ -328,4 +329,8 @@ export async function getCuentasServicioSelectService(
   }
 
   return findCuentasServicioSelect(empresaId, filters);
+}
+
+export async function getTiposServicioDisponiblesService(empresaId: string) {
+  return findTiposServicioDisponibles(empresaId);
 }

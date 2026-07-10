@@ -10,6 +10,22 @@ function formatDateOptional(date: Date | null | undefined): string | null {
     return date.toISOString();
 }
 
+export function formatUbicacionDireccion(ubicacion: {
+    calle: number | null;
+    avenida: number | null;
+    zona: number | null;
+    numeroCasa: number | null;
+}): string {
+    const partes = [
+        ubicacion.calle != null && `Calle ${ubicacion.calle}`,
+        ubicacion.avenida != null && `Avenida ${ubicacion.avenida}`,
+        ubicacion.zona != null && `Zona ${ubicacion.zona}`,
+        ubicacion.numeroCasa != null && `Casa ${ubicacion.numeroCasa}`,
+    ].filter(Boolean);
+
+    return partes.join(", ");
+}
+
 export function mapOrdenToDto(orden: OrdenReportRaw): OrdenReportItemDto {
     const asignacion = orden.asignaciones[0];
     const tecnico = asignacion
@@ -42,6 +58,9 @@ export function mapOrdenToDto(orden: OrdenReportRaw): OrdenReportItemDto {
             id: orden.ubicacion.id,
             nombre: orden.ubicacion.nombre,
             zona: orden.ubicacion.zona,
+            avenida: orden.ubicacion.avenida,
+            calle: orden.ubicacion.calle,
+            numeroCasa: orden.ubicacion.numeroCasa,
         },
         tecnico,
         createdAt: orden.createdAt.toISOString(),

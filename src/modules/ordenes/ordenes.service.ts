@@ -15,6 +15,7 @@ import {
   findOrdenesByEmpresa,
   findOrdenesSelect,
   findTipoServicioById,
+  findTiposServicioDisponibles,
   findUbicacionById,
   updateOrden,
   updateOrdenStatus,
@@ -306,4 +307,8 @@ export async function getOrdenesSelectService(
   }
 
   return findOrdenesSelect(empresaId, filters);
+}
+
+export async function getTiposServicioDisponiblesService(empresaId: string) {
+  return findTiposServicioDisponibles(empresaId);
 }

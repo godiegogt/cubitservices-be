@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 import { OrdenesReportResultDto } from "./ordenes-report.dto";
 import { buildOrdenesReportHtml } from "./ordenes-report.template";
 import { formatDate } from "../../../common/utils/datetime";
+import { formatUbicacionDireccion } from "./ordenes-report.mapper";
 
 export async function exportOrdenesExcel(
     report: OrdenesReportResultDto
@@ -13,7 +14,7 @@ export async function exportOrdenesExcel(
 
     const sheet = workbook.addWorksheet("Reporte de Órdenes");
 
-    const COL_COUNT = 14;
+    const COL_COUNT = 13;
 
     const titleRow = sheet.addRow(["Reporte de Órdenes de Servicio"]);
     titleRow.font = { bold: true, size: 14 };
@@ -65,7 +66,6 @@ export async function exportOrdenesExcel(
         "Cliente",
         "Tipo Servicio",
         "Ubicación",
-        "Zona",
         "Técnico",
         "Fecha Programada",
         "Fecha Inicio",
@@ -95,8 +95,7 @@ export async function exportOrdenesExcel(
             item.cliente.codigo,
             item.cliente.nombre,
             item.tipoServicio.nombre,
-            item.ubicacion.nombre,
-            item.ubicacion.zona ?? "",
+            formatUbicacionDireccion(item.ubicacion),
             item.tecnico?.nombre ?? "",
             item.fechaProgramada ? formatDate(new Date(item.fechaProgramada)) : "",
             item.fechaInicio ? formatDate(new Date(item.fechaInicio)) : "",
@@ -104,7 +103,7 @@ export async function exportOrdenesExcel(
         ]);
     }
 
-    [14, 30, 14, 12, 12, 14, 28, 22, 22, 8, 24, 16, 14, 14].forEach(
+    [14, 30, 14, 12, 12, 14, 28, 22, 32, 24, 16, 14, 14].forEach(
         (width, i) => { sheet.getColumn(i + 1).width = width; }
     );
 
