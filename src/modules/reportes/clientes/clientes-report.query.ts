@@ -6,7 +6,7 @@ export function buildClientesWhereClause(
   empresaId: string,
   filters: ClientesReportFilters,
 ): { where: Prisma.ClienteWhereInput; whereBase: Prisma.ClienteWhereInput } {
-  const { estado, zonaId, servicio, search, fechaInicio, fechaFin } =
+  const { estado, zonaId, servicioId, search, fechaInicio, fechaFin } =
     filters;
 
   const createdAtFilter: { gte?: Date; lte?: Date } = {};
@@ -17,9 +17,9 @@ export function buildClientesWhereClause(
     empresaId,
     ...(Object.keys(createdAtFilter).length && { createdAt: createdAtFilter }),
     ...(zonaId !== undefined && { ubicaciones: { some: { zona: zonaId } } }),
-    ...(servicio && {
+    ...(servicioId && {
       cuentasServicio: {
-        some: { codigo: { contains: servicio, mode: "insensitive" } },
+        some: { codigo: { contains: servicioId, mode: "insensitive" } },
       },
     }),
     ...(search && {
