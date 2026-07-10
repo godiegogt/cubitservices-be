@@ -20,3 +20,7 @@ export const updateUserSchema = z.object({
 export const updateUserStatusSchema = z.object({
   estado: z.nativeEnum(EstadoUsuario),
 });
+
+export const listUsersQuerySchema = z.object({
+  search: z.string().min(1).optional(),
+});
