@@ -24,7 +24,14 @@ export interface OrdenReportItemDto {
     fechaCierre: string | null;
     cliente: { id: string; codigo: string; nombre: string };
     tipoServicio: { id: string; nombre: string };
-    ubicacion: { id: string; nombre: string; zona: number | null };
+    ubicacion: {
+        id: string;
+        nombre: string;
+        zona: number | null;
+        avenida: number | null;
+        calle: number | null;
+        numeroCasa: number | null;
+    };
     tecnico: { id: string; nombre: string } | null;
     createdAt: string;
 }

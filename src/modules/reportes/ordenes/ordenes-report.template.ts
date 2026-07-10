@@ -1,5 +1,6 @@
 import { OrdenesReportResultDto } from "./ordenes-report.dto";
 import { formatDate } from "../../../common/utils/datetime";
+import { formatUbicacionDireccion } from "./ordenes-report.mapper";
 
 function escapeHtml(str: string): string {
     return str
@@ -33,8 +34,7 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
             <td>${escapeHtml(item.cliente.codigo)}</td>
             <td>${escapeHtml(item.cliente.nombre)}</td>
             <td>${escapeHtml(item.tipoServicio.nombre)}</td>
-            <td>${escapeHtml(item.ubicacion.nombre)}</td>
-            <td>${item.ubicacion.zona ?? "-"}</td>
+            <td>${escapeHtml(formatUbicacionDireccion(item.ubicacion))}</td>
             <td>${item.tecnico ? escapeHtml(item.tecnico.nombre) : "-"}</td>
             <td>${item.fechaProgramada ? formatDate(new Date(item.fechaProgramada)) : "-"}</td>
             <td>${item.fechaInicio ? formatDate(new Date(item.fechaInicio)) : "-"}</td>
@@ -185,7 +185,6 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
               <th>Cliente</th>
               <th>Tipo Servicio</th>
               <th>Ubicación</th>
-              <th>Zona</th>
               <th>Técnico</th>
               <th>F. Programada</th>
               <th>F. Inicio</th>
