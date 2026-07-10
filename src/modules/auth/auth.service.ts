@@ -26,6 +26,8 @@ export async function loginUser(email: string, password: string) {
     userId: user.id,
     empresaId: user.empresaId,
     rolId: user.rolId,
+    nombres: user.nombres,
+    apellidos: user.apellidos ?? "",
   });
 
   return {
