@@ -12,7 +12,10 @@ const LABELS_TIPO: Record<string, string> = {
 };
 
 export async function generarPdf(data: EstadoCuentaResponse): Promise<Buffer> {
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    const browser = await puppeteer.launch({
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
     try {
     const page = await browser.newPage();
     await page.setContent(buildEstadoCuentaHtml(data), { waitUntil: 'domcontentloaded' });
