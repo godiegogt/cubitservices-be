@@ -1,5 +1,5 @@
 import prisma from "../../config/prisma";
-import { EstadoRegistroBasico } from "@prisma/client";
+import { EstadoRegistroBasico, CategoriaServicio } from "@prisma/client";
 
 export async function findTiposServicioByEmpresa(empresaId: string) {
   return prisma.tipoServicio.findMany({
@@ -28,6 +28,7 @@ export async function createTipoServicio(data: {
   nombre: string;
   descripcion?: string;
   precioBase: number;
+  categoriaServicio: CategoriaServicio;
 }) {
   return prisma.tipoServicio.create({
     data: {
@@ -35,6 +36,7 @@ export async function createTipoServicio(data: {
       nombre: data.nombre,
       descripcion: data.descripcion,
       precioBase: data.precioBase,
+      categoriaServicio: data.categoriaServicio,
       estado: EstadoRegistroBasico.ACTIVO,
     },
   });
@@ -46,6 +48,7 @@ export async function updateTipoServicio(
     nombre?: string;
     descripcion?: string;
     precioBase?: number;
+    categoriaServicio?: CategoriaServicio;
   }
 ) {
   return prisma.tipoServicio.update({

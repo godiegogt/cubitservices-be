@@ -1,4 +1,4 @@
-import { EstadoRegistroBasico } from "@prisma/client";
+import { EstadoRegistroBasico, CategoriaServicio } from "@prisma/client";
 import {
   createTipoServicio,
   findTipoServicioById,
@@ -17,6 +17,7 @@ export async function createTipoServicioService(input: {
   nombre: string;
   descripcion?: string;
   precioBase: number;
+  categoriaServicio: CategoriaServicio;
 }) {
   const existing = await findTipoServicioByName(input.empresaId, input.nombre);
 
@@ -34,6 +35,7 @@ export async function updateTipoServicioService(
     nombre?: string;
     descripcion?: string;
     precioBase?: number;
+    categoriaServicio?: CategoriaServicio;
   }
 ) {
   const tipoServicio = await findTipoServicioById(id);

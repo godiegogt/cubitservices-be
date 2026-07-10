@@ -6,6 +6,7 @@ import {
   listOrdenes,
   listOrdenesSelectHandler,
   listOrdenEstados,
+  listTiposServicioDisponiblesHandler,
   updateOrdenHandler,
   updateOrdenStatusHandler,
 } from "./ordenes.controller";
@@ -19,6 +20,7 @@ router.use(requireAuth);
 router.get("/", listOrdenes);
 router.get("/dashboard", dashboardOrdenesController);
 router.get("/select/:cuentaServicioId", listOrdenesSelectHandler);
+router.get("/tipos-servicio", listTiposServicioDisponiblesHandler);
 router.get("/:id", getOrdenHandler);
 router.get("/:id/estados", listOrdenEstados);
 router.post("/", createOrdenHandler);

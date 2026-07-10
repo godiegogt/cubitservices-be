@@ -12,6 +12,7 @@ import {
   getOrdenes,
   getOrdenesSelectService,
   getOrdenEstadosService,
+  getTiposServicioDisponiblesService,
   updateOrdenService,
   updateOrdenStatusService,
 } from "./ordenes.service";
@@ -194,6 +195,32 @@ export async function listOrdenEstados(req: Request, res: Response) {
         error instanceof Error
           ? error.message
           : "Error obteniendo historial de estados",
+    });
+  }
+}
+
+export async function listTiposServicioDisponiblesHandler(req: Request, res: Response) {
+  try {
+    if (!req.auth) {
+      return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+    const empresaId = req.auth.empresaId;
+
+    const tipos = await getTiposServicioDisponiblesService(empresaId);
+
+    return res.json({
+      success: true,
+      message: "Tipos de servicio obtenidos correctamente",
+      data: tipos,
+    });
+  } catch (error) {
+    if (handleCommonErrors(error, res)) return;
+    return res.status(400).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Error obteniendo tipos de servicio",
     });
   }
 }
