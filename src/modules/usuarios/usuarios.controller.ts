@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import {
   createUserSchema,
+  listUsersQuerySchema,
   updateUserSchema,
   updateUserStatusSchema,
 } from "./usuarios.schemas";
 import {
   createUserService,
   getUsers,
+  searchUsersService,
   updateUserService,
   updateUserStatusService,
 } from "./usuarios.service";
@@ -19,6 +21,24 @@ export async function listUsers(req: Request, res: Response) {
     success: true,
     data: users,
   });
+}
+
+export async function searchUsersHandler(req: Request, res: Response) {
+  try {
+    const empresaId = req.auth!.empresaId;
+    const filters = listUsersQuerySchema.parse(req.query);
+    const users = await searchUsersService(empresaId, filters);
+
+    return res.json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Error obteniendo usuarios",
+    });
+  }
 }
 
 export async function createUserHandler(req: Request, res: Response) {

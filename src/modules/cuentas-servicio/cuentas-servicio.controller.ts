@@ -12,6 +12,7 @@ import {
   getCuentasServicio,
   getCuentasServicioSelectByClienteService,
   getCuentasServicioSelectService,
+  getTiposServicioDisponiblesService,
   updateCuentaServicioService,
   updateCuentaServicioStatusService,
 } from "./cuentas-servicio.service";
@@ -159,6 +160,27 @@ export async function updateCuentaServicioStatusHandler(
         error instanceof Error
           ? error.message
           : "Error actualizando estado de la cuenta de servicio",
+    });
+  }
+}
+
+export async function listTiposServicioDisponiblesHandler(req: Request, res: Response) {
+  try {
+    const empresaId = req.auth!.empresaId;
+    const tipos = await getTiposServicioDisponiblesService(empresaId);
+
+    return res.json({
+      success: true,
+      message: "Tipos de servicio obtenidos correctamente",
+      data: tipos,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Error obteniendo tipos de servicio",
     });
   }
 }

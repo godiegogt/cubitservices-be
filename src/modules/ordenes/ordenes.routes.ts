@@ -6,22 +6,28 @@ import {
   listOrdenes,
   listOrdenesSelectHandler,
   listOrdenEstados,
+  listTiposServicioDisponiblesHandler,
   updateOrdenHandler,
   updateOrdenStatusHandler,
 } from "./ordenes.controller";
 import ordenServicioArchivosRouter from "../ordenes-archivos/orden-archivo.routes"
+import { dashboardOrdenesController } from "./dashboard/dashboard.controller";
+import ordenServicioAsignacionesRouter from "../ordenes-asignaciones/orden-asignacion.routes"
 
 const router = Router();
 
 router.use(requireAuth);
 
 router.get("/", listOrdenes);
+router.get("/dashboard", dashboardOrdenesController);
 router.get("/select/:cuentaServicioId", listOrdenesSelectHandler);
+router.get("/tipos-servicio", listTiposServicioDisponiblesHandler);
 router.get("/:id", getOrdenHandler);
 router.get("/:id/estados", listOrdenEstados);
 router.post("/", createOrdenHandler);
 router.patch("/:id", updateOrdenHandler);
 router.patch("/:id/estado", updateOrdenStatusHandler);
 router.use("/:ordenServicioId/archivos", ordenServicioArchivosRouter)
+router.use("/:ordenServicioId/asignaciones", ordenServicioAsignacionesRouter)
 
 export default router;

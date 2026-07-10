@@ -1,10 +1,13 @@
 import {
+  CategoriaServicio,
   EstadoOrdenServicio,
+  EstadoRegistroBasico,
   OrigenOrden,
   Prisma,
   PrioridadOrden,
 } from "@prisma/client";
 import prisma from "../../config/prisma";
+import { startOfDay, endOfDay } from "../../common/utils/datetime";
 
 const ordenServicioInclude = {
   cuentaServicio: {
@@ -32,6 +35,10 @@ const ordenServicioInclude = {
       direccion: true,
       referencia: true,
       estado: true,
+      zona: true,
+      avenida: true,
+      calle: true,
+      numeroCasa: true,
     },
   },
   tipoServicio: {
@@ -67,6 +74,9 @@ export async function findOrdenesByEmpresa(
     tipoServicioId?: string;
     prioridad?: PrioridadOrden;
     origen?: OrigenOrden;
+    fechaDesde?: string;
+    fechaHasta?: string;
+    zona?: number;
     search?: string;
   }
 ) {
@@ -85,6 +95,15 @@ export async function findOrdenesByEmpresa(
   }),
   ...(filters?.prioridad && { prioridad: filters.prioridad }),
   ...(filters?.origen && { origen: filters.origen }),
+
+  ...(filters?.fechaDesde && {
+    createdAt: {
+      gte: startOfDay(filters.fechaDesde),
+      ...(filters.fechaHasta && { lte: endOfDay(filters.fechaHasta) }),
+    },
+  }),
+
+  ...(filters?.zona !== undefined && { ubicacion: { zona: filters.zona } }),
 
   ...(filters?.search && {
     OR: [
@@ -162,6 +181,23 @@ export async function findUbicacionById(id: string) {
 export async function findTipoServicioById(id: string) {
   return prisma.tipoServicio.findUnique({
     where: { id },
+  });
+}
+
+export async function findTiposServicioDisponibles(empresaId: string) {
+  return prisma.tipoServicio.findMany({
+    where: {
+      empresaId,
+      categoriaServicio: CategoriaServicio.MANTENIMIENTO,
+      estado: EstadoRegistroBasico.ACTIVO,
+    },
+    select: {
+      id: true,
+      nombre: true,
+      descripcion: true,
+      precioBase: true,
+    },
+    orderBy: { nombre: "asc" },
   });
 }
 
