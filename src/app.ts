@@ -16,6 +16,7 @@ import cuentasServicioRoutes from "./modules/cuentas-servicio/cuentas-servicio.r
 import ordenesRoutes from "./modules/ordenes/ordenes.routes";
 import cargosRoutes from "./modules/cargos/cargos.routes";
 import pagosRoutes from "./modules/pagos/pagos.routes";
+import dashboardRoutes from "./modules/dashboard/admin-dashboard.routes";
 import reportesRoutes from "./modules/reportes/reportes.routes";
 
 const app = express();
@@ -51,6 +52,7 @@ app.use("/cuentas-servicio", cuentasServicioRoutes);
 app.use("/ordenes", ordenesRoutes);
 app.use("/cargos", cargosRoutes);
 app.use("/pagos", pagosRoutes);
+app.use("/dashboard", dashboardRoutes);
 app.use("/reportes", reportesRoutes);
 app.use("/cuentas-servicio", cargosRoutes);
 
