@@ -1,5 +1,7 @@
 import {
+  CategoriaServicio,
   EstadoOrdenServicio,
+  EstadoRegistroBasico,
   OrigenOrden,
   Prisma,
   PrioridadOrden,
@@ -179,6 +181,23 @@ export async function findUbicacionById(id: string) {
 export async function findTipoServicioById(id: string) {
   return prisma.tipoServicio.findUnique({
     where: { id },
+  });
+}
+
+export async function findTiposServicioDisponibles(empresaId: string) {
+  return prisma.tipoServicio.findMany({
+    where: {
+      empresaId,
+      categoriaServicio: CategoriaServicio.MANTENIMIENTO,
+      estado: EstadoRegistroBasico.ACTIVO,
+    },
+    select: {
+      id: true,
+      nombre: true,
+      descripcion: true,
+      precioBase: true,
+    },
+    orderBy: { nombre: "asc" },
   });
 }
 

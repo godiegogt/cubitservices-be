@@ -5,6 +5,7 @@ import {
   getCuentaServicioHandler,
   listCuentasServicio,
   listCuentasServicioSelectHandler,
+  listTiposServicioDisponiblesHandler,
   updateCuentaServicioHandler,
   updateCuentaServicioStatusHandler,
 } from "./cuentas-servicio.controller";
@@ -18,6 +19,7 @@ router.use(requireAuth);
 
 router.get("/", listCuentasServicio);
 router.get("/select", listCuentasServicioSelectHandler);
+router.get("/tipos-servicio", listTiposServicioDisponiblesHandler);
 router.get("/:id", getCuentaServicioHandler);
 router.post("/", createCuentaServicioHandler);
 router.patch("/:id", updateCuentaServicioHandler);
