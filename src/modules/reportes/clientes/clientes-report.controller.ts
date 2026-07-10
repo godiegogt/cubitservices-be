@@ -38,7 +38,7 @@ export async function reporteClientesHandler(req: Request, res: Response) {
         const report = await generarReporteClientes(empresaId, {
             estado: query.estado,
             zonaId: query.zonaId,
-            servicio: query.servicio,
+            servicioId: query.servicioId,
             search: query.search,
             fechaInicio: query.fechaInicio,
             fechaFin: query.fechaFin,
