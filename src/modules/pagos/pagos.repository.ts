@@ -205,6 +205,18 @@ export async function createAplicacionesPago(
   });
 }
 
+export async function incrementAplicacionPagoMonto(
+  pagoId: string,
+  cargoId: string,
+  montoAdicional: Prisma.Decimal,
+  client: PrismaClientLike = prisma
+) {
+  return client.aplicacionPago.update({
+    where: { pagoId_cargoId: { pagoId, cargoId } },
+    data: { montoAplicado: { increment: montoAdicional } },
+  });
+}
+
 export async function updateCargoSaldoEstado(
   id: string,
   saldo: Prisma.Decimal,

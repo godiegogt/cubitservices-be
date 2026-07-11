@@ -17,6 +17,7 @@ import {
   findPagoById,
   findPagosByEmpresa,
   getPagoWithDetail,
+  incrementAplicacionPagoMonto,
   updateCargoSaldoEstado,
   updatePagoStatus,
 } from "./pagos.repository";
@@ -328,18 +329,32 @@ export async function applyPagoService(
       aplicacionesExistentes.map((aplicacion) => aplicacion.cargoId)
     );
 
-    if (input.aplicaciones.some((aplicacion) => cargoIdsAplicados.has(aplicacion.cargoId))) {
-      throw new Error("Ya existe una aplicacion para ese pago y cargo");
+    const aplicacionesNuevas = input.aplicaciones.filter(
+      (aplicacion) => !cargoIdsAplicados.has(aplicacion.cargoId)
+    );
+    const aplicacionesAIncrementar = input.aplicaciones.filter((aplicacion) =>
+      cargoIdsAplicados.has(aplicacion.cargoId)
+    );
+
+    if (aplicacionesNuevas.length > 0) {
+      await createAplicacionesPago(
+        aplicacionesNuevas.map((aplicacion) => ({
+          pagoId: id,
+          cargoId: aplicacion.cargoId,
+          montoAplicado: new Prisma.Decimal(aplicacion.montoAplicado),
+        })),
+        tx
+      );
     }
 
-    await createAplicacionesPago(
-      input.aplicaciones.map((aplicacion) => ({
-        pagoId: id,
-        cargoId: aplicacion.cargoId,
-        montoAplicado: new Prisma.Decimal(aplicacion.montoAplicado),
-      })),
-      tx
-    );
+    for (const aplicacion of aplicacionesAIncrementar) {
+      await incrementAplicacionPagoMonto(
+        id,
+        aplicacion.cargoId,
+        new Prisma.Decimal(aplicacion.montoAplicado),
+        tx
+      );
+    }
 
     for (const aplicacion of input.aplicaciones) {
       const cargo = cargosById.get(aplicacion.cargoId)!;
