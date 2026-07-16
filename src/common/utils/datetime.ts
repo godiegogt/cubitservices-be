@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 const GUATEMALA_TIME_ZONE = "America/Guatemala";
 
 export function formatDate(date: Date): string {
@@ -29,4 +30,8 @@ export function startOfDay(dateStr: string): Date {
 
 export function endOfDay(dateStr: string): Date {
   return new Date(`${dateStr}T23:59:59.999Z`);
+}
+
+export function decimalToNumber(value: Prisma.Decimal): number {
+    return value.toNumber();
 }
