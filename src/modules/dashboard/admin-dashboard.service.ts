@@ -1,11 +1,11 @@
 import { Prisma } from "@prisma/client";
 import {
+    queryCargosEsperadosPeriodo,
     queryCarteraPendiente,
     queryClientesMorosos,
     queryCobradoPeriodo,
     queryIngresosPeriodo,
     queryIngresosPorZona,
-    queryMetaCobranza,
     queryOrdenesPendientes,
     queryOrdenesEstado,
     queryOrdenesVencidas,
@@ -42,7 +42,7 @@ export async function getAdminDashboard(
     carteraPendiente,
     serviciosSuspendidos,
     ordenesPendientes,
-    metaCobranzaBase,
+    cargosEsperadosPeriodo,
     ingresosPeriodoRaw,
     ingresosPorZonaRaw,
     ordenesEstadoRaw,
@@ -53,7 +53,7 @@ export async function getAdminDashboard(
     queryCarteraPendiente(queryFilters),
     queryServiciosSuspendidos(queryFilters),
     queryOrdenesPendientes(queryFilters),
-    queryMetaCobranza(empresaId, zona),
+    queryCargosEsperadosPeriodo(queryFilters),
     queryIngresosPeriodo(queryFilters),
     queryIngresosPorZona(queryFilters),
     queryOrdenesEstado(queryFilters),
@@ -66,12 +66,12 @@ export async function getAdminDashboard(
         ? cobradoPeriodo.toNumber()
         : Number(cobradoPeriodo);
 
-    const metaNum =
-    metaCobranzaBase instanceof Prisma.Decimal
-        ? metaCobranzaBase.toNumber()
-        : Number(metaCobranzaBase);
+    const esperadoNum =
+    cargosEsperadosPeriodo instanceof Prisma.Decimal
+        ? cargosEsperadosPeriodo.toNumber()
+        : Number(cargosEsperadosPeriodo);
 
-    const metaCobranza = metaNum > 0 ? (cobradoNum / metaNum) * 100 : 0;
+    const metaCobranza = esperadoNum > 0 ? (cobradoNum / esperadoNum) * 100 : 0;
 
     return {
     filters: mapFilters(fechaDesdeStr, fechaHastaStr, zona),
