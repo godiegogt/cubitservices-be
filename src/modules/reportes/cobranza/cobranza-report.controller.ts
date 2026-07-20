@@ -41,6 +41,8 @@ function toCobranzaReportFilters(
     parsed: CobranzaReportQuery | CobranzaReportExportQuery,
 ): CobranzaReportFilters {
     return {
+    fechaInicio: parsed.fechaInicio,
+    fechaFin: parsed.fechaFin,
     codigoCliente: parsed.codigoCliente,
     nombreCliente: parsed.nombreCliente,
     estadoCargo: parsed.estadoCargo,

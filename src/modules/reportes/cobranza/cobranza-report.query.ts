@@ -1,6 +1,16 @@
-import { EstadoCargo, Prisma } from "@prisma/client";
+import { EstadoCargo, EstadoCuentaServicio, Prisma } from "@prisma/client";
 import prisma from "../../../config/prisma";
-import { CobranzaReportFilters } from "./cobranza-report.dto";
+
+export interface CobranzaQueryFilters {
+    fechaInicio?: Date;
+    fechaFin?: Date;
+    codigoCliente?: string;
+    nombreCliente?: string;
+    estadoCargo?: EstadoCargo[];
+    estadoServicio?: EstadoCuentaServicio;
+    tipoServicioId?: string;
+    zona?: number;
+}
 
 const ESTADOS_CARGO_PENDIENTES: EstadoCargo[] = [
     EstadoCargo.PENDIENTE,
@@ -31,7 +41,7 @@ const cargoReporteOrderBy: Prisma.CargoOrderByWithRelationInput[] = [
 ];
 
 function buildClienteFilter(
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
 ): Prisma.ClienteWhereInput | undefined {
     if (!filters.codigoCliente && !filters.nombreCliente) return undefined;
 
@@ -51,7 +61,7 @@ function buildClienteFilter(
 }
 
 function buildCuentaServicioFilter(
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
 ): Prisma.CuentaServicioWhereInput | undefined {
     if (
     !filters.estadoServicio &&
@@ -74,7 +84,7 @@ function buildCuentaServicioFilter(
 
 function buildCargoWhere(
     empresaId: string,
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
 ): Prisma.CargoWhereInput {
     const estados = filters.estadoCargo?.length
     ? filters.estadoCargo
@@ -85,6 +95,14 @@ function buildCargoWhere(
     return {
     empresaId,
     estado: { in: estados },
+    ...(filters.fechaInicio || filters.fechaFin
+        ? {
+            fechaEmision: {
+            ...(filters.fechaInicio ? { gte: filters.fechaInicio } : {}),
+            ...(filters.fechaFin ? { lte: filters.fechaFin } : {}),
+            },
+        }
+        : {}),
     ...(clienteFilter ? { cliente: clienteFilter } : {}),
     ...(cuentaServicioFilter ? { cuentaServicio: cuentaServicioFilter } : {}),
     };
@@ -92,7 +110,7 @@ function buildCargoWhere(
 
 export async function getCobranzaRows(
     empresaId: string,
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
     skip: number,
     take: number,
 ): Promise<CargoReporteItem[]> {
@@ -107,7 +125,7 @@ export async function getCobranzaRows(
 
 export async function getCobranzaRowsAll(
     empresaId: string,
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
 ): Promise<CargoReporteItem[]> {
     return prisma.cargo.findMany({
         where: buildCargoWhere(empresaId, filters),
@@ -118,14 +136,14 @@ export async function getCobranzaRowsAll(
 
 export async function countCobranzaRows(
     empresaId: string,
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
 ): Promise<number> {
     return prisma.cargo.count({ where: buildCargoWhere(empresaId, filters) });
 }
 
 export async function getTotalPendiente(
     empresaId: string,
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
 ): Promise<number> {
     const result = await prisma.cargo.aggregate({
         where: buildCargoWhere(empresaId, filters),
@@ -137,7 +155,7 @@ export async function getTotalPendiente(
 
 export async function getCuentasPendientes(
     empresaId: string,
-    filters: CobranzaReportFilters,
+    filters: CobranzaQueryFilters,
 ): Promise<number> {
     const clienteFilter = buildClienteFilter(filters);
     const cuentaServicioFilter = buildCuentaServicioFilter(filters);
@@ -146,6 +164,14 @@ export async function getCuentasPendientes(
     where: {
         empresaId,
         estado: { in: ESTADOS_CARGO_PENDIENTES },
+        ...(filters.fechaInicio || filters.fechaFin
+        ? {
+            fechaEmision: {
+                ...(filters.fechaInicio ? { gte: filters.fechaInicio } : {}),
+                ...(filters.fechaFin ? { lte: filters.fechaFin } : {}),
+            },
+            }
+        : {}),
         ...(clienteFilter ? { cliente: clienteFilter } : {}),
         ...(cuentaServicioFilter ? { cuentaServicio: cuentaServicioFilter } : {}),
     },

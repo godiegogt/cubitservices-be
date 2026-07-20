@@ -1,6 +1,8 @@
 import { EstadoCargo, EstadoCuentaServicio } from "@prisma/client";
 
 export interface CobranzaReportFilters {
+    fechaInicio?: string;
+    fechaFin?: string;
     codigoCliente?: string;
     nombreCliente?: string;
     estadoCargo?: EstadoCargo[];

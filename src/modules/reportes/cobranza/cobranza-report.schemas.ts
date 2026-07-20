@@ -25,6 +25,8 @@ const estadoServicioSchema = z
     );
 
 const filtersSchema = z.object({
+    fechaInicio: z.string().date().optional(),
+    fechaFin: z.string().date().optional(),
     codigoCliente: z.string().min(1).max(50).optional(),
     nombreCliente: z.string().min(1).max(150).optional(),
     estadoCargo: estadoCargoSchema.optional(),
@@ -33,12 +35,26 @@ const filtersSchema = z.object({
     zona: z.coerce.number().int().min(0).optional(),
 });
 
-export const cobranzaReportQuerySchema = filtersSchema.extend({
+const rangoFechasRefineOptions = {
+    message: "fechaInicio no puede ser mayor que fechaFin",
+    path: ["fechaInicio"] as string[],
+};
+
+function validarRangoFechas(d: { fechaInicio?: string; fechaFin?: string }) {
+    return !(d.fechaInicio && d.fechaFin && d.fechaInicio > d.fechaFin);
+}
+
+export const cobranzaReportQuerySchema = filtersSchema
+    .extend({
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(10),
-});
+    })
+    .refine(validarRangoFechas, rangoFechasRefineOptions);
 
-export const cobranzaReportExportSchema = filtersSchema;
+export const cobranzaReportExportSchema = filtersSchema.refine(
+    validarRangoFechas,
+    rangoFechasRefineOptions,
+);
 
 export type CobranzaReportQuery = z.infer<typeof cobranzaReportQuerySchema>;
 export type CobranzaReportExportQuery = z.infer<
