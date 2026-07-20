@@ -27,11 +27,11 @@ const ordenReportInclude = {
     asignaciones: {
         where: { estado: EstadoAsignacionOrden.ACTIVA },
         select: {
+            rolEnOrden: true,
             usuario: {
                 select: { id: true, nombres: true, apellidos: true },
             },
         },
-        take: 1,
     },
 } satisfies Prisma.OrdenServicioInclude;
 

@@ -1,4 +1,4 @@
-import { EstadoOrdenServicio, PrioridadOrden, OrigenOrden } from "@prisma/client";
+import { EstadoOrdenServicio, PrioridadOrden, OrigenOrden, RolEnOrden } from "@prisma/client";
 
 export interface OrdenesReportFilters {
     estado?: EstadoOrdenServicio;
@@ -32,7 +32,7 @@ export interface OrdenReportItemDto {
         calle: number | null;
         numeroCasa: number | null;
     };
-    tecnico: { id: string; nombre: string } | null;
+    asignados: { id: string; nombre: string; rol: RolEnOrden }[];
     createdAt: string;
 }
 

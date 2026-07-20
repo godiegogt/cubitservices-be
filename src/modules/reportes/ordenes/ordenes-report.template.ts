@@ -27,7 +27,6 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
             (item) => `
         <tr>
             <td>${escapeHtml(item.numeroOrden)}</td>
-            <td>${escapeHtml(item.titulo)}</td>
             <td>${item.estado}</td>
             <td>${item.prioridad}</td>
             <td>${item.origen}</td>
@@ -35,7 +34,15 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
             <td>${escapeHtml(item.cliente.nombre)}</td>
             <td>${escapeHtml(item.tipoServicio.nombre)}</td>
             <td>${escapeHtml(formatUbicacionDireccion(item.ubicacion))}</td>
-            <td>${item.tecnico ? escapeHtml(item.tecnico.nombre) : "-"}</td>
+            <td>${
+                item.asignados.length
+                    ? escapeHtml(
+                          item.asignados
+                              .map((a) => `${a.nombre} (${a.rol})`)
+                              .join(", ")
+                      )
+                    : "-"
+            }</td>
             <td>${item.fechaProgramada ? formatDate(new Date(item.fechaProgramada)) : "-"}</td>
             <td>${item.fechaInicio ? formatDate(new Date(item.fechaInicio)) : "-"}</td>
             <td>${item.fechaCierre ? formatDate(new Date(item.fechaCierre)) : "-"}</td>
@@ -177,7 +184,6 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
           <thead>
             <tr>
               <th>N° Orden</th>
-              <th>Título</th>
               <th>Estado</th>
               <th>Prioridad</th>
               <th>Origen</th>
@@ -185,7 +191,7 @@ export function buildOrdenesReportHtml(report: OrdenesReportResultDto): string {
               <th>Cliente</th>
               <th>Tipo Servicio</th>
               <th>Ubicación</th>
-              <th>Técnico</th>
+              <th>Asignados</th>
               <th>F. Programada</th>
               <th>F. Inicio</th>
               <th>F. Cierre</th>

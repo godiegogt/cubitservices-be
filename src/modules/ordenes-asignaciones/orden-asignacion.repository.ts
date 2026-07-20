@@ -1,4 +1,4 @@
-import { EstadoAsignacionOrden, Prisma } from "@prisma/client";
+import { EstadoAsignacionOrden, Prisma, RolEnOrden } from "@prisma/client";
 import prisma from "../../config/prisma";
 
 const ordenServicioAsignacionInclude = {
@@ -31,7 +31,7 @@ export async function findAsignacionesByOrdenId(ordenServicioId: string) {
 export async function findAsignacionActiva(
   ordenServicioId: string,
   usuarioId: string,
-  rolEnOrden: string
+  rolEnOrden: RolEnOrden
 ) {
   return prisma.ordenServicioAsignacion.findFirst({
     where: {
@@ -53,7 +53,7 @@ export async function findAsignacionById(id: string) {
 export async function createAsignacion(data: {
   ordenServicioId: string;
   usuarioId: string;
-  rolEnOrden: string;
+  rolEnOrden: RolEnOrden;
   asignadoPor: string;
 }) {
   return prisma.ordenServicioAsignacion.create({

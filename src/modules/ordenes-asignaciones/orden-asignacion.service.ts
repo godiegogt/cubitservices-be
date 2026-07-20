@@ -1,4 +1,4 @@
-import { EstadoAsignacionOrden, EstadoOrdenServicio, EstadoUsuario } from "@prisma/client";
+import { EstadoAsignacionOrden, EstadoOrdenServicio, EstadoUsuario, RolEnOrden } from "@prisma/client";
 import { findOrdenById } from "../ordenes/ordenes.repository";
 import { findUserById } from "../usuarios/usuarios.repository";
 import {
@@ -39,7 +39,7 @@ export async function createAsignacionService(
   asignadoPor: string,
   input: {
     usuarioId: string;
-    rolEnOrden: string;
+    rolEnOrden: RolEnOrden;
   }
 ) {
   const orden = await validarOrdenDeEmpresa(ordenServicioId, empresaId);
