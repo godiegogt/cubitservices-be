@@ -17,6 +17,7 @@ import {
   findPagoById,
   findPagosByEmpresa,
   getPagoWithDetail,
+  incrementAplicacionPagoMonto,
   updateCargoSaldoEstado,
   updatePagoStatus,
 } from "./pagos.repository";
@@ -297,6 +298,12 @@ export async function applyPagoService(
     }
 
     const cargosById = new Map(cargos.map((cargo) => [cargo.id, cargo]));
+    const cargoIdsAplicados = new Set(
+      aplicacionesExistentes.map((aplicacion) => aplicacion.cargoId)
+    );
+
+    const aplicacionesNuevas: typeof input.aplicaciones = [];
+    const aplicacionesAIncrementar: typeof input.aplicaciones = [];
 
     for (const aplicacion of input.aplicaciones) {
       const cargo = cargosById.get(aplicacion.cargoId);
@@ -322,24 +329,33 @@ export async function applyPagoService(
       if (montoAplicado.greaterThan(cargo.saldo)) {
         throw new Error("El monto aplicado no puede exceder el saldo del cargo");
       }
+
+      if (cargoIdsAplicados.has(aplicacion.cargoId)) {
+        aplicacionesAIncrementar.push(aplicacion);
+      } else {
+        aplicacionesNuevas.push(aplicacion);
+      }
     }
 
-    const cargoIdsAplicados = new Set(
-      aplicacionesExistentes.map((aplicacion) => aplicacion.cargoId)
-    );
-
-    if (input.aplicaciones.some((aplicacion) => cargoIdsAplicados.has(aplicacion.cargoId))) {
-      throw new Error("Ya existe una aplicacion para ese pago y cargo");
+    if (aplicacionesNuevas.length > 0) {
+      await createAplicacionesPago(
+        aplicacionesNuevas.map((aplicacion) => ({
+          pagoId: id,
+          cargoId: aplicacion.cargoId,
+          montoAplicado: new Prisma.Decimal(aplicacion.montoAplicado),
+        })),
+        tx
+      );
     }
 
-    await createAplicacionesPago(
-      input.aplicaciones.map((aplicacion) => ({
-        pagoId: id,
-        cargoId: aplicacion.cargoId,
-        montoAplicado: new Prisma.Decimal(aplicacion.montoAplicado),
-      })),
-      tx
-    );
+    for (const aplicacion of aplicacionesAIncrementar) {
+      await incrementAplicacionPagoMonto(
+        id,
+        aplicacion.cargoId,
+        new Prisma.Decimal(aplicacion.montoAplicado),
+        tx
+      );
+    }
 
     for (const aplicacion of input.aplicaciones) {
       const cargo = cargosById.get(aplicacion.cargoId)!;
