@@ -298,6 +298,12 @@ export async function applyPagoService(
     }
 
     const cargosById = new Map(cargos.map((cargo) => [cargo.id, cargo]));
+    const cargoIdsAplicados = new Set(
+      aplicacionesExistentes.map((aplicacion) => aplicacion.cargoId)
+    );
+
+    const aplicacionesNuevas: typeof input.aplicaciones = [];
+    const aplicacionesAIncrementar: typeof input.aplicaciones = [];
 
     for (const aplicacion of input.aplicaciones) {
       const cargo = cargosById.get(aplicacion.cargoId);
@@ -323,18 +329,13 @@ export async function applyPagoService(
       if (montoAplicado.greaterThan(cargo.saldo)) {
         throw new Error("El monto aplicado no puede exceder el saldo del cargo");
       }
+
+      if (cargoIdsAplicados.has(aplicacion.cargoId)) {
+        aplicacionesAIncrementar.push(aplicacion);
+      } else {
+        aplicacionesNuevas.push(aplicacion);
+      }
     }
-
-    const cargoIdsAplicados = new Set(
-      aplicacionesExistentes.map((aplicacion) => aplicacion.cargoId)
-    );
-
-    const aplicacionesNuevas = input.aplicaciones.filter(
-      (aplicacion) => !cargoIdsAplicados.has(aplicacion.cargoId)
-    );
-    const aplicacionesAIncrementar = input.aplicaciones.filter((aplicacion) =>
-      cargoIdsAplicados.has(aplicacion.cargoId)
-    );
 
     if (aplicacionesNuevas.length > 0) {
       await createAplicacionesPago(
