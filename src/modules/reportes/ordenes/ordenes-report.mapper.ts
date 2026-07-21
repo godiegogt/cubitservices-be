@@ -27,13 +27,11 @@ export function formatUbicacionDireccion(ubicacion: {
 }
 
 export function mapOrdenToDto(orden: OrdenReportRaw): OrdenReportItemDto {
-    const asignacion = orden.asignaciones[0];
-    const tecnico = asignacion
-        ? {
-                id: asignacion.usuario.id,
-                nombre: `${asignacion.usuario.nombres} ${asignacion.usuario.apellidos}`.trim(),
-            }
-        : null;
+    const asignados = orden.asignaciones.map((asignacion) => ({
+        id: asignacion.usuario.id,
+        nombre: `${asignacion.usuario.nombres} ${asignacion.usuario.apellidos}`.trim(),
+        rol: asignacion.rolEnOrden,
+    }));
 
     return {
         id: orden.id,
@@ -62,7 +60,7 @@ export function mapOrdenToDto(orden: OrdenReportRaw): OrdenReportItemDto {
             calle: orden.ubicacion.calle,
             numeroCasa: orden.ubicacion.numeroCasa,
         },
-        tecnico,
+        asignados,
         createdAt: orden.createdAt.toISOString(),
     };
 }

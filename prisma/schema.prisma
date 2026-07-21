@@ -176,6 +176,12 @@ enum CategoriaServicio {
   SERVICIO
 }
 
+enum RolEnOrden {
+	TECNICO
+	AYUDANTE
+	SUPERVISOR
+}
+
 /// ===========================
 /// ORGANIZACION
 /// ===========================
@@ -512,7 +518,7 @@ model OrdenServicioAsignacion {
   id               String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   ordenServicioId  String                 @map("orden_servicio_id") @db.Uuid
   usuarioId        String                 @map("usuario_id") @db.Uuid
-  rolEnOrden       String                 @map("rol_en_orden") @db.VarChar(50)
+  rolEnOrden       RolEnOrden             @map("rol_en_orden")
   estado           EstadoAsignacionOrden
   asignadoPor      String                 @map("asignado_por") @db.Uuid
   fechaAsignacion  DateTime               @map("fecha_asignacion") @db.Timestamptz(6)

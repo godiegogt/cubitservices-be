@@ -14,7 +14,7 @@ export async function exportOrdenesExcel(
 
     const sheet = workbook.addWorksheet("Reporte de Órdenes");
 
-    const COL_COUNT = 13;
+    const COL_COUNT = 12;
 
     const titleRow = sheet.addRow(["Reporte de Órdenes de Servicio"]);
     titleRow.font = { bold: true, size: 14 };
@@ -58,7 +58,6 @@ export async function exportOrdenesExcel(
 
     const dataHeaders = [
         "N° Orden",
-        "Título",
         "Estado",
         "Prioridad",
         "Origen",
@@ -66,7 +65,7 @@ export async function exportOrdenesExcel(
         "Cliente",
         "Tipo Servicio",
         "Ubicación",
-        "Técnico",
+        "Asignados",
         "Fecha Programada",
         "Fecha Inicio",
         "Fecha Cierre",
@@ -88,7 +87,6 @@ export async function exportOrdenesExcel(
     for (const item of report.data) {
         sheet.addRow([
             item.numeroOrden,
-            item.titulo,
             item.estado,
             item.prioridad,
             item.origen,
@@ -96,14 +94,14 @@ export async function exportOrdenesExcel(
             item.cliente.nombre,
             item.tipoServicio.nombre,
             formatUbicacionDireccion(item.ubicacion),
-            item.tecnico?.nombre ?? "",
+            item.asignados.map((a) => `${a.nombre} (${a.rol})`).join(", "),
             item.fechaProgramada ? formatDate(new Date(item.fechaProgramada)) : "",
             item.fechaInicio ? formatDate(new Date(item.fechaInicio)) : "",
             item.fechaCierre ? formatDate(new Date(item.fechaCierre)) : "",
         ]);
     }
 
-    [14, 30, 14, 12, 12, 14, 28, 22, 32, 24, 16, 14, 14].forEach(
+    [14, 14, 12, 12, 14, 28, 22, 32, 24, 16, 14, 14].forEach(
         (width, i) => { sheet.getColumn(i + 1).width = width; }
     );
 

@@ -1,5 +1,5 @@
 import prisma from '../../../config/prisma';
-import { EstadoAsignacionOrden, EstadoOrdenServicio, PrioridadOrden, Prisma } from '@prisma/client';
+import { EstadoAsignacionOrden, EstadoOrdenServicio, PrioridadOrden, Prisma, RolEnOrden } from '@prisma/client';
 import { RawOrdenRow } from './ordenes-dashboard.types';
 
 const ORDEN_SELECT = {
@@ -47,7 +47,7 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
                 some: {
                     estado: EstadoAsignacionOrden.ACTIVA,
                     usuarioId: f.responsableId,
-                    rolEnOrden: 'responsable',
+                    rolEnOrden: RolEnOrden.TECNICO,
                 },
             },
         }),
