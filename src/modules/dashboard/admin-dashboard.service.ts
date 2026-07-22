@@ -35,7 +35,10 @@ export async function getAdminDashboard(
     const fechaDesdeStr = input.fechaDesde ?? formatDateOnly(defaults.desde);
     const fechaHastaStr = input.fechaHasta ?? formatDateOnly(defaults.hasta);
 
-    const queryFilters = { empresaId, fechaDesde, fechaHasta, zona };
+    const fechaDesdeExplicita = input.fechaDesde ? startOfDay(input.fechaDesde) : undefined;
+    const fechaHastaExplicita = input.fechaHasta ? endOfDay(input.fechaHasta) : undefined;
+
+    const queryFilters = { empresaId, fechaDesde, fechaHasta, fechaDesdeExplicita, fechaHastaExplicita, zona };
 
     const [
     cobradoPeriodo,

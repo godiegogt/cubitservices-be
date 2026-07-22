@@ -11,6 +11,8 @@ interface DashboardQueryFilters {
     empresaId: string;
     fechaDesde: Date;
     fechaHasta: Date;
+    fechaDesdeExplicita?: Date;
+    fechaHastaExplicita?: Date;
     zona?: number;
 }
 
@@ -230,7 +232,7 @@ export async function queryClientesMorosos(filters: DashboardQueryFilters) {
 }
 
 export async function queryOrdenesVencidas(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesdeExplicita, fechaHastaExplicita, zona } = filters;
 
     return prisma.ordenServicio.count({
     where: {
@@ -238,7 +240,11 @@ export async function queryOrdenesVencidas(filters: DashboardQueryFilters) {
         estado: {
         notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA],
         },
-        fechaProgramada: { gte: fechaDesde, lte: fechaHasta, lt: new Date() },
+        fechaProgramada: {
+        ...(fechaDesdeExplicita && { gte: fechaDesdeExplicita }),
+        ...(fechaHastaExplicita && { lte: fechaHastaExplicita }),
+        lt: new Date(),
+        },
         ...zonaFilterUbicacion(zona),
     },
     });
