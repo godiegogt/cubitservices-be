@@ -15,7 +15,7 @@ export const createOrdenSchema = z.object({
   descripcion: z.string().optional(),
   origen: z.nativeEnum(OrigenOrden),
   prioridad: z.nativeEnum(PrioridadOrden),
-  fechaProgramada: dateTimeStringSchema.optional(),
+  fechaProgramada: dateTimeStringSchema,
   requiereEvidenciaFinal: z.boolean().optional(),
   observacionesGenerales: z.string().optional(),
 });

@@ -141,7 +141,7 @@ export async function createOrdenService(input: {
   descripcion?: string;
   origen: OrigenOrden;
   prioridad: PrioridadOrden;
-  fechaProgramada?: string;
+  fechaProgramada: string;
   requiereEvidenciaFinal?: boolean;
   observacionesGenerales?: string;
 }) {
@@ -165,16 +165,13 @@ export async function createOrdenService(input: {
     validateTipoServicio(input.empresaId, input.tipoServicioId),
   ]);
 
-  const estado = input.fechaProgramada
-    ? EstadoOrdenServicio.PROGRAMADA
-    : EstadoOrdenServicio.PENDIENTE;
   const numeroOrden = await generateNumeroOrden(input.empresaId);
 
   return createOrden({
     ...input,
     clienteId: cuentaServicio.clienteId,
     numeroOrden,
-    estado,
+    estado: EstadoOrdenServicio.PROGRAMADA,
     fechaProgramada: parseDateTime(input.fechaProgramada),
   });
 }
