@@ -90,7 +90,7 @@ export async function queryOrdenesPendientes(filters: DashboardQueryFilters) {
         estado: {
         notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA],
         },
-        createdAt: { gte: fechaDesde, lte: fechaHasta },
+        fechaProgramada: { gte: fechaDesde, lte: fechaHasta },
         ...zonaFilterUbicacion(zona),
     },
     });
@@ -189,7 +189,7 @@ export async function queryOrdenesEstado(filters: DashboardQueryFilters) {
     estado: {
         notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA],
     },
-    createdAt: { gte: fechaDesde, lte: fechaHasta },
+    fechaProgramada: { gte: fechaDesde, lte: fechaHasta },
     ...zonaFilterUbicacion(zona),
     };
 
@@ -238,8 +238,7 @@ export async function queryOrdenesVencidas(filters: DashboardQueryFilters) {
         estado: {
         notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA],
         },
-        createdAt: { gte: fechaDesde, lte: fechaHasta },
-        fechaProgramada: { lt: new Date() },
+        fechaProgramada: { gte: fechaDesde, lte: fechaHasta, lt: new Date() },
         ...zonaFilterUbicacion(zona),
     },
     });

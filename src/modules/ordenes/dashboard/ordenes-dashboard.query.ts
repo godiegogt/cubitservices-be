@@ -99,7 +99,7 @@ function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado'
     return {
         empresaId: f.empresaId,
         estado,
-        createdAt: { gte: f.desde, lte: f.hasta },
+        fechaProgramada: { gte: f.desde, lte: f.hasta },
         ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
     };
 }
@@ -145,7 +145,7 @@ export async function getOrdenesPorEstado(
             where: {
                 empresaId: filters.empresaId,
                 estado: { not: EstadoOrdenServicio.PENDIENTE },
-                createdAt: { gte: filters.desde, lte: filters.hasta },
+                fechaProgramada: { gte: filters.desde, lte: filters.hasta },
                 ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
             },
             _count: { _all: true },
