@@ -7,11 +7,12 @@ UPDATE "orden_servicio_asignacion"
 SET "rol_en_orden" = 'TECNICO'
 WHERE "rol_en_orden" = 'responsable';
 
--- NOTA: si existen filas con otros valores fuera de ('TECNICO','AYUDANTE','SUPERVISOR')
--- (por ejemplo el antiguo default "ENCARGADO"), este ALTER fallará. Verificar con
--- SELECT DISTINCT rol_en_orden FROM orden_servicio_asignacion; antes de aplicar.
+-- Normalizar el antiguo default "ENCARGADO" -> equivale a TECNICO
+UPDATE "orden_servicio_asignacion"
+SET "rol_en_orden" = 'TECNICO'
+WHERE "rol_en_orden" = 'ENCARGADO';
 
 -- AlterTable: convertir la columna existente usando cast explícito (preserva los datos)
 ALTER TABLE "orden_servicio_asignacion"
   ALTER COLUMN "rol_en_orden" TYPE "RolEnOrden"
-  USING ("rol_en_orden"::text::"RolEnOrden");
+  USING ("rol_en_orden"::"RolEnOrden");
