@@ -20,10 +20,12 @@ export function buildCobranzaReportHtml(report: CobranzaReportResponse): string 
     <tr>
         <td>${escapeHtml(item.clienteNombre)}</td>
         <td>${escapeHtml(item.cuentaServicioNombre)}</td>
+        <td>${escapeHtml(item.cuentaServicioDireccion || "-")}</td>
         <td>${escapeHtml(item.tipoServicio)}</td>
         <td>${escapeHtml(item.periodo)}</td>
         <td>${escapeHtml(item.concepto)}</td>
         <td>${item.fechaVencimiento || "-"}</td>
+        <td>${item.fechaCreacion || "-"}</td>
         <td class="text-right">${money(item.saldoPendiente)}</td>
         <td>${escapeHtml(item.estadoCargo)}</td>
         <td>${escapeHtml(item.estadoServicio)}</td>
@@ -158,10 +160,12 @@ export function buildCobranzaReportHtml(report: CobranzaReportResponse): string 
             <tr>
                 <th>Cliente</th>
                 <th>Cuenta servicio</th>
+                <th>Dirección</th>
                 <th>Tipo servicio</th>
                 <th>Periodo</th>
                 <th>Concepto</th>
                 <th>Fecha vencimiento</th>
+                <th>Fecha creación</th>
                 <th class="text-right">Saldo pendiente</th>
                 <th>Estado cargo</th>
                 <th>Estado servicio</th>

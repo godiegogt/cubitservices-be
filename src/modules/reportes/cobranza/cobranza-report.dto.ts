@@ -21,10 +21,12 @@ export interface CobranzaReportRow {
     clienteNombre: string;
     cuentaServicioId: string;
     cuentaServicioNombre: string;
+    cuentaServicioDireccion: string;
     tipoServicio: string;
     periodo: string;
     concepto: string;
     fechaVencimiento: string;
+    fechaCreacion: string;
     saldoPendiente: number;
     estadoCargo: EstadoCargo;
     estadoServicio: EstadoCuentaServicio;
