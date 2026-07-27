@@ -30,10 +30,7 @@ const cargoReporteInclude = {
         tipoServicio: { select: { nombre: true } },
         ubicacion: {
         select: {
-            zona: true,
-            avenida: true,
-            calle: true,
-            numeroCasa: true,
+            direccion: true,
         },
         },
     },

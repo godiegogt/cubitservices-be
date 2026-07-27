@@ -1,5 +1,4 @@
 import { formatDateOnly, decimalToNumber  } from "../../../common/utils/datetime";
-import { formatUbicacionDireccion } from "../ordenes/ordenes-report.mapper";
 import {
     CobranzaReportKpis,
     CobranzaReportResponse,
@@ -7,15 +6,13 @@ import {
 } from "./cobranza-report.dto";
 import { CargoReporteItem } from "./cobranza-report.query";
 
-const UBICACION_VACIA = { calle: null, avenida: null, zona: null, numeroCasa: null };
-
 export function mapToRow(cargo: CargoReporteItem): CobranzaReportRow {
     return {
     clienteId: cargo.cliente.id,
     clienteNombre: cargo.cliente.nombreRazonSocial,
     cuentaServicioId: cargo.cuentaServicio.id,
     cuentaServicioNombre: cargo.cuentaServicio.nombre,
-    cuentaServicioDireccion: formatUbicacionDireccion(cargo.cuentaServicio.ubicacion ?? UBICACION_VACIA),
+    cuentaServicioDireccion: cargo.cuentaServicio.ubicacion?.direccion || "-",
     tipoServicio: cargo.cuentaServicio.tipoServicio.nombre,
     periodo: cargo.periodoReferencia ?? "",
     concepto: cargo.concepto,
