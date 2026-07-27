@@ -29,10 +29,10 @@ export async function queryCobradoPeriodo(filters: DashboardQueryFilters) {
 
     const result = await prisma.aplicacionPago.aggregate({
         where: {
+        createdAt: { gte: fechaDesde, lte: fechaHasta },
         pago: {
             empresaId,
             estado: EstadoPago.CONFIRMADO,
-            fechaPago: { gte: fechaDesde, lte: fechaHasta },
         },
         ...(zona ? { cargo: { cuentaServicio: { ubicacion: { zona } } } } : {}),
     },
@@ -91,7 +91,7 @@ export async function queryIngresosPeriodo(filters: DashboardQueryFilters) {
     const rows = await prisma.$queryRaw<
         { fecha: Date; total: Prisma.Decimal }[]
     >`
-        SELECT p.fecha_pago AS fecha, SUM(ap.monto_aplicado) AS total
+        SELECT DATE(ap.created_at) AS fecha, SUM(ap.monto_aplicado) AS total
         FROM aplicacion_pago ap
         JOIN pago p ON p.id = ap.pago_id
         JOIN cargo c ON c.id = ap.cargo_id
@@ -99,11 +99,11 @@ export async function queryIngresosPeriodo(filters: DashboardQueryFilters) {
         JOIN cliente_ubicacion cu ON cu.id = cs.ubicacion_id
         WHERE p.empresa_id = ${empresaId}::uuid
         AND p.estado = 'CONFIRMADO'
-        AND p.fecha_pago >= ${fechaDesde}
-        AND p.fecha_pago <= ${fechaHasta}
+        AND ap.created_at >= ${fechaDesde}
+        AND ap.created_at <= ${fechaHasta}
         AND cu.zona = ${zona}
-        GROUP BY p.fecha_pago
-        ORDER BY p.fecha_pago ASC
+        GROUP BY DATE(ap.created_at)
+        ORDER BY DATE(ap.created_at) ASC
     `;
     return rows;
     }
@@ -111,15 +111,15 @@ export async function queryIngresosPeriodo(filters: DashboardQueryFilters) {
     const rows = await prisma.$queryRaw<
     { fecha: Date; total: Prisma.Decimal }[]
     >`
-    SELECT p.fecha_pago AS fecha, SUM(ap.monto_aplicado) AS total
+    SELECT DATE(ap.created_at) AS fecha, SUM(ap.monto_aplicado) AS total
     FROM aplicacion_pago ap
     JOIN pago p ON p.id = ap.pago_id
     WHERE p.empresa_id = ${empresaId}::uuid
         AND p.estado = 'CONFIRMADO'
-        AND p.fecha_pago >= ${fechaDesde}
-        AND p.fecha_pago <= ${fechaHasta}
-    GROUP BY p.fecha_pago
-    ORDER BY p.fecha_pago ASC
+        AND ap.created_at >= ${fechaDesde}
+        AND ap.created_at <= ${fechaHasta}
+    GROUP BY DATE(ap.created_at)
+    ORDER BY DATE(ap.created_at) ASC
     `;
     return rows;
 }
@@ -165,8 +165,8 @@ export async function queryIngresosPorZona(filters: DashboardQueryFilters) {
         JOIN cliente_ubicacion cu ON cu.id = cs.ubicacion_id
         WHERE p.empresa_id = ${empresaId}::uuid
         AND p.estado = 'CONFIRMADO'
-        AND p.fecha_pago >= ${fechaDesde}
-        AND p.fecha_pago <= ${fechaHasta}
+        AND ap.created_at >= ${fechaDesde}
+        AND ap.created_at <= ${fechaHasta}
         AND cu.zona IS NOT NULL
         GROUP BY cu.zona
     ),
