@@ -210,14 +210,13 @@ export async function queryOrdenesEstado(filters: DashboardQueryFilters) {
 }
 
 export async function queryClientesMorosos(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, zona } = filters;
 
     const count = await prisma.cargo.groupBy({
     by: ["clienteId"],
     where: {
         empresaId,
-        estado: EstadoCargo.VENCIDO,
-        fechaEmision: { gte: fechaDesde, lte: fechaHasta },
+        estado: { in: [EstadoCargo.PENDIENTE, EstadoCargo.PARCIAL, EstadoCargo.VENCIDO] },
         fechaVencimiento: {
         lte: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
         },
