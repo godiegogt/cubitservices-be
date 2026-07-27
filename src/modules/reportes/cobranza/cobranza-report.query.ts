@@ -28,6 +28,14 @@ const cargoReporteInclude = {
         nombre: true,
         estado: true,
         tipoServicio: { select: { nombre: true } },
+        ubicacion: {
+        select: {
+            zona: true,
+            avenida: true,
+            calle: true,
+            numeroCasa: true,
+        },
+        },
     },
     },
 } satisfies Prisma.CargoInclude;
