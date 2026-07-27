@@ -59,7 +59,7 @@ function buildBaseWhere(
     }
 
     if (filters.fechaInicio || filters.fechaFin) {
-        where.createdAt = {
+        where.fechaProgramada = {
             ...(filters.fechaInicio && { gte: startOfDay(filters.fechaInicio) }),
             ...(filters.fechaFin && { lte: endOfDay(filters.fechaFin) }),
         };

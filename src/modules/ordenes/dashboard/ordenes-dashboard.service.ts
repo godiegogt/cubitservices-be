@@ -24,13 +24,19 @@ export async function getOrdenesDashboard(
     const hasta = endOfDay(fechaHasta);
     const ahora = new Date();
 
-    const kpiFilters = { empresaId, desde, hasta, ahora, zona: query.zona };
+    const fechaHastaExplicita = query.fechaHasta ?? query.fechaDesde;
+    const desdeExplicita = query.fechaDesde ? startOfDay(query.fechaDesde) : undefined;
+    const hastaExplicita = fechaHastaExplicita ? endOfDay(fechaHastaExplicita) : undefined;
+
+    const kpiFilters = { empresaId, desde, hasta, ahora, desdeExplicita, hastaExplicita, zona: query.zona };
 
     const dataFilters = {
         empresaId,
         desde,
         hasta,
         ahora,
+        desdeExplicita,
+        hastaExplicita,
         estado: query.estado,
         prioridad: query.prioridad,
         clienteId: query.clienteId,

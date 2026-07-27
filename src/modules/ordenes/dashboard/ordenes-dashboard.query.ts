@@ -26,6 +26,8 @@ interface DataFilters {
     desde: Date;
     hasta: Date;
     ahora: Date;
+    desdeExplicita?: Date;
+    hastaExplicita?: Date;
     estado?: EstadoOrdenServicio | 'VENCIDA';
     prioridad?: PrioridadOrden;
     clienteId?: string;
@@ -65,7 +67,11 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
         return {
             ...base,
             estado: { notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA] },
-            fechaProgramada: { lt: f.ahora },
+            fechaProgramada: {
+                ...(f.desdeExplicita && { gte: f.desdeExplicita }),
+                ...(f.hastaExplicita && { lte: f.hastaExplicita }),
+                lt: f.ahora,
+            },
         };
     }
     
@@ -92,6 +98,8 @@ interface KpiFilters {
     desde: Date;
     hasta: Date;
     ahora: Date;
+    desdeExplicita?: Date;
+    hastaExplicita?: Date;
     zona?: number;
 }
 
@@ -99,7 +107,7 @@ function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado'
     return {
         empresaId: f.empresaId,
         estado,
-        createdAt: { gte: f.desde, lte: f.hasta },
+        fechaProgramada: { gte: f.desde, lte: f.hasta },
         ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
     };
 }
@@ -130,7 +138,11 @@ export async function contarVencidas(f: KpiFilters): Promise<number> {
         where: {
             empresaId: f.empresaId,
             estado: { notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA] },
-            fechaProgramada: { lt: f.ahora },
+            fechaProgramada: {
+                ...(f.desdeExplicita && { gte: f.desdeExplicita }),
+                ...(f.hastaExplicita && { lte: f.hastaExplicita }),
+                lt: f.ahora,
+            },
             ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
         },
     });
@@ -145,7 +157,7 @@ export async function getOrdenesPorEstado(
             where: {
                 empresaId: filters.empresaId,
                 estado: { not: EstadoOrdenServicio.PENDIENTE },
-                createdAt: { gte: filters.desde, lte: filters.hasta },
+                fechaProgramada: { gte: filters.desde, lte: filters.hasta },
                 ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
             },
             _count: { _all: true },
