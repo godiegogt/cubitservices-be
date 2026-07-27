@@ -98,6 +98,19 @@ export async function findCargosByEmpresa(
                 mode: "insensitive",
               },
             },
+            {
+              cliente: {
+                nombreRazonSocial: {
+                  contains: filters.search,
+                  mode: "insensitive",
+                },
+              },
+            },
+            {
+              cuentaServicio: {
+                codigo: { contains: filters.search, mode: "insensitive" },
+              },
+            },
           ],
         }
       : {}),
