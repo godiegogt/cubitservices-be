@@ -1,6 +1,7 @@
 import {
   EstadoCargo,
   EstadoCuentaServicio,
+  OrigenCargo,
   TipoCargo,
   TipoMora,
   TipoVencimiento,
@@ -95,7 +96,7 @@ function formatCargo(cargo: CargoListItem | CargoDetail) {
   };
 }
 
-async function createCargoInternal(input: {
+export async function createCargoInternal(input: {
   empresaId: string;
   cuentaServicioId: string;
   ordenServicioId?: string | null;
@@ -104,6 +105,8 @@ async function createCargoInternal(input: {
   periodoReferencia?: string;
   monto: number;
   fechaEmision: string;
+  origen?: OrigenCargo;
+  dryRun?: boolean;
 }) {
   const cuentaServicio = await findCuentaServicioById(input.cuentaServicioId);
 
@@ -178,6 +181,20 @@ async function createCargoInternal(input: {
   const fechaEmision = parseDateOnly(input.fechaEmision);
   const fechaVencimiento = calculateFechaVencimiento(fechaEmision, politica);
 
+  if (input.dryRun) {
+    return {
+      id: null,
+      tipoCargo: input.tipoCargo,
+      concepto: input.concepto,
+      periodoReferencia: input.periodoReferencia ?? null,
+      monto: input.monto.toString(),
+      saldo: input.monto.toString(),
+      fechaEmision: formatDateOnly(fechaEmision),
+      fechaVencimiento: formatDateOnly(fechaVencimiento),
+      estado: EstadoCargo.PENDIENTE,
+    };
+  }
+
   const cargo = await createCargo({
     empresaId: input.empresaId,
     clienteId: cuentaServicio.clienteId,
@@ -195,6 +212,7 @@ async function createCargoInternal(input: {
     tipoMoraAplicada: politica?.tipoMora ?? null,
     valorMoraAplicado: politica?.valorMora ?? null,
     estado: EstadoCargo.PENDIENTE,
+    origen: input.origen,
   });
 
   return {
