@@ -75,6 +75,16 @@ export async function findCuentasCandidatas(empresaId: string) {
   });
 }
 
+export async function countCuentasCandidatas(empresaId: string) {
+  return prisma.cuentaServicio.count({
+    where: {
+      empresaId,
+      modalidad: ModalidadServicio.RECURRENTE,
+      frecuencia: FrecuenciaServicio.MENSUAL,
+    },
+  });
+}
+
 export async function createEjecucion(data: {
   empresaId: string;
   usuarioId?: string | null;
@@ -103,6 +113,22 @@ export async function updateEjecucion(
     cantidadErrores: number;
     montoGenerado: Prisma.Decimal | number;
     mensajeError?: string | null;
+  }
+) {
+  return prisma.ejecucionGeneracionCargo.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function updateEjecucionProgreso(
+  id: string,
+  data: {
+    cantidadProcesadas: number;
+    cantidadGeneradas: number;
+    cantidadOmitidas: number;
+    cantidadErrores: number;
+    montoGenerado: Prisma.Decimal | number;
   }
 ) {
   return prisma.ejecucionGeneracionCargo.update({

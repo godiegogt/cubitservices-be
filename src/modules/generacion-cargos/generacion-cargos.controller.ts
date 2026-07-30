@@ -7,12 +7,12 @@ import {
   previewQuerySchema,
 } from "./generacion-cargos.schemas";
 import {
-  generarCargosService,
   getCargosGeneradosService,
   getDetallesService,
   getEjecucionByIdService,
   getEjecucionesService,
   getPreviewService,
+  iniciarGeneracionCargosService,
 } from "./generacion-cargos.service";
 
 export async function previewHandler(req: Request, res: Response) {
@@ -42,15 +42,15 @@ export async function generarCargosHandler(req: Request, res: Response) {
     const usuarioId = req.auth!.userId;
     const parsed = generarCargosSchema.parse(req.body);
 
-    const ejecucion = await generarCargosService({
+    const ejecucion = await iniciarGeneracionCargosService({
       empresaId,
       usuarioId,
       periodo: parsed.periodo,
     });
 
-    return res.status(201).json({
+    return res.status(202).json({
       success: true,
-      message: "Generación de cargos finalizada",
+      message: "Generación de cargos iniciada",
       data: ejecucion,
     });
   } catch (error) {

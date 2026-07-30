@@ -9,6 +9,7 @@ import {
 import { createCargoInternal } from "../cargos/cargos.service";
 import {
   CargoGeneradoItem,
+  countCuentasCandidatas,
   createDetalle,
   createEjecucion,
   findCargosPorCuentas,
@@ -18,14 +19,35 @@ import {
   findEjecucionById,
   findEjecucionesByEmpresa,
   updateEjecucion,
+  updateEjecucionProgreso,
 } from "./generacion-cargos.repository";
 
-function formatEjecucion<T extends { montoGenerado: Prisma.Decimal }>(
-  ejecucion: T
-) {
+async function formatEjecucion<
+  T extends {
+    empresaId: string;
+    estado: EstadoEjecucionGeneracion;
+    cantidadProcesadas: number;
+    montoGenerado: Prisma.Decimal;
+  }
+>(ejecucion: T) {
+  const enProceso = ejecucion.estado === EstadoEjecucionGeneracion.PROCESANDO;
+  const cantidadTotal = enProceso
+    ? await countCuentasCandidatas(ejecucion.empresaId)
+    : ejecucion.cantidadProcesadas;
+  const porcentaje = enProceso
+    ? cantidadTotal > 0
+      ? Math.min(
+          100,
+          Math.round((ejecucion.cantidadProcesadas / cantidadTotal) * 100)
+        )
+      : 0
+    : 100;
+
   return {
     ...ejecucion,
     montoGenerado: ejecucion.montoGenerado.toString(),
+    cantidadTotal,
+    porcentaje,
   };
 }
 
@@ -62,27 +84,22 @@ function formatCargoGenerado(cargo: CargoGeneradoItem) {
   };
 }
 
-export async function generarCargosService(input: {
-  empresaId: string;
-  usuarioId: string;
-  periodo: string;
-}) {
-  const ejecucion = await createEjecucion({
-    empresaId: input.empresaId,
-    usuarioId: input.usuarioId,
-    periodo: input.periodo,
-    origen: OrigenEjecucion.MANUAL,
-  });
-
+async function ejecutarGeneracionCargos(
+  ejecucionId: string,
+  input: { empresaId: string; periodo: string }
+) {
   try {
     const cuentas = await findCuentasCandidatas(input.empresaId);
+    const pasoProgreso = Math.max(1, Math.ceil(cuentas.length / 20));
 
     let generadas = 0;
     let omitidas = 0;
     let errores = 0;
     let montoGenerado = new Prisma.Decimal(0);
 
-    for (const cuenta of cuentas) {
+    for (let i = 0; i < cuentas.length; i += 1) {
+      const cuenta = cuentas[i];
+
       try {
         await createCargoInternal({
           empresaId: input.empresaId,
@@ -99,7 +116,7 @@ export async function generarCargosService(input: {
         montoGenerado = montoGenerado.add(cuenta.montoBase);
 
         await createDetalle({
-          ejecucionId: ejecucion.id,
+          ejecucionId,
           cuentaServicioId: cuenta.id,
           clienteId: cuenta.cliente.id,
           resultado: ResultadoGeneracion.GENERADO,
@@ -108,7 +125,7 @@ export async function generarCargosService(input: {
         if (esErrorDuplicado(error)) {
           omitidas += 1;
           await createDetalle({
-            ejecucionId: ejecucion.id,
+            ejecucionId,
             cuentaServicioId: cuenta.id,
             clienteId: cuenta.cliente.id,
             resultado: ResultadoGeneracion.OMITIDO,
@@ -117,13 +134,24 @@ export async function generarCargosService(input: {
         } else {
           errores += 1;
           await createDetalle({
-            ejecucionId: ejecucion.id,
+            ejecucionId,
             cuentaServicioId: cuenta.id,
             clienteId: cuenta.cliente.id,
             resultado: ResultadoGeneracion.ERROR,
             mensaje: error instanceof Error ? error.message : "Error desconocido",
           });
         }
+      }
+
+      const procesadas = i + 1;
+      if (procesadas % pasoProgreso === 0 || procesadas === cuentas.length) {
+        await updateEjecucionProgreso(ejecucionId, {
+          cantidadProcesadas: procesadas,
+          cantidadGeneradas: generadas,
+          cantidadOmitidas: omitidas,
+          cantidadErrores: errores,
+          montoGenerado,
+        });
       }
     }
 
@@ -132,7 +160,7 @@ export async function generarCargosService(input: {
         ? EstadoEjecucionGeneracion.COMPLETADA_CON_ERRORES
         : EstadoEjecucionGeneracion.COMPLETADA;
 
-    const actualizada = await updateEjecucion(ejecucion.id, {
+    await updateEjecucion(ejecucionId, {
       estado,
       fechaFin: new Date(),
       cantidadProcesadas: cuentas.length,
@@ -141,10 +169,8 @@ export async function generarCargosService(input: {
       cantidadErrores: errores,
       montoGenerado,
     });
-
-    return formatEjecucion(actualizada);
   } catch (error) {
-    const actualizada = await updateEjecucion(ejecucion.id, {
+    await updateEjecucion(ejecucionId, {
       estado: EstadoEjecucionGeneracion.FALLIDA,
       fechaFin: new Date(),
       cantidadProcesadas: 0,
@@ -155,9 +181,29 @@ export async function generarCargosService(input: {
       mensajeError:
         error instanceof Error ? error.message : "Error crítico desconocido",
     });
-
-    return formatEjecucion(actualizada);
   }
+}
+
+export async function iniciarGeneracionCargosService(input: {
+  empresaId: string;
+  usuarioId: string;
+  periodo: string;
+}) {
+  const ejecucion = await createEjecucion({
+    empresaId: input.empresaId,
+    usuarioId: input.usuarioId,
+    periodo: input.periodo,
+    origen: OrigenEjecucion.MANUAL,
+  });
+
+  ejecutarGeneracionCargos(ejecucion.id, {
+    empresaId: input.empresaId,
+    periodo: input.periodo,
+  }).catch((error) => {
+    console.error("Error inesperado generando cargos", error);
+  });
+
+  return formatEjecucion(ejecucion);
 }
 
 export async function getEjecucionesService(
@@ -179,7 +225,7 @@ export async function getEjecucionesService(
   );
 
   return {
-    data: ejecuciones.map(formatEjecucion),
+    data: await Promise.all(ejecuciones.map(formatEjecucion)),
     meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
   };
 }
