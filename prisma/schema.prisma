@@ -695,9 +695,10 @@ model Cargo {
 
   aplicacionesPago          AplicacionPago[]
 
+  detallesGeneracion        EjecucionGeneracionCargoDetalle[]
+
   origen                    OrigenCargo     @default(MANUAL)
 
-  @@unique([cuentaServicioId, periodoReferencia, tipoCargo])
 
   @@index([empresaId])
   @@index([clienteId])
@@ -844,6 +845,7 @@ model EjecucionGeneracionCargoDetalle {
   ejecucionId      String              @map("ejecucion_id") @db.Uuid
   cuentaServicioId String              @map("cuenta_servicio_id") @db.Uuid
   clienteId        String              @map("cliente_id") @db.Uuid
+  cargoId          String?             @map("cargo_id") @db.Uuid
   resultado        ResultadoGeneracion
   mensaje          String?
   createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -851,11 +853,13 @@ model EjecucionGeneracionCargoDetalle {
   ejecucion      EjecucionGeneracionCargo @relation(fields: [ejecucionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   cuentaServicio CuentaServicio           @relation(fields: [cuentaServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   cliente        Cliente                  @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cargo          Cargo?                   @relation(fields: [cargoId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([ejecucionId])
   @@index([resultado])
   @@index([cuentaServicioId])
   @@index([ejecucionId, resultado])
+  @@index([cargoId])
   @@map("ejecucion_generacion_cargo_detalle")
 }
 

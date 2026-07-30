@@ -1,4 +1,5 @@
 import {
+  EstadoCargo,
   EstadoEjecucionGeneracion,
   FrecuenciaServicio,
   ModalidadServicio,
@@ -141,6 +142,7 @@ export async function createDetalle(data: {
   ejecucionId: string;
   cuentaServicioId: string;
   clienteId: string;
+  cargoId?: string | null;
   resultado: ResultadoGeneracion;
   mensaje?: string | null;
 }) {
@@ -216,13 +218,11 @@ export async function findDetallesByEjecucion(
   return { detalles, total };
 }
 
-export async function findCuentaServicioIdsGeneradas(ejecucionId: string) {
-  const detalles = await prisma.ejecucionGeneracionCargoDetalle.findMany({
+export async function findDetallesGeneradosConCargoId(ejecucionId: string) {
+  return prisma.ejecucionGeneracionCargoDetalle.findMany({
     where: { ejecucionId, resultado: ResultadoGeneracion.GENERADO },
-    select: { cuentaServicioId: true },
+    select: { cargoId: true, cuentaServicioId: true },
   });
-
-  return detalles.map((detalle) => detalle.cuentaServicioId);
 }
 
 const cargoGeneradoInclude = {
@@ -262,6 +262,33 @@ export async function findCargosPorCuentas(
     tipoCargo: TipoCargo.SERVICIO,
     periodoReferencia: periodo,
     cuentaServicioId: { in: cuentaServicioIds },
+    estado: { not: EstadoCargo.ANULADO },
+  };
+
+  const [cargos, total] = await Promise.all([
+    prisma.cargo.findMany({
+      where,
+      include: cargoGeneradoInclude,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.cargo.count({ where }),
+  ]);
+
+  return { cargos, total };
+}
+
+export async function findCargosPorIds(
+  cargoIds: string[],
+  pagination?: { page: number; limit: number }
+) {
+  const page = pagination?.page ?? 1;
+  const limit = pagination?.limit ?? 20;
+  const skip = (page - 1) * limit;
+
+  const where: Prisma.CargoWhereInput = {
+    id: { in: cargoIds },
   };
 
   const [cargos, total] = await Promise.all([

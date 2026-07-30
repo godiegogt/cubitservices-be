@@ -13,9 +13,10 @@ import {
   createDetalle,
   createEjecucion,
   findCargosPorCuentas,
+  findCargosPorIds,
   findCuentasCandidatas,
-  findCuentaServicioIdsGeneradas,
   findDetallesByEjecucion,
+  findDetallesGeneradosConCargoId,
   findEjecucionById,
   findEjecucionesByEmpresa,
   updateEjecucion,
@@ -101,7 +102,7 @@ async function ejecutarGeneracionCargos(
       const cuenta = cuentas[i];
 
       try {
-        await createCargoInternal({
+        const cargoCreado = await createCargoInternal({
           empresaId: input.empresaId,
           cuentaServicioId: cuenta.id,
           tipoCargo: TipoCargo.SERVICIO,
@@ -119,6 +120,7 @@ async function ejecutarGeneracionCargos(
           ejecucionId,
           cuentaServicioId: cuenta.id,
           clienteId: cuenta.cliente.id,
+          cargoId: cargoCreado.id,
           resultado: ResultadoGeneracion.GENERADO,
         });
       } catch (error) {
@@ -352,21 +354,28 @@ export async function getCargosGeneradosService(
   const page = Math.max(1, filters?.page ?? 1);
   const limit = Math.min(100, Math.max(1, filters?.limit ?? 20));
 
-  const cuentaServicioIds = await findCuentaServicioIdsGeneradas(id);
+  const detalles = await findDetallesGeneradosConCargoId(id);
 
-  if (cuentaServicioIds.length === 0) {
+  if (detalles.length === 0) {
     return {
       data: [],
       meta: { total: 0, page, limit, totalPages: 0 },
     };
   }
 
-  const { cargos, total } = await findCargosPorCuentas(
-    empresaId,
-    ejecucion.periodo,
-    cuentaServicioIds,
-    { page, limit }
-  );
+  const cargoIds = detalles
+    .map((detalle) => detalle.cargoId)
+    .filter((cargoId): cargoId is string => cargoId !== null);
+
+  const { cargos, total } =
+    cargoIds.length > 0
+      ? await findCargosPorIds(cargoIds, { page, limit })
+      : await findCargosPorCuentas(
+          empresaId,
+          ejecucion.periodo,
+          detalles.map((detalle) => detalle.cuentaServicioId),
+          { page, limit }
+        );
 
   return {
     data: cargos.map(formatCargoGenerado),

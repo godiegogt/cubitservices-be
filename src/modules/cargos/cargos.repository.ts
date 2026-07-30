@@ -167,6 +167,7 @@ export async function findDuplicateServicioCargo(input: {
       cuentaServicioId: input.cuentaServicioId,
       tipoCargo: TipoCargo.SERVICIO,
       periodoReferencia: input.periodoReferencia,
+      estado: { not: EstadoCargo.ANULADO },
     },
   });
 }
