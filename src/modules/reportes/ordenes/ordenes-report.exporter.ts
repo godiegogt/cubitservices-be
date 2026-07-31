@@ -3,7 +3,6 @@ import ExcelJS from "exceljs";
 import { OrdenesReportResultDto } from "./ordenes-report.dto";
 import { buildOrdenesReportHtml } from "./ordenes-report.template";
 import { formatDate } from "../../../common/utils/datetime";
-import { formatUbicacionDireccion } from "./ordenes-report.mapper";
 
 export async function exportOrdenesExcel(
     report: OrdenesReportResultDto
@@ -93,7 +92,7 @@ export async function exportOrdenesExcel(
             item.cliente.codigo,
             item.cliente.nombre,
             item.tipoServicio.nombre,
-            formatUbicacionDireccion(item.ubicacion),
+            item.ubicacion.direccion ? item.ubicacion.direccion: "-",
             item.asignados.map((a) => `${a.nombre} (${a.rol})`).join(", "),
             item.fechaProgramada ? formatDate(new Date(item.fechaProgramada)) : "",
             item.fechaInicio ? formatDate(new Date(item.fechaInicio)) : "",

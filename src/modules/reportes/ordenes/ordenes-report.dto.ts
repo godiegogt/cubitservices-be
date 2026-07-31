@@ -25,12 +25,7 @@ export interface OrdenReportItemDto {
     cliente: { id: string; codigo: string; nombre: string };
     tipoServicio: { id: string; nombre: string };
     ubicacion: {
-        id: string;
-        nombre: string;
-        zona: number | null;
-        avenida: number | null;
-        calle: number | null;
-        numeroCasa: number | null;
+        direccion: string,
     };
     asignados: { id: string; nombre: string; rol: RolEnOrden }[];
     createdAt: string;

@@ -16,12 +16,7 @@ const ordenReportInclude = {
     },
     ubicacion: {
         select: {
-            id: true,
-            nombre: true,
-            zona: true,
-            avenida: true,
-            calle: true,
-            numeroCasa: true,
+            direccion: true,
         },
     },
     asignaciones: {
