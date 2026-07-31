@@ -196,42 +196,27 @@ export async function queryIngresosPorZona(filters: DashboardQueryFilters) {
 export async function queryOrdenesEstado(filters: DashboardQueryFilters) {
     const { empresaId, fechaDesde, fechaHasta, zona } = filters;
 
-    const baseWhere = {
-    empresaId,
-    estado: {
-        notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA],
+    const grouped = await prisma.ordenServicio.groupBy({
+    by: ["estado"],
+    where: {
+        empresaId,
+        fechaProgramada: { gte: fechaDesde, lte: fechaHasta },
+        ...zonaFilterUbicacion(zona),
     },
-    fechaProgramada: { gte: fechaDesde, lte: fechaHasta },
-    ...zonaFilterUbicacion(zona),
-    };
+    _count: { _all: true },
+    });
 
-    const [pendientes, programadas, enProceso] = await Promise.all([
-    prisma.ordenServicio.count({
-        where: { ...baseWhere, estado: EstadoOrdenServicio.PENDIENTE },
-    }),
-    prisma.ordenServicio.count({
-        where: { ...baseWhere, estado: EstadoOrdenServicio.PROGRAMADA },
-    }),
-    prisma.ordenServicio.count({
-        where: {
-        ...baseWhere,
-        estado: { in: [EstadoOrdenServicio.EN_PROCESO, EstadoOrdenServicio.PAUSADA] },
-        },
-    }),
-    ]);
-
-    return { pendientes, programadas, enProceso };
+    return grouped.map((g) => ({ estado: g.estado, cantidad: g._count._all }));
 }
 
 export async function queryClientesMorosos(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, zona } = filters;
 
     const count = await prisma.cargo.groupBy({
     by: ["clienteId"],
     where: {
         empresaId,
-        estado: EstadoCargo.VENCIDO,
-        fechaEmision: { gte: fechaDesde, lte: fechaHasta },
+        estado: { in: [EstadoCargo.PENDIENTE, EstadoCargo.PARCIAL, EstadoCargo.VENCIDO] },
         fechaVencimiento: {
         lte: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
         },

@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { EstadoOrdenServicio, Prisma } from "@prisma/client";
 import type {
     DashboardAlert,
     DashboardFilters,
@@ -76,16 +76,32 @@ export function mapIngresosPorZona(
     });
 }
 
-export function mapOrdenesEstado(raw: {
-    pendientes: number;
-    programadas: number;
-    enProceso: number;
-}): OrdenEstadoRow[] {
-    return [
-    { estado: "Pendientes", cantidad: raw.pendientes },
-    { estado: "Programadas", cantidad: raw.programadas },
-    { estado: "En Proceso", cantidad: raw.enProceso },
-    ];
+const ESTADO_LABELS: Record<EstadoOrdenServicio, string> = {
+    [EstadoOrdenServicio.PENDIENTE]: "Pendientes",
+    [EstadoOrdenServicio.PROGRAMADA]: "Programadas",
+    [EstadoOrdenServicio.EN_PROCESO]: "En Proceso",
+    [EstadoOrdenServicio.PAUSADA]: "Pausadas",
+    [EstadoOrdenServicio.FINALIZADA]: "Finalizadas",
+    [EstadoOrdenServicio.CANCELADA]: "Canceladas",
+};
+
+const ESTADO_ORDEN: EstadoOrdenServicio[] = [
+    EstadoOrdenServicio.PENDIENTE,
+    EstadoOrdenServicio.PROGRAMADA,
+    EstadoOrdenServicio.EN_PROCESO,
+    EstadoOrdenServicio.PAUSADA,
+    EstadoOrdenServicio.FINALIZADA,
+    EstadoOrdenServicio.CANCELADA,
+];
+
+export function mapOrdenesEstado(
+    rows: { estado: EstadoOrdenServicio; cantidad: number }[]
+): OrdenEstadoRow[] {
+    const cantidadPorEstado = new Map(rows.map((r) => [r.estado, r.cantidad]));
+    return ESTADO_ORDEN.map((estado) => ({
+    estado: ESTADO_LABELS[estado],
+    cantidad: cantidadPorEstado.get(estado) ?? 0,
+    }));
 }
 
 export function mapAlertas(raw: {

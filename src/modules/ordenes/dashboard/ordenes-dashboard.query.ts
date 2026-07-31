@@ -174,18 +174,15 @@ export async function getOrdenesPorEstado(
 
 export async function getProximasAEjecutar(filters: {
     empresaId: string;
-    ahora: Date;
     zona?: number;
 }): Promise<RawOrdenRow[]> {
     return prisma.ordenServicio.findMany({
         where: {
             empresaId: filters.empresaId,
             estado: EstadoOrdenServicio.PROGRAMADA,
-            fechaProgramada: { gte: filters.ahora },
             ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
         },
         orderBy: [{ fechaProgramada: { sort: 'asc', nulls: 'last' } }, { createdAt: 'desc' }],
-        take: 5,
         select: ORDEN_SELECT,
     });
 }

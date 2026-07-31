@@ -63,7 +63,7 @@ export async function getOrdenesDashboard(
         contarEnProceso(kpiFilters),
         contarVencidas(kpiFilters),
         getOrdenesPorEstado(dataFilters),
-        getProximasAEjecutar({ empresaId, ahora, zona: query.zona }),
+        getProximasAEjecutar({ empresaId, zona: query.zona }),
         getOrdenes(dataFilters, skip, query.pageSize),
         contarOrdenes(dataFilters),
     ]);
