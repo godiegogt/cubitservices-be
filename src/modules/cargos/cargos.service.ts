@@ -18,6 +18,7 @@ import {
   findPoliticaCobroById,
   updateCargoStatus,
 } from "./cargos.repository";
+import { CargoDuplicadoError } from "./cargos.errors";
 
 function parseDateOnly(value: string) {
   return new Date(`${value}T00:00:00.000Z`);
@@ -162,7 +163,7 @@ export async function createCargoInternal(input: {
     });
 
     if (duplicate) {
-      throw new Error("Ya existe un cargo SERVICIO para ese periodo");
+      throw new CargoDuplicadoError();
     }
   }
 

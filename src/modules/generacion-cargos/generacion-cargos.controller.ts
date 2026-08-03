@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import { ZodError } from "zod";
+import { CargoDuplicadoError } from "../cargos/cargos.errors";
 import {
   generarCargosSchema,
   getCargosGeneradosQuerySchema,
@@ -15,6 +17,34 @@ import {
   iniciarGeneracionCargosService,
 } from "./generacion-cargos.service";
 
+const ERRORES_NO_ENCONTRADO = ["Ejecución no encontrada"];
+
+function handleGeneracionCargosError(
+  res: Response,
+  error: unknown,
+  defaultMessage: string
+) {
+  if (error instanceof ZodError) {
+    return res.status(400).json({
+      success: false,
+      message: "Datos de entrada inválidos",
+      errors: error.issues,
+    });
+  }
+
+  if (error instanceof CargoDuplicadoError) {
+    return res.status(409).json({ success: false, message: error.message });
+  }
+
+  if (error instanceof Error && ERRORES_NO_ENCONTRADO.includes(error.message)) {
+    return res.status(404).json({ success: false, message: error.message });
+  }
+
+  console.error(defaultMessage, error);
+
+  return res.status(500).json({ success: false, message: defaultMessage });
+}
+
 export async function previewHandler(req: Request, res: Response) {
   try {
     const empresaId = req.auth!.empresaId;
@@ -28,11 +58,11 @@ export async function previewHandler(req: Request, res: Response) {
       data: preview,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Error obteniendo previsualización",
-    });
+    return handleGeneracionCargosError(
+      res,
+      error,
+      "Error obteniendo previsualización"
+    );
   }
 }
 
@@ -54,11 +84,7 @@ export async function generarCargosHandler(req: Request, res: Response) {
       data: ejecucion,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Error generando cargos",
-    });
+    return handleGeneracionCargosError(res, error, "Error generando cargos");
   }
 }
 
@@ -75,11 +101,11 @@ export async function listEjecucionesHandler(req: Request, res: Response) {
       meta: result.meta,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Error obteniendo ejecuciones",
-    });
+    return handleGeneracionCargosError(
+      res,
+      error,
+      "Error obteniendo ejecuciones"
+    );
   }
 }
 
@@ -96,11 +122,7 @@ export async function getEjecucionHandler(req: Request, res: Response) {
       data: ejecucion,
     });
   } catch (error) {
-    return res.status(404).json({
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Error obteniendo ejecución",
-    });
+    return handleGeneracionCargosError(res, error, "Error obteniendo ejecución");
   }
 }
 
@@ -119,11 +141,7 @@ export async function listDetallesHandler(req: Request, res: Response) {
       meta: result.meta,
     });
   } catch (error) {
-    return res.status(404).json({
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Error obteniendo detalle",
-    });
+    return handleGeneracionCargosError(res, error, "Error obteniendo detalle");
   }
 }
 
@@ -142,10 +160,10 @@ export async function listCargosGeneradosHandler(req: Request, res: Response) {
       meta: result.meta,
     });
   } catch (error) {
-    return res.status(404).json({
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Error obteniendo cargos generados",
-    });
+    return handleGeneracionCargosError(
+      res,
+      error,
+      "Error obteniendo cargos generados"
+    );
   }
 }

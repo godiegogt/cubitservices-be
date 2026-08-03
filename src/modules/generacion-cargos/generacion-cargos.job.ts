@@ -6,6 +6,7 @@ import {
   TipoCargo,
 } from "@prisma/client";
 import { createCargoInternal } from "../cargos/cargos.service";
+import { CargoDuplicadoError } from "../cargos/cargos.errors";
 import { formatDate } from "../../common/utils/datetime";
 import {
   createDetalle,
@@ -22,10 +23,7 @@ export function esErrorDuplicado(error: unknown) {
     return true;
   }
 
-  return (
-    error instanceof Error &&
-    error.message === "Ya existe un cargo SERVICIO para ese periodo"
-  );
+  return error instanceof CargoDuplicadoError;
 }
 
 export function hoyComoFecha() {
