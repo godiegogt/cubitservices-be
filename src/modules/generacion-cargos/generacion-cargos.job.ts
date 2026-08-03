@@ -39,6 +39,7 @@ export async function ejecutarGeneracionCargos(
   let generadas = 0;
   let omitidas = 0;
   let errores = 0;
+  let procesadas = 0;
   let montoGenerado = new Prisma.Decimal(0);
   try {
     const cuentas = await findCuentasCandidatas(input.empresaId);
@@ -93,7 +94,7 @@ export async function ejecutarGeneracionCargos(
         }
       }
 
-      const procesadas = i + 1;
+      procesadas = i + 1;
       if (procesadas % pasoProgreso === 0 || procesadas === cuentas.length) {
         await updateEjecucionProgreso(ejecucionId, {
           cantidadProcesadas: procesadas,
@@ -123,11 +124,11 @@ export async function ejecutarGeneracionCargos(
     await updateEjecucion(ejecucionId, {
       estado: EstadoEjecucionGeneracion.FALLIDA,
       fechaFin: new Date(),
-      cantidadProcesadas: 0,
-      cantidadGeneradas: 0,
-      cantidadOmitidas: 0,
-      cantidadErrores: 0,
-      montoGenerado: 0,
+      cantidadProcesadas: procesadas,
+      cantidadGeneradas: generadas,
+      cantidadOmitidas: omitidas,
+      cantidadErrores: errores,
+      montoGenerado,
       mensajeError:
         error instanceof Error ? error.message : "Error crítico desconocido",
     });
