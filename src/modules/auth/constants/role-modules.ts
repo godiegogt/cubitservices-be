@@ -10,6 +10,7 @@ export const ROLE_MODULES: Record<RoleCode, ModuleCode[]> = {
     ModuleCode.CUENTAS_SERVICIO,
     ModuleCode.PAGOS,
     ModuleCode.CARGOS,
+    ModuleCode.REPORTES,
     ModuleCode.REPORTE_PAGOS,
     ModuleCode.REPORTE_COBRANZA,
     ],
@@ -19,11 +20,14 @@ export const ROLE_MODULES: Record<RoleCode, ModuleCode[]> = {
     ModuleCode.CLIENTES,
     ModuleCode.CUENTAS_SERVICIO,
     ModuleCode.ORDENES,
+    ModuleCode.REPORTES,
     ModuleCode.REPORTE_CLIENTES,
     ModuleCode.REPORTE_ORDENES,
     ],
 
     TECNICO: [
     ModuleCode.ORDENES,
+    ModuleCode.REPORTES,
+    ModuleCode.REPORTE_ORDENES
     ],
 };
