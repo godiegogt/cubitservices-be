@@ -182,6 +182,37 @@ enum RolEnOrden {
 	SUPERVISOR
 }
 
+enum EstadoEjecucionGeneracion {
+  PROCESANDO
+  COMPLETADA
+  COMPLETADA_CON_ERRORES
+  FALLIDA
+
+  @@map("estado_ejecucion_generacion")
+}
+
+enum ResultadoGeneracion {
+  GENERADO
+  OMITIDO
+  ERROR
+
+  @@map("resultado_generacion")
+}
+
+enum OrigenEjecucion {
+  MANUAL
+  JOB
+
+  @@map("origen_ejecucion")
+}
+
+enum OrigenCargo {
+  MANUAL
+  GENERACION_AUTOMATICA
+
+  @@map("origen_cargo")
+}
+
 /// ===========================
 /// ORGANIZACION
 /// ===========================
@@ -208,6 +239,8 @@ model Empresa {
   moras              Mora[]
   pagos              Pago[]
   historial          Historial[]
+
+  ejecucionesGeneracionCargo EjecucionGeneracionCargo[]
 
   @@map("empresa")
 }
@@ -255,6 +288,8 @@ model Usuario {
   pagosRegistrados            Pago[]
   historial                   Historial[]
 
+  ejecucionesSolicitadas EjecucionGeneracionCargo[]
+
   @@unique([empresaId, email])
   @@index([empresaId])
   @@index([rolId])
@@ -298,6 +333,8 @@ model Cliente {
   ordenesServicio   OrdenServicio[]
   cargos            Cargo[]
   pagos             Pago[]
+
+  detallesGeneracionCargo EjecucionGeneracionCargoDetalle[]
 
   @@unique([empresaId, codigo])
   @@index([empresaId])
@@ -434,6 +471,8 @@ model CuentaServicio {
   archivos         CuentaServicioArchivo[]
   ordenesServicio  OrdenServicio[]
   cargos           Cargo[]
+
+  detallesGeneracionCargo EjecucionGeneracionCargoDetalle[]
 
   @@unique([empresaId, codigo])
   @@index([empresaId])
@@ -656,6 +695,11 @@ model Cargo {
 
   aplicacionesPago          AplicacionPago[]
 
+  detallesGeneracion        EjecucionGeneracionCargoDetalle[]
+
+  origen                    OrigenCargo     @default(MANUAL)
+
+
   @@index([empresaId])
   @@index([clienteId])
   @@index([cuentaServicioId])
@@ -767,3 +811,55 @@ model Historial {
   @@index([modulo, accion])
   @@map("historial")
 }
+
+model EjecucionGeneracionCargo {
+  id                 String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  empresaId          String                    @map("empresa_id") @db.Uuid
+  usuarioId          String?                   @map("usuario_id") @db.Uuid
+  periodo            String                    @db.VarChar(7)
+  origen             OrigenEjecucion
+  estado             EstadoEjecucionGeneracion
+  fechaInicio        DateTime                  @default(now()) @map("fecha_inicio") @db.Timestamptz(6)
+  fechaFin           DateTime?                 @map("fecha_fin") @db.Timestamptz(6)
+  cantidadProcesadas Int                       @default(0) @map("cantidad_procesadas")
+  cantidadGeneradas  Int                       @default(0) @map("cantidad_generadas")
+  cantidadOmitidas   Int                       @default(0) @map("cantidad_omitidas")
+  cantidadErrores    Int                       @default(0) @map("cantidad_errores")
+  montoGenerado      Decimal                   @default(0) @map("monto_generado") @db.Decimal(12, 2)
+  mensajeError       String?                   @map("mensaje_error")
+  createdAt          DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  empresa  Empresa                          @relation(fields: [empresaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario  Usuario?                         @relation(fields: [usuarioId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  detalles EjecucionGeneracionCargoDetalle[]
+
+  @@index([empresaId])
+  @@index([estado])
+  @@index([periodo])
+  @@map("ejecucion_generacion_cargo")
+}
+
+model EjecucionGeneracionCargoDetalle {
+  id               String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ejecucionId      String              @map("ejecucion_id") @db.Uuid
+  cuentaServicioId String              @map("cuenta_servicio_id") @db.Uuid
+  clienteId        String              @map("cliente_id") @db.Uuid
+  cargoId          String?             @map("cargo_id") @db.Uuid
+  resultado        ResultadoGeneracion
+  mensaje          String?
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  ejecucion      EjecucionGeneracionCargo @relation(fields: [ejecucionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cuentaServicio CuentaServicio           @relation(fields: [cuentaServicioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cliente        Cliente                  @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cargo          Cargo?                   @relation(fields: [cargoId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([ejecucionId])
+  @@index([resultado])
+  @@index([cuentaServicioId])
+  @@index([ejecucionId, resultado])
+  @@index([cargoId])
+  @@map("ejecucion_generacion_cargo_detalle")
+}
+

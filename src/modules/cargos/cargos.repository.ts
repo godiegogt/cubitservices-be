@@ -1,5 +1,6 @@
 import {
   EstadoCargo,
+  OrigenCargo,
   Prisma,
   TipoCargo,
   TipoMora,
@@ -166,6 +167,7 @@ export async function findDuplicateServicioCargo(input: {
       cuentaServicioId: input.cuentaServicioId,
       tipoCargo: TipoCargo.SERVICIO,
       periodoReferencia: input.periodoReferencia,
+      estado: { not: EstadoCargo.ANULADO },
     },
   });
 }
@@ -187,6 +189,7 @@ export async function createCargo(data: {
   tipoMoraAplicada?: TipoMora | null;
   valorMoraAplicado?: Prisma.Decimal | number | null;
   estado: EstadoCargo;
+  origen?: OrigenCargo;
 }) {
   return prisma.cargo.create({
     data: {
@@ -206,6 +209,7 @@ export async function createCargo(data: {
       tipoMoraAplicada: data.tipoMoraAplicada,
       valorMoraAplicado: data.valorMoraAplicado,
       estado: data.estado,
+      origen: data.origen,
     },
     include: cargoDetailInclude,
   });
