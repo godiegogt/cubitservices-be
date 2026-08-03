@@ -1,12 +1,10 @@
 import {
-  EstadoCargo,
   EstadoEjecucionGeneracion,
   FrecuenciaServicio,
   ModalidadServicio,
   OrigenEjecucion,
   Prisma,
   ResultadoGeneracion,
-  TipoCargo,
 } from "@prisma/client";
 import prisma from "../../config/prisma";
 
@@ -246,38 +244,6 @@ const cargoGeneradoInclude = {
 export type CargoGeneradoItem = Prisma.CargoGetPayload<{
   include: typeof cargoGeneradoInclude;
 }>;
-
-export async function findCargosPorCuentas(
-  empresaId: string,
-  periodo: string,
-  cuentaServicioIds: string[],
-  pagination?: { page: number; limit: number }
-) {
-  const page = pagination?.page ?? 1;
-  const limit = pagination?.limit ?? 20;
-  const skip = (page - 1) * limit;
-
-  const where: Prisma.CargoWhereInput = {
-    empresaId,
-    tipoCargo: TipoCargo.SERVICIO,
-    periodoReferencia: periodo,
-    cuentaServicioId: { in: cuentaServicioIds },
-    estado: { not: EstadoCargo.ANULADO },
-  };
-
-  const [cargos, total] = await Promise.all([
-    prisma.cargo.findMany({
-      where,
-      include: cargoGeneradoInclude,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.cargo.count({ where }),
-  ]);
-
-  return { cargos, total };
-}
 
 export async function findCargosPorIds(
   cargoIds: string[],

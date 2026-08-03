@@ -10,7 +10,6 @@ import { esErrorDuplicado, ejecutarGeneracionCargos, hoyComoFecha } from "./gene
 import { formatCargoGenerado, formatEjecucion } from "./generacion-cargos.mapper";
 import {
   createEjecucion,
-  findCargosPorCuentas,
   findCargosPorIds,
   findCuentasCandidatas,
   findDetallesByEjecucion,
@@ -200,15 +199,7 @@ export async function getCargosGeneradosService(
     .map((detalle) => detalle.cargoId)
     .filter((cargoId): cargoId is string => cargoId !== null);
 
-  const { cargos, total } =
-    cargoIds.length > 0
-      ? await findCargosPorIds(cargoIds, { page, limit })
-      : await findCargosPorCuentas(
-          empresaId,
-          ejecucion.periodo,
-          detalles.map((detalle) => detalle.cuentaServicioId),
-          { page, limit }
-        );
+  const { cargos, total } = await findCargosPorIds(cargoIds, { page, limit });
 
   return {
     data: cargos.map(formatCargoGenerado),
