@@ -26,14 +26,62 @@ async function main() {
     where: {
       empresaId_nombre: {
         empresaId: empresa.id,
-        nombre: "Administrador",
+        nombre: "ADMINISTRADOR",
       },
     },
     update: {},
     create: {
       empresaId: empresa.id,
-      nombre: "Administrador",
+      nombre: "ADMINISTRADOR",
       descripcion: "Rol administrador inicial del sistema",
+      estado: EstadoRegistroBasico.ACTIVO,
+    },
+  });
+
+  const rolCajero = await prisma.rol.upsert({
+    where: {
+      empresaId_nombre: {
+        empresaId: empresa.id,
+        nombre: "CAJERO",
+      },
+    },
+    update: {},
+    create: {
+      empresaId: empresa.id,
+      nombre: "CAJERO",
+      descripcion: "Rol cajero inicial del sistema",
+      estado: EstadoRegistroBasico.ACTIVO,
+    },
+  });
+
+  const rolOperador = await prisma.rol.upsert({
+    where: {
+      empresaId_nombre: {
+        empresaId: empresa.id,
+        nombre: "OPERADOR",
+      },
+    },
+    update: {},
+    create: {
+      empresaId: empresa.id,
+      nombre: "OPERADOR",
+      descripcion: "Rol operador inicial del sistema",
+      estado: EstadoRegistroBasico.ACTIVO,
+    },
+  });
+
+  const rolTecnico = await prisma.rol.upsert({
+    where: {
+      empresaId_nombre: {
+        empresaId: empresa.id,
+        nombre: "TECNICO",
+      },
+    },
+    update: {},
+    create: {
+      empresaId: empresa.id,
+      nombre: "TECNICO",
+      descripcion: "Rol tecnico inicial del sistema",
       estado: EstadoRegistroBasico.ACTIVO,
     },
   });
@@ -63,7 +111,7 @@ async function main() {
   console.log("Seed ejecutado correctamente");
   console.log({
     empresa: empresa.nombre,
-    rol: rolAdmin.nombre,
+    roles: [rolAdmin.nombre, rolCajero.nombre, rolOperador.nombre, rolTecnico.nombre],
     usuario: "admin@cubitservices.com",
     password: "Admin123*",
   });
