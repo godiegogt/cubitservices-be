@@ -4,6 +4,8 @@ import prisma from "../../config/prisma";
 import { getAuthCookieOptions } from "../../common/utils/auth-cookie";
 import { loginSchema } from "./auth.schemas";
 import { loginUser } from "./auth.service";
+import { ROLE_MODULES } from "./constants/role-modules";
+import { RoleCode } from "./constants/role-codes";
 
 export async function login(req: Request, res: Response) {
   try {
@@ -57,6 +59,8 @@ export async function me(req: Request, res: Response) {
       });
     }
 
+    const modulos = ROLE_MODULES[user.rol.nombre as RoleCode];
+
     return res.json({
       success: true,
       message: "Sesión actual",
@@ -74,6 +78,7 @@ export async function me(req: Request, res: Response) {
           id: user.rol.id,
           nombre: user.rol.nombre,
         },
+        modulos,
       },
     });
   } catch {
