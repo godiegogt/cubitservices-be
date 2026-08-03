@@ -3,10 +3,9 @@ import {
   OrigenEjecucion,
   Prisma,
   ResultadoGeneracion,
-  TipoCargo,
 } from "@prisma/client";
-import { createCargoInternal } from "../cargos/cargos.service";
-import { esErrorDuplicado, ejecutarGeneracionCargos, hoyComoFecha } from "./generacion-cargos.job";
+import { ejecutarGeneracionCargos } from "./generacion-cargos.job";
+import { procesarCuentaCandidata } from "./generacion-cargos.processor";
 import { formatCargoGenerado, formatEjecucion } from "./generacion-cargos.mapper";
 import {
   createEjecucion,
@@ -122,42 +121,35 @@ export async function getPreviewService(empresaId: string, periodo: string) {
       cliente: cuenta.cliente,
     };
 
-    try {
-      await createCargoInternal({
-        empresaId,
-        cuentaServicioId: cuenta.id,
-        tipoCargo: TipoCargo.SERVICIO,
-        concepto: `Cargo de servicio ${periodo}`,
-        periodoReferencia: periodo,
-        monto: cuenta.montoBase.toNumber(),
-        fechaEmision: hoyComoFecha(),
-        dryRun: true,
-      });
+    const resultado = await procesarCuentaCandidata(
+      cuenta,
+      { empresaId, periodo },
+      { dryRun: true }
+    );
 
+    if (resultado.resultado === "GENERADO") {
       elegibles += 1;
-      montoEstimado = montoEstimado.add(cuenta.montoBase);
+      montoEstimado = montoEstimado.add(resultado.monto);
 
       detalle.push({
         ...base,
         resultado: ResultadoGeneracion.GENERADO,
         mensaje: null,
       });
-    } catch (error) {
-      if (esErrorDuplicado(error)) {
-        omitidas += 1;
-        detalle.push({
-          ...base,
-          resultado: ResultadoGeneracion.OMITIDO,
-          mensaje: "Ya existe un cargo SERVICIO para ese periodo",
-        });
-      } else {
-        errores += 1;
-        detalle.push({
-          ...base,
-          resultado: ResultadoGeneracion.ERROR,
-          mensaje: error instanceof Error ? error.message : "Error desconocido",
-        });
-      }
+    } else if (resultado.resultado === "OMITIDO") {
+      omitidas += 1;
+      detalle.push({
+        ...base,
+        resultado: ResultadoGeneracion.OMITIDO,
+        mensaje: resultado.mensaje,
+      });
+    } else {
+      errores += 1;
+      detalle.push({
+        ...base,
+        resultado: ResultadoGeneracion.ERROR,
+        mensaje: resultado.mensaje,
+      });
     }
   }
 

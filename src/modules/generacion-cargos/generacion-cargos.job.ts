@@ -1,34 +1,11 @@
-import {
-  EstadoEjecucionGeneracion,
-  OrigenCargo,
-  Prisma,
-  ResultadoGeneracion,
-  TipoCargo,
-} from "@prisma/client";
-import { createCargoInternal } from "../cargos/cargos.service";
-import { CargoDuplicadoError } from "../cargos/cargos.errors";
-import { formatDate } from "../../common/utils/datetime";
+import { EstadoEjecucionGeneracion, Prisma, ResultadoGeneracion } from "@prisma/client";
 import {
   createDetalle,
   findCuentasCandidatas,
   updateEjecucion,
   updateEjecucionProgreso,
 } from "./generacion-cargos.repository";
-
-export function esErrorDuplicado(error: unknown) {
-  if (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2002"
-  ) {
-    return true;
-  }
-
-  return error instanceof CargoDuplicadoError;
-}
-
-export function hoyComoFecha() {
-  return formatDate(new Date());
-}
+import { procesarCuentaCandidata } from "./generacion-cargos.processor";
 
 export async function ejecutarGeneracionCargos(
   ejecucionId: string,
@@ -43,53 +20,42 @@ export async function ejecutarGeneracionCargos(
     const cuentas = await findCuentasCandidatas(input.empresaId);
     const pasoProgreso = Math.max(1, Math.ceil(cuentas.length / 20));
 
-    
-
     for (let i = 0; i < cuentas.length; i += 1) {
       const cuenta = cuentas[i];
 
-      try {
-        const cargoCreado = await createCargoInternal({
-          empresaId: input.empresaId,
-          cuentaServicioId: cuenta.id,
-          tipoCargo: TipoCargo.SERVICIO,
-          concepto: `Cargo de servicio ${input.periodo}`,
-          periodoReferencia: input.periodo,
-          monto: cuenta.montoBase.toNumber(),
-          fechaEmision: hoyComoFecha(),
-          origen: OrigenCargo.GENERACION_AUTOMATICA,
-        });
+      const resultado = await procesarCuentaCandidata(cuenta, input, {
+        dryRun: false,
+      });
 
+      if (resultado.resultado === "GENERADO") {
         generadas += 1;
-        montoGenerado = montoGenerado.add(cuenta.montoBase);
+        montoGenerado = montoGenerado.add(resultado.monto);
 
         await createDetalle({
           ejecucionId,
           cuentaServicioId: cuenta.id,
           clienteId: cuenta.cliente.id,
-          cargoId: cargoCreado.id,
+          cargoId: resultado.cargoId,
           resultado: ResultadoGeneracion.GENERADO,
         });
-      } catch (error) {
-        if (esErrorDuplicado(error)) {
-          omitidas += 1;
-          await createDetalle({
-            ejecucionId,
-            cuentaServicioId: cuenta.id,
-            clienteId: cuenta.cliente.id,
-            resultado: ResultadoGeneracion.OMITIDO,
-            mensaje: "Ya existe un cargo SERVICIO para ese periodo",
-          });
-        } else {
-          errores += 1;
-          await createDetalle({
-            ejecucionId,
-            cuentaServicioId: cuenta.id,
-            clienteId: cuenta.cliente.id,
-            resultado: ResultadoGeneracion.ERROR,
-            mensaje: error instanceof Error ? error.message : "Error desconocido",
-          });
-        }
+      } else if (resultado.resultado === "OMITIDO") {
+        omitidas += 1;
+        await createDetalle({
+          ejecucionId,
+          cuentaServicioId: cuenta.id,
+          clienteId: cuenta.cliente.id,
+          resultado: ResultadoGeneracion.OMITIDO,
+          mensaje: resultado.mensaje,
+        });
+      } else {
+        errores += 1;
+        await createDetalle({
+          ejecucionId,
+          cuentaServicioId: cuenta.id,
+          clienteId: cuenta.cliente.id,
+          resultado: ResultadoGeneracion.ERROR,
+          mensaje: resultado.mensaje,
+        });
       }
 
       procesadas = i + 1;
