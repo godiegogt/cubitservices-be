@@ -5,6 +5,8 @@ export const ROLE_MODULES: Record<RoleCode, ModuleCode[]> = {
     ADMINISTRADOR: Object.values(ModuleCode),
 
     CAJERO: [
+    ModuleCode.CLIENTES,
+    ModuleCode.CUENTAS_SERVICIO,
     ModuleCode.PAGOS,
     ModuleCode.CARGOS,
     ModuleCode.REPORTES,
@@ -12,7 +14,6 @@ export const ROLE_MODULES: Record<RoleCode, ModuleCode[]> = {
     ],
 
     OPERADOR: [
-    ModuleCode.DASHBOARD_OPERATIVO,
     ModuleCode.CLIENTES,
     ModuleCode.CUENTAS_SERVICIO,
     ModuleCode.ORDENES,
