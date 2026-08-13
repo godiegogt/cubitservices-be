@@ -18,6 +18,7 @@ export const createOrdenSchema = z.object({
   fechaProgramada: dateTimeStringSchema,
   requiereEvidenciaFinal: z.boolean().optional(),
   observacionesGenerales: z.string().optional(),
+  montoCargo: z.number().positive().optional(),
 });
 
 export const updateOrdenSchema = z.object({
