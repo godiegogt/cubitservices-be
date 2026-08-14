@@ -9,8 +9,6 @@ export const ROLE_MODULES: Record<RoleCode, ModuleCode[]> = {
     ModuleCode.CUENTAS_SERVICIO,
     ModuleCode.PAGOS,
     ModuleCode.CARGOS,
-    ModuleCode.REPORTES,
-    ModuleCode.REPORTE_PAGOS,
     ],
 
     OPERADOR: [
