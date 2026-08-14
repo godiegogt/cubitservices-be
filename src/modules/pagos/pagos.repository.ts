@@ -66,12 +66,12 @@ type PrismaClientLike = typeof prisma | Prisma.TransactionClient;
 
 export async function findPagosByEmpresa(
   empresaId: string,
-  filters?: {
+  filters: {
     clienteId?: string;
     metodoPagoId?: string;
     estado?: EstadoPago;
-    fechaDesde?: Date;
-    fechaHasta?: Date;
+    desde: Date;
+    hasta: Date;
     search?: string;
   },
   pagination?: {
@@ -85,18 +85,11 @@ export async function findPagosByEmpresa(
 
   const where: Prisma.PagoWhereInput = {
     empresaId,
-    clienteId: filters?.clienteId,
-    metodoPagoId: filters?.metodoPagoId,
-    estado: filters?.estado,
-    ...(filters?.fechaDesde || filters?.fechaHasta
-      ? {
-          fechaPago: {
-            gte: filters.fechaDesde,
-            lte: filters.fechaHasta,
-          },
-        }
-      : {}),
-    ...(filters?.search
+    clienteId: filters.clienteId,
+    metodoPagoId: filters.metodoPagoId,
+    estado: filters.estado,
+    fechaPago: { gte: filters.desde, lt: filters.hasta },
+    ...(filters.search
       ? {
           OR: [
             { referencia: { contains: filters.search, mode: "insensitive" } },

@@ -75,8 +75,6 @@ export const getPagosQuerySchema = z.object({
   clienteId: z.string().uuid().optional(),
   metodoPagoId: z.string().uuid().optional(),
   estado: z.nativeEnum(EstadoPago).optional(),
-  fechaDesde: dateStringSchema.optional(),
-  fechaHasta: dateStringSchema.optional(),
   search: z.string().min(1).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

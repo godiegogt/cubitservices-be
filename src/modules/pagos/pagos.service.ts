@@ -21,6 +21,7 @@ import {
   updateCargoSaldoEstado,
   updatePagoStatus,
 } from "./pagos.repository";
+import { formatDate, startOfDay } from "../../common/utils/datetime";
 
 function parseDateOnly(value: string) {
   return new Date(`${value}T00:00:00.000Z`);
@@ -147,8 +148,6 @@ export async function getPagosService(
     clienteId?: string;
     metodoPagoId?: string;
     estado?: EstadoPago;
-    fechaDesde?: string;
-    fechaHasta?: string;
     search?: string;
     page?: number;
     limit?: number;
@@ -157,14 +156,19 @@ export async function getPagosService(
   const page = Math.max(1, filters?.page ?? 1);
   const limit = Math.min(100, Math.max(1, filters?.limit ?? 20));
 
+  const hoy = formatDate(new Date());
+  const desde = startOfDay(hoy);
+  const hasta = startOfDay(hoy);
+  hasta.setUTCDate(hasta.getUTCDate() + 1);
+
   const { pagos, total } = await findPagosByEmpresa(
     empresaId,
     {
       clienteId: filters?.clienteId,
       metodoPagoId: filters?.metodoPagoId,
       estado: filters?.estado,
-      fechaDesde: filters?.fechaDesde ? parseDateOnly(filters.fechaDesde) : undefined,
-      fechaHasta: filters?.fechaHasta ? parseDateOnly(filters.fechaHasta) : undefined,
+      desde,
+      hasta,
       search: filters?.search,
     },
     { page, limit }
