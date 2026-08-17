@@ -29,6 +29,7 @@ export function buildClientesReportHtml(report: ClientesReportResultDto): string
   const filtroTexto = [
     report.filters.estado ? `Estado: ${report.filters.estado}` : null,
     report.filters.zonaId !== undefined ? `Zona: ${report.filters.zonaId}` : null,
+    report.filters.aldea !== undefined ? `Aldea: ${report.filters.aldea}` : null,
     report.filters.fechaInicio ? `Desde: ${report.filters.fechaInicio}` : null,
     report.filters.fechaFin ? `Hasta: ${report.filters.fechaFin}` : null,
   ]

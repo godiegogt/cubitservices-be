@@ -58,10 +58,11 @@ export async function createUbicacionService(
     latitud?: number | null;
     longitud?: number | null;
     esPrincipal: boolean;
-    zona?: number | null;
+    zona?: string | null;
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;
+    aldea?: string | null;
     }
 ) {
     await validarClienteDeEmpresa(clienteId, empresaId);
@@ -95,10 +96,11 @@ export async function updateUbicacionService(
     latitud?: number | null;
     longitud?: number | null;
     esPrincipal?: boolean;
-    zona?: number | null;
+    zona?: string | null;
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;
+    aldea?: string | null;
     }
 ) {
     await validarUbicacionDeCliente(ubicacionId, clienteId, empresaId);

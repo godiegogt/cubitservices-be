@@ -13,21 +13,31 @@ interface DashboardQueryFilters {
     fechaHasta: Date;
     fechaDesdeExplicita?: Date;
     fechaHastaExplicita?: Date;
-    zona?: number;
+    zona?: string;
+    aldea?: string;
 }
 
-function zonaFilterCuentaServicio(zona?: number) {
-    if (!zona) return {};
-    return { cuentaServicio: { ubicacion: { zona } } };
+function ubicacionFilter(zona?: string, aldea?: string) {
+    if (!zona && !aldea) return {};
+    return {
+        ubicacion: {
+            ...(zona && { zona: { equals: zona, mode: "insensitive" as const } }),
+            ...(aldea && { aldea: { equals: aldea, mode: "insensitive" as const } }),
+        },
+    };
 }
 
-function zonaFilterUbicacion(zona?: number) {
-    if (!zona) return {};
-    return { ubicacion: { zona } };
+function zonaFilterCuentaServicio(zona?: string, aldea?: string) {
+    if (!zona && !aldea) return {};
+    return { cuentaServicio: ubicacionFilter(zona, aldea) };
+}
+
+function zonaFilterUbicacion(zona?: string, aldea?: string) {
+    return ubicacionFilter(zona, aldea);
 }
 
 export async function queryCobradoPeriodo(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesde, fechaHasta, zona, aldea } = filters;
 
     const result = await prisma.aplicacionPago.aggregate({
         where: {
@@ -36,7 +46,7 @@ export async function queryCobradoPeriodo(filters: DashboardQueryFilters) {
             empresaId,
             estado: EstadoPago.CONFIRMADO,
         },
-        ...(zona ? { cargo: { cuentaServicio: { ubicacion: { zona } } } } : {}),
+        ...((zona || aldea) ? { cargo: { cuentaServicio: ubicacionFilter(zona, aldea) } } : {}),
     },
     _sum: { montoAplicado: true },
     });
@@ -44,14 +54,14 @@ export async function queryCobradoPeriodo(filters: DashboardQueryFilters) {
 }
 
 export async function queryCarteraPendiente(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesde, fechaHasta, zona, aldea } = filters;
 
     const result = await prisma.cargo.aggregate({
     where: {
         empresaId,
         estado: { in: [EstadoCargo.PENDIENTE, EstadoCargo.PARCIAL, EstadoCargo.VENCIDO] },
         fechaEmision: { gte: fechaDesde, lte: fechaHasta },
-        ...zonaFilterCuentaServicio(zona),
+        ...zonaFilterCuentaServicio(zona, aldea),
     },
     _sum: { saldo: true },
     });
@@ -59,20 +69,20 @@ export async function queryCarteraPendiente(filters: DashboardQueryFilters) {
 }
 
 export async function queryServiciosSuspendidos(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesde, fechaHasta, zona, aldea } = filters;
 
     return prisma.cuentaServicio.count({
     where: {
         empresaId,
         estado: EstadoCuentaServicio.SUSPENDIDA,
         createdAt: { gte: fechaDesde, lte: fechaHasta },
-        ...zonaFilterUbicacion(zona),
+        ...zonaFilterUbicacion(zona, aldea),
     },
     });
 }
 
 export async function queryOrdenesPendientes(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesde, fechaHasta, zona, aldea } = filters;
 
     return prisma.ordenServicio.count({
     where: {
@@ -81,15 +91,15 @@ export async function queryOrdenesPendientes(filters: DashboardQueryFilters) {
         notIn: [EstadoOrdenServicio.FINALIZADA, EstadoOrdenServicio.CANCELADA],
         },
         fechaProgramada: { gte: fechaDesde, lte: fechaHasta },
-        ...zonaFilterUbicacion(zona),
+        ...zonaFilterUbicacion(zona, aldea),
     },
     });
 }
 
 export async function queryIngresosPeriodo(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesde, fechaHasta, zona, aldea } = filters;
 
-    if (zona) {
+    if (zona || aldea) {
     const rows = await prisma.$queryRaw<
         { fecha: Date; total: Prisma.Decimal }[]
     >`
@@ -103,7 +113,8 @@ export async function queryIngresosPeriodo(filters: DashboardQueryFilters) {
         AND p.estado = 'CONFIRMADO'
         AND ap.created_at >= ${fechaDesde}
         AND ap.created_at <= ${fechaHasta}
-        AND cu.zona = ${zona}
+        ${zona ? Prisma.sql`AND cu.zona ILIKE ${zona}` : Prisma.empty}
+        ${aldea ? Prisma.sql`AND cu.aldea ILIKE ${aldea}` : Prisma.empty}
         GROUP BY DATE(ap.created_at)
         ORDER BY DATE(ap.created_at) ASC
     `;
@@ -130,7 +141,7 @@ export async function queryIngresosPorZona(filters: DashboardQueryFilters) {
     const { empresaId, fechaDesde, fechaHasta } = filters;
 
     const rows = await prisma.$queryRaw<
-    { zona: number | null; usuarios: bigint; esperado: Prisma.Decimal; ingreso: Prisma.Decimal }[]
+    { zona: string | null; usuarios: bigint; esperado: Prisma.Decimal; ingreso: Prisma.Decimal }[]
     >`
     WITH zona_usuarios AS (
         SELECT
@@ -194,14 +205,14 @@ export async function queryIngresosPorZona(filters: DashboardQueryFilters) {
 }
 
 export async function queryOrdenesEstado(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesde, fechaHasta, zona, aldea } = filters;
 
     const grouped = await prisma.ordenServicio.groupBy({
     by: ["estado"],
     where: {
         empresaId,
         fechaProgramada: { gte: fechaDesde, lte: fechaHasta },
-        ...zonaFilterUbicacion(zona),
+        ...zonaFilterUbicacion(zona, aldea),
     },
     _count: { _all: true },
     });
@@ -210,7 +221,7 @@ export async function queryOrdenesEstado(filters: DashboardQueryFilters) {
 }
 
 export async function queryClientesMorosos(filters: DashboardQueryFilters) {
-    const { empresaId, zona } = filters;
+    const { empresaId, zona, aldea } = filters;
 
     const count = await prisma.cargo.groupBy({
     by: ["clienteId"],
@@ -220,14 +231,14 @@ export async function queryClientesMorosos(filters: DashboardQueryFilters) {
         fechaVencimiento: {
         lte: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
         },
-        ...zonaFilterCuentaServicio(zona),
+        ...zonaFilterCuentaServicio(zona, aldea),
     },
     });
     return count.length;
 }
 
 export async function queryOrdenesVencidas(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesdeExplicita, fechaHastaExplicita, zona } = filters;
+    const { empresaId, fechaDesdeExplicita, fechaHastaExplicita, zona, aldea } = filters;
 
     return prisma.ordenServicio.count({
     where: {
@@ -240,19 +251,19 @@ export async function queryOrdenesVencidas(filters: DashboardQueryFilters) {
         ...(fechaHastaExplicita && { lte: fechaHastaExplicita }),
         lt: new Date(),
         },
-        ...zonaFilterUbicacion(zona),
+        ...zonaFilterUbicacion(zona, aldea),
     },
     });
 }
 
 export async function queryCargosEsperadosPeriodo(filters: DashboardQueryFilters) {
-    const { empresaId, fechaDesde, fechaHasta, zona } = filters;
+    const { empresaId, fechaDesde, fechaHasta, zona, aldea } = filters;
 
     const result = await prisma.cargo.aggregate({
     where: {
         empresaId,
         fechaEmision: { gte: fechaDesde, lte: fechaHasta },
-        ...zonaFilterCuentaServicio(zona),
+        ...zonaFilterCuentaServicio(zona, aldea),
     },
     _sum: { monto: true },
     });

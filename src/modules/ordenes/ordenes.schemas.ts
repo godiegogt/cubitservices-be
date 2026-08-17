@@ -46,6 +46,7 @@ export const listOrdenesQuerySchema = z.object({
   origen: z.nativeEnum(OrigenOrden).optional(),
   fechaDesde: z.string().date().optional(),
   fechaHasta: z.string().date().optional(),
-  zona: z.coerce.number().int().optional(),
+  zona: z.string().trim().min(1).optional(),
+  aldea: z.string().trim().min(1).optional(),
   search: z.string().min(1).optional(),
 });

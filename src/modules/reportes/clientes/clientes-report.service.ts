@@ -43,6 +43,7 @@ export async function generarReporteClientes(
   const filtersDto: ClientesReportResultDto["filters"] = {
     ...(filters.estado && { estado: filters.estado }),
     ...(filters.zonaId !== undefined && { zonaId: filters.zonaId }),
+    ...(filters.aldea !== undefined && { aldea: filters.aldea }),
     ...(filters.servicioId && { servicioId: filters.servicioId }),
     ...(filters.search && { search: filters.search }),
     ...(filters.fechaInicio && { fechaInicio: filters.fechaInicio }),

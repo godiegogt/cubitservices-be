@@ -49,6 +49,7 @@ function toCobranzaReportFilters(
     estadoServicio: parsed.estadoServicio,
     tipoServicioId: parsed.tipoServicioId,
     zona: parsed.zona,
+    aldea: parsed.aldea,
     };
 }
 

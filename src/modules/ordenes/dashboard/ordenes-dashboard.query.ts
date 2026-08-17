@@ -21,6 +21,16 @@ const ORDEN_SELECT = {
     },
 } satisfies Prisma.OrdenServicioSelect;
 
+function ubicacionFilter(zona?: string, aldea?: string) {
+    if (zona === undefined && aldea === undefined) return {};
+    return {
+        ubicacion: {
+            ...(zona !== undefined && { zona: { equals: zona, mode: 'insensitive' as const } }),
+            ...(aldea !== undefined && { aldea: { equals: aldea, mode: 'insensitive' as const } }),
+        },
+    };
+}
+
 interface DataFilters {
     empresaId: string;
     desde: Date;
@@ -34,7 +44,8 @@ interface DataFilters {
     tipoServicioId?: string;
     responsableId?: string;
     search?: string;
-    zona?: number;
+    zona?: string;
+    aldea?: string;
 }
 
 function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
@@ -43,7 +54,7 @@ function whereData(f: DataFilters): Prisma.OrdenServicioWhereInput {
         ...(f.prioridad && { prioridad: f.prioridad }),
         ...(f.clienteId && { clienteId: f.clienteId }),
         ...(f.tipoServicioId && { tipoServicioId: f.tipoServicioId }),
-        ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
+        ...ubicacionFilter(f.zona, f.aldea),
         ...(f.responsableId && {
             asignaciones: {
                 some: {
@@ -100,7 +111,8 @@ interface KpiFilters {
     ahora: Date;
     desdeExplicita?: Date;
     hastaExplicita?: Date;
-    zona?: number;
+    zona?: string;
+    aldea?: string;
 }
 
 function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado']): Prisma.OrdenServicioWhereInput {
@@ -108,7 +120,7 @@ function whereKpi(f: KpiFilters, estado: Prisma.OrdenServicioWhereInput['estado'
         empresaId: f.empresaId,
         estado,
         fechaProgramada: { gte: f.desde, lte: f.hasta },
-        ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
+        ...ubicacionFilter(f.zona, f.aldea),
     };
 }
 
@@ -143,7 +155,7 @@ export async function contarVencidas(f: KpiFilters): Promise<number> {
                 ...(f.hastaExplicita && { lte: f.hastaExplicita }),
                 lt: f.ahora,
             },
-            ...(f.zona !== undefined && { ubicacion: { zona: f.zona } }),
+            ...ubicacionFilter(f.zona, f.aldea),
         },
     });
 }
@@ -158,7 +170,7 @@ export async function getOrdenesPorEstado(
                 empresaId: filters.empresaId,
                 estado: { not: EstadoOrdenServicio.PENDIENTE },
                 fechaProgramada: { gte: filters.desde, lte: filters.hasta },
-                ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
+                ...ubicacionFilter(filters.zona, filters.aldea),
             },
             _count: { _all: true },
             orderBy: { estado: 'asc' },
@@ -174,13 +186,14 @@ export async function getOrdenesPorEstado(
 
 export async function getProximasAEjecutar(filters: {
     empresaId: string;
-    zona?: number;
+    zona?: string;
+    aldea?: string;
 }): Promise<RawOrdenRow[]> {
     return prisma.ordenServicio.findMany({
         where: {
             empresaId: filters.empresaId,
             estado: EstadoOrdenServicio.PROGRAMADA,
-            ...(filters.zona !== undefined && { ubicacion: { zona: filters.zona } }),
+            ...ubicacionFilter(filters.zona, filters.aldea),
         },
         orderBy: [{ fechaProgramada: { sort: 'asc', nulls: 'last' } }, { createdAt: 'desc' }],
         select: ORDEN_SELECT,

@@ -1,7 +1,7 @@
 import { EstadoRegistroBasico } from "@prisma/client";
 
 export interface ZonaServiciosDto {
-    zona: number | null;
+    zona: string | null;
     servicios: string[];
 }
 
@@ -28,7 +28,8 @@ export interface ClientesSummaryDto {
 
 export interface ClientesReportFilters {
     estado?: EstadoRegistroBasico;
-    zonaId?: number;
+    zonaId?: string;
+    aldea?: string;
     servicioId?: string;
     fechaInicio?: string;
     fechaFin?: string;

@@ -49,6 +49,9 @@ export async function exportClientesExcel(
     report.filters.zonaId !== undefined
         ? `Zona: ${report.filters.zonaId}`
         : null,
+    report.filters.aldea !== undefined
+        ? `Aldea: ${report.filters.aldea}`
+        : null,
     report.filters.servicioId
         ? `Código de servicio: ${report.filters.servicioId}`
         : null,

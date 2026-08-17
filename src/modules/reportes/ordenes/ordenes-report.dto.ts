@@ -4,7 +4,8 @@ export interface OrdenesReportFilters {
     estado?: EstadoOrdenServicio;
     tipoServicioId?: string;
     tecnicoId?: string;
-    zonaId?: number;
+    zonaId?: string;
+    aldea?: string;
     fechaInicio?: string;
     fechaFin?: string;
     search?: string;

@@ -8,7 +8,8 @@ export interface CobranzaReportFilters {
     estadoCargo?: EstadoCargo[];
     estadoServicio?: EstadoCuentaServicio;
     tipoServicioId?: string;
-    zona?: number;
+    zona?: string;
+    aldea?: string;
 }
 
 export interface CobranzaReportKpis {

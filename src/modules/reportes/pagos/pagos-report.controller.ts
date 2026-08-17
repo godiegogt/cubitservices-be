@@ -44,6 +44,7 @@ function toReportePagosFilters(
     codigoCliente: parsed.codigoCliente,
     nombreCliente: parsed.nombreCliente,
     zona: parsed.zona,
+    aldea: parsed.aldea,
     metodoPagoId: parsed.metodoPagoId,
     estado: parsed.estado,
     usuarioRegistradorId: parsed.usuarioRegistradorId,

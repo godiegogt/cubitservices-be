@@ -32,13 +32,14 @@ export async function getAdminDashboard(
     const fechaDesde = input.fechaDesde ? startOfDay(input.fechaDesde) : defaults.desde;
     const fechaHasta = input.fechaHasta ? endOfDay(input.fechaHasta) : defaults.hasta;
     const zona = input.zona;
+    const aldea = input.aldea;
     const fechaDesdeStr = input.fechaDesde ?? formatDateOnly(defaults.desde);
     const fechaHastaStr = input.fechaHasta ?? formatDateOnly(defaults.hasta);
 
     const fechaDesdeExplicita = input.fechaDesde ? startOfDay(input.fechaDesde) : undefined;
     const fechaHastaExplicita = input.fechaHasta ? endOfDay(input.fechaHasta) : undefined;
 
-    const queryFilters = { empresaId, fechaDesde, fechaHasta, fechaDesdeExplicita, fechaHastaExplicita, zona };
+    const queryFilters = { empresaId, fechaDesde, fechaHasta, fechaDesdeExplicita, fechaHastaExplicita, zona, aldea };
 
     const [
     cobradoPeriodo,
@@ -77,7 +78,7 @@ export async function getAdminDashboard(
     const metaCobranza = esperadoNum > 0 ? (cobradoNum / esperadoNum) * 100 : 0;
 
     return {
-    filters: mapFilters(fechaDesdeStr, fechaHastaStr, zona),
+    filters: mapFilters(fechaDesdeStr, fechaHastaStr, zona, aldea),
     kpis: mapKpis({
         cobradoPeriodo:
         cobradoPeriodo instanceof Prisma.Decimal

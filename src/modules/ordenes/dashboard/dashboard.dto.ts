@@ -9,7 +9,8 @@ export interface OrdenesDashboardFilters {
     tipoServicioId?: string;
     responsableId?: string;
     search?: string;
-    zona?: number;
+    zona?: string;
+    aldea?: string;
     page: number;
     pageSize: number;
 }
@@ -56,7 +57,7 @@ export interface OrdenDashboardRow {
     estado: EstadoOrdenServicio | "VENCIDA";
     prioridad: PrioridadOrden;
     fechaProgramada: string | null;
-    zona: number | null;
+    zona: string | null;
     responsable: OrdenResponsableDto;
 }
 
