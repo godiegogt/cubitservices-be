@@ -2,7 +2,6 @@ export interface DashboardFilters {
     fechaDesde: string;
     fechaHasta: string;
     zona: string | null;
-    aldea: string | null;
 }
 
 export interface DashboardKpis {

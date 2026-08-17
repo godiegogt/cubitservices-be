@@ -359,7 +359,6 @@ model ClienteUbicacion {
   calle       Int?
   avenida     Int?
   numeroCasa  Int?              @map("numero_casa")
-  aldea       String?
 
   cliente           Cliente           @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   cuentasServicio   CuentaServicio[]

@@ -33,7 +33,6 @@ const filtersSchema = z.object({
     estadoServicio: estadoServicioSchema.optional(),
     tipoServicioId: z.string().uuid().optional(),
     zona: z.string().trim().min(1).optional(),
-    aldea: z.string().trim().min(1).optional(),
 });
 
 const rangoFechasRefineOptions = {

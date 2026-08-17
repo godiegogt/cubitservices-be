@@ -10,7 +10,6 @@ export interface OrdenesDashboardFilters {
     responsableId?: string;
     search?: string;
     zona?: string;
-    aldea?: string;
     page: number;
     pageSize: number;
 }

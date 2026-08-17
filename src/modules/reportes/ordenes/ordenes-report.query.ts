@@ -49,11 +49,8 @@ function buildBaseWhere(
         };
     }
 
-    if (filters.zonaId !== undefined || filters.aldea !== undefined) {
-        where.ubicacion = {
-            ...(filters.zonaId !== undefined && { zona: { equals: filters.zonaId, mode: "insensitive" } }),
-            ...(filters.aldea !== undefined && { aldea: { equals: filters.aldea, mode: "insensitive" } }),
-        };
+    if (filters.zonaId !== undefined) {
+        where.ubicacion = { zona: { equals: filters.zonaId, mode: "insensitive" } };
     }
 
     if (filters.fechaInicio || filters.fechaFin) {

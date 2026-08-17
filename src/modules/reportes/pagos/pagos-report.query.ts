@@ -42,7 +42,6 @@ export interface PagosReporteFilters {
     codigoCliente?: string;
     nombreCliente?: string;
     zona?: string;
-    aldea?: string;
     metodoPagoId?: string;
     estado?: EstadoPago;
     usuarioRegistradorId?: string;
@@ -69,7 +68,7 @@ function buildPagoWhere(
         }
         : {}),
     ...(filters.clienteId ? { clienteId: filters.clienteId } : {}),
-    ...(filters.codigoCliente || filters.nombreCliente || filters.zona !== undefined || filters.aldea !== undefined
+    ...(filters.codigoCliente || filters.nombreCliente || filters.zona !== undefined
         ? {
             cliente: {
             ...(filters.codigoCliente
@@ -78,13 +77,10 @@ function buildPagoWhere(
             ...(filters.nombreCliente
                 ? { nombreRazonSocial: { contains: filters.nombreCliente, mode: "insensitive" as const } }
                 : {}),
-            ...((filters.zona !== undefined || filters.aldea !== undefined)
+            ...(filters.zona !== undefined
                 ? {
                     ubicaciones: {
-                        some: {
-                            ...(filters.zona !== undefined && { zona: { equals: filters.zona, mode: "insensitive" as const } }),
-                            ...(filters.aldea !== undefined && { aldea: { equals: filters.aldea, mode: "insensitive" as const } }),
-                        },
+                        some: { zona: { equals: filters.zona, mode: "insensitive" as const } },
                     },
                 }
                 : {}),

@@ -77,7 +77,6 @@ export async function findOrdenesByEmpresa(
     fechaDesde?: string;
     fechaHasta?: string;
     zona?: string;
-    aldea?: string;
     search?: string;
   }
 ) {
@@ -104,11 +103,8 @@ export async function findOrdenesByEmpresa(
     },
   }),
 
-  ...((filters?.zona !== undefined || filters?.aldea !== undefined) && {
-    ubicacion: {
-      ...(filters?.zona !== undefined && { zona: { equals: filters.zona, mode: "insensitive" as const } }),
-      ...(filters?.aldea !== undefined && { aldea: { equals: filters.aldea, mode: "insensitive" as const } }),
-    },
+  ...(filters?.zona !== undefined && {
+    ubicacion: { zona: { equals: filters.zona, mode: "insensitive" as const } },
   }),
 
   ...(filters?.search && {

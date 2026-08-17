@@ -8,7 +8,6 @@ const baseFiltersSchema = {
     tipoServicioId: z.string().uuid().optional(),
     tecnicoId: z.string().uuid().optional(),
     zonaId: z.string().trim().min(1).optional(),
-    aldea: z.string().trim().min(1).optional(),
     fechaInicio: dateStringSchema.optional(),
     fechaFin: dateStringSchema.optional(),
     search: z.string().min(1).max(120).optional(),

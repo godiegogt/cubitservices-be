@@ -62,7 +62,6 @@ export async function createUbicacionService(
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;
-    aldea?: string | null;
     }
 ) {
     await validarClienteDeEmpresa(clienteId, empresaId);
@@ -100,7 +99,6 @@ export async function updateUbicacionService(
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;
-    aldea?: string | null;
     }
 ) {
     await validarUbicacionDeCliente(ubicacionId, clienteId, empresaId);

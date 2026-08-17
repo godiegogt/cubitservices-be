@@ -4,7 +4,6 @@ import { EstadoRegistroBasico } from "@prisma/client";
 const filtersSchema = z.object({
     estado: z.nativeEnum(EstadoRegistroBasico).optional(),
     zonaId: z.string().trim().min(1).optional(),
-    aldea: z.string().trim().min(1).optional(),
     servicioId: z.string().min(1).optional(),
     search: z.string().min(1).max(120).optional(),
     fechaInicio: z.string().date().optional(),

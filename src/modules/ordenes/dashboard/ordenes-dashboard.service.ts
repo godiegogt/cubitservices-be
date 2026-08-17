@@ -28,7 +28,7 @@ export async function getOrdenesDashboard(
     const desdeExplicita = query.fechaDesde ? startOfDay(query.fechaDesde) : undefined;
     const hastaExplicita = fechaHastaExplicita ? endOfDay(fechaHastaExplicita) : undefined;
 
-    const kpiFilters = { empresaId, desde, hasta, ahora, desdeExplicita, hastaExplicita, zona: query.zona, aldea: query.aldea };
+    const kpiFilters = { empresaId, desde, hasta, ahora, desdeExplicita, hastaExplicita, zona: query.zona };
 
     const dataFilters = {
         empresaId,
@@ -44,7 +44,6 @@ export async function getOrdenesDashboard(
         responsableId: query.responsableId,
         search: query.search,
         zona: query.zona,
-        aldea: query.aldea,
     };
 
     const skip = (query.page - 1) * query.pageSize;
@@ -64,7 +63,7 @@ export async function getOrdenesDashboard(
         contarEnProceso(kpiFilters),
         contarVencidas(kpiFilters),
         getOrdenesPorEstado(dataFilters),
-        getProximasAEjecutar({ empresaId, zona: query.zona, aldea: query.aldea }),
+        getProximasAEjecutar({ empresaId, zona: query.zona }),
         getOrdenes(dataFilters, skip, query.pageSize),
         contarOrdenes(dataFilters),
     ]);
@@ -79,7 +78,6 @@ export async function getOrdenesDashboard(
         responsableId: query.responsableId,
         search: query.search,
         zona: query.zona,
-        aldea: query.aldea,
         page: query.page,
         pageSize: query.pageSize,
     };

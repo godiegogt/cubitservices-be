@@ -26,7 +26,6 @@ export const createUbicacion = (data: {
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;
-    aldea?: string | null;
 }) => {
     return prisma.clienteUbicacion.create({
     data: {
@@ -49,7 +48,6 @@ export const updateUbicacion = (
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;
-    aldea?: string | null;
 }
 ) => {
     return prisma.clienteUbicacion.update({

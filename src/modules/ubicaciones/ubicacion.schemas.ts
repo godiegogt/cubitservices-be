@@ -12,7 +12,6 @@ export const createUbicacionSchema = z.object({
     calle: z.number().nullable().optional(),
     avenida: z.number().nullable().optional(),
     numeroCasa: z.number().nullable().optional(),
-    aldea: z.string().nullable().optional(),
 });
 
 export const updateUbicacionSchema = z.object({
@@ -26,7 +25,6 @@ export const updateUbicacionSchema = z.object({
     calle: z.number().nullable().optional(),
     avenida: z.number().nullable().optional(),
     numeroCasa: z.number().nullable().optional(),
-    aldea: z.string().nullable().optional(),
 });
 
 export const updateUbicacionEstadoSchema = z.object({

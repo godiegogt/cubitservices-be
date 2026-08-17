@@ -8,7 +8,6 @@ const filtersSchema = z.object({
   codigoCliente: z.string().min(1).max(50).optional(),
   nombreCliente: z.string().min(1).max(150).optional(),
   zona: z.string().trim().min(1).optional(),
-  aldea: z.string().trim().min(1).optional(),
   metodoPagoId: z.string().uuid().optional(),
   estado: z.nativeEnum(EstadoPago).optional(),
   usuarioRegistradorId: z.string().uuid().optional(),

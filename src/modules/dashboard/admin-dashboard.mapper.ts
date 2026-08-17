@@ -13,14 +13,12 @@ import { formatDateOnly } from "../../common/utils/datetime";
 export function mapFilters(
     fechaDesde: string,
     fechaHasta: string,
-    zona?: string,
-    aldea?: string
+    zona?: string
 ): DashboardFilters {
     return {
     fechaDesde,
     fechaHasta,
     zona: zona ?? null,
-    aldea: aldea ?? null,
     };
 }
 

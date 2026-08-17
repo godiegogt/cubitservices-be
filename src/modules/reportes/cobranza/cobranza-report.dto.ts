@@ -9,7 +9,6 @@ export interface CobranzaReportFilters {
     estadoServicio?: EstadoCuentaServicio;
     tipoServicioId?: string;
     zona?: string;
-    aldea?: string;
 }
 
 export interface CobranzaReportKpis {

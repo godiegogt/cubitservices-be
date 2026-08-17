@@ -10,7 +10,6 @@ export interface CobranzaQueryFilters {
     estadoServicio?: EstadoCuentaServicio;
     tipoServicioId?: string;
     zona?: string;
-    aldea?: string;
 }
 
 const ESTADOS_CARGO_PENDIENTES: EstadoCargo[] = [
@@ -72,8 +71,7 @@ function buildCuentaServicioFilter(
     if (
     !filters.estadoServicio &&
     !filters.tipoServicioId &&
-    filters.zona === undefined &&
-    filters.aldea === undefined
+    filters.zona === undefined
     ) {
     return undefined;
     }
@@ -83,12 +81,9 @@ function buildCuentaServicioFilter(
     ...(filters.tipoServicioId
         ? { tipoServicioId: filters.tipoServicioId }
         : {}),
-    ...((filters.zona !== undefined || filters.aldea !== undefined)
+    ...(filters.zona !== undefined
         ? {
-            ubicacion: {
-                ...(filters.zona !== undefined && { zona: { equals: filters.zona, mode: "insensitive" as const } }),
-                ...(filters.aldea !== undefined && { aldea: { equals: filters.aldea, mode: "insensitive" as const } }),
-            },
+            ubicacion: { zona: { equals: filters.zona, mode: "insensitive" as const } },
         }
         : {}),
     };

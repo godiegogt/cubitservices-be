@@ -56,7 +56,6 @@ function buildQueryFilters(filters: ReportePagosFilters) {
     codigoCliente: filters.codigoCliente,
     nombreCliente: filters.nombreCliente,
     zona: filters.zona,
-    aldea: filters.aldea,
     metodoPagoId: filters.metodoPagoId,
     estado: filters.estado,
     usuarioRegistradorId: filters.usuarioRegistradorId,

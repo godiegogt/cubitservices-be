@@ -29,7 +29,6 @@ export interface ClientesSummaryDto {
 export interface ClientesReportFilters {
     estado?: EstadoRegistroBasico;
     zonaId?: string;
-    aldea?: string;
     servicioId?: string;
     fechaInicio?: string;
     fechaFin?: string;
