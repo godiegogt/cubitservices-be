@@ -24,6 +24,7 @@ export const createClienteSchema = z
     telefono: z.string().max(30).optional(),
     email: z.string().email().optional(),
     direccionFiscal: z.string().optional(),
+    nit: z.string().max(10).optional(),
     observaciones: z.string().optional(),
   })
   .superRefine((data, ctx) => {
@@ -63,6 +64,7 @@ export const updateClienteSchema = z.object({
   telefono: z.string().max(30).optional(),
   email: z.string().email().optional(),
   direccionFiscal: z.string().optional(),
+  nit: z.string().max(10).optional(),
   observaciones: z.string().optional(),
 });
 
