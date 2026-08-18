@@ -217,6 +217,16 @@ export async function incrementAplicacionPagoMonto(
   });
 }
 
+export async function resetAplicacionesMontoByPagoId(
+  pagoId: string,
+  client: PrismaClientLike = prisma
+) {
+  return client.aplicacionPago.updateMany({
+    where: { pagoId },
+    data: { montoAplicado: 0 },
+  });
+}
+
 export async function updateCargoSaldoEstado(
   id: string,
   saldo: Prisma.Decimal,

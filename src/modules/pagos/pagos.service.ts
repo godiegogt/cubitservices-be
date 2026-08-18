@@ -18,6 +18,7 @@ import {
   findPagosByEmpresa,
   getPagoWithDetail,
   incrementAplicacionPagoMonto,
+  resetAplicacionesMontoByPagoId,
   updateCargoSaldoEstado,
   updatePagoStatus,
 } from "./pagos.repository";
@@ -96,10 +97,6 @@ function ensureCanUpdatePaymentStatus(
     pago.estado === EstadoPago.CONFIRMADO &&
     nuevoEstado === EstadoPago.ANULADO
   ) {
-    if (pago.aplicaciones.length > 0) {
-      throw new Error("No se puede anular un pago con aplicaciones");
-    }
-
     return;
   }
 
@@ -247,15 +244,36 @@ export async function updatePagoStatusService(
     motivo?: string;
   }
 ) {
-  const pago = await findPagoById(id);
+  return prisma.$transaction(async (tx) => {
+    const pago = await findPagoById(id, tx);
 
-  if (!pago || pago.empresaId !== empresaId) {
-    throw new Error("Pago no encontrado");
-  }
+    if (!pago || pago.empresaId !== empresaId) {
+      throw new Error("Pago no encontrado");
+    }
 
-  ensureCanUpdatePaymentStatus(pago, input.estado, input.motivo);
+    ensureCanUpdatePaymentStatus(pago, input.estado, input.motivo);
 
-  return updatePagoStatus(id, input.estado);
+    const pagoActualizado = await updatePagoStatus(id, input.estado, tx);
+
+    if (input.estado === EstadoPago.ANULADO) {
+      for (const aplicacion of pago.aplicaciones) {
+        if (aplicacion.cargo.estado === EstadoCargo.ANULADO) {
+          continue;
+        }
+
+        const nuevoSaldo = aplicacion.cargo.saldo.plus(aplicacion.montoAplicado);
+        const nuevoEstado = calculateCargoNewState(aplicacion.cargo.monto, nuevoSaldo);
+
+        await updateCargoSaldoEstado(aplicacion.cargo.id, nuevoSaldo, nuevoEstado, tx);
+      }
+
+      if (pago.aplicaciones.length > 0) {
+        await resetAplicacionesMontoByPagoId(id, tx);
+      }
+    }
+
+    return pagoActualizado;
+  });
 }
 
 export async function applyPagoService(
