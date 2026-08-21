@@ -458,6 +458,7 @@ model CuentaServicio {
   diaCorte         Int?                   @map("dia_corte")
   diaPago          Int?                   @map("dia_pago")
   estado           EstadoCuentaServicio
+  tvExtra          Int?                   @map("tv_extra") @default(0)
   observaciones    Json?                  @default("[]")
   motivo           Json?                  @default("[]")
   createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)

@@ -175,6 +175,7 @@ export async function createCuentaServicioService(input: {
   montoBase: number;
   diaCorte?: number;
   diaPago?: number;
+  tvExtra?: number;
 }) {
   const [existing] = await Promise.all([
     findCuentaServicioByCodigo(input.empresaId, input.codigo),
@@ -219,6 +220,7 @@ export async function updateCuentaServicioService(
     montoBase?: number;
     diaCorte?: number | null;
     diaPago?: number | null;
+    tvExtra?: number | null;
   }, usuarioId: string
 ) {
   const cuentaServicio = await findCuentaServicioById(id);

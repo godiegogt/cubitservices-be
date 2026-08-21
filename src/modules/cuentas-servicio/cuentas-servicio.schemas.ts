@@ -18,6 +18,7 @@ const createCuentaServicioBaseSchema = z.object({
   montoBase: z.number().min(0),
   diaCorte: z.number().int().min(1).max(31).optional(),
   diaPago: z.number().int().min(1).max(31).optional(),
+  tvExtra: z.number().int().min(0).optional(),
 });
 
 const updateCuentaServicioBaseSchema = z.object({
@@ -35,6 +36,7 @@ const updateCuentaServicioBaseSchema = z.object({
   montoBase: z.number().min(0).optional(),
   diaCorte: z.number().int().min(1).max(31).nullable().optional(),
   diaPago: z.number().int().min(1).max(31).nullable().optional(),
+  tvExtra: z.number().int().min(0).nullable().optional(),
 });
 
 export const createCuentaServicioSchema = createCuentaServicioBaseSchema.superRefine(
