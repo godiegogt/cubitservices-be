@@ -320,6 +320,7 @@ model Cliente {
   telefono          String?              @db.VarChar(30)
   email             String?              @db.VarChar(180)
   direccionFiscal   String?              @map("direccion_fiscal")
+  nit               String?              @db.VarChar(10)
 
   estado            EstadoRegistroBasico
   observaciones     String?

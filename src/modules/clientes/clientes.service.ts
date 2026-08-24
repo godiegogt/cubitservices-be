@@ -66,6 +66,7 @@ export async function createClienteService(input: {
   telefono?: string;
   email?: string;
   direccionFiscal?: string;
+  nit?: string;
   observaciones?: string;
 }) {
   const existing = await findClienteByCodigo(input.empresaId, input.codigo);
@@ -93,6 +94,7 @@ export async function updateClienteService(
     telefono?: string;
     email?: string;
     direccionFiscal?: string;
+    nit?: string;
     observaciones?: string;
   }
 ) {

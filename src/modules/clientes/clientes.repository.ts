@@ -126,6 +126,7 @@ export async function createCliente(data: {
   telefono?: string;
   email?: string;
   direccionFiscal?: string;
+  nit?: string;
   observaciones?: string;
 }) {
   return prisma.cliente.create({
@@ -144,6 +145,7 @@ export async function createCliente(data: {
       telefono: data.telefono,
       email: data.email,
       direccionFiscal: data.direccionFiscal,
+      nit: data.nit,
       observaciones: data.observaciones,
       estado: EstadoRegistroBasico.ACTIVO,
     },
@@ -165,6 +167,7 @@ export async function updateCliente(
     telefono?: string;
     email?: string;
     direccionFiscal?: string;
+    nit?: string;
     observaciones?: string;
   }
 ) {
