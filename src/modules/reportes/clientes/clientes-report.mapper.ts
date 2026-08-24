@@ -22,7 +22,7 @@ function resolveZonasServicios(
   ubicaciones: ClienteReportRow["ubicaciones"],
   cuentasServicio: ClienteReportRow["cuentasServicio"],
 ): ZonaServiciosDto[] {
-  const serviciosPorZona = new Map<number | null, Set<string>>();
+  const serviciosPorZona = new Map<string | null, Set<string>>();
 
   for (const ubicacion of ubicaciones) {
     if (!serviciosPorZona.has(ubicacion.zona)) {
@@ -43,7 +43,7 @@ function resolveZonasServicios(
     .sort((a, b) => {
       if (a.zona === null) return 1;
       if (b.zona === null) return -1;
-      return a.zona - b.zona;
+      return a.zona.localeCompare(b.zona);
     });
 }
 

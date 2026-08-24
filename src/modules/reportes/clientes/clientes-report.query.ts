@@ -16,7 +16,11 @@ export function buildClientesWhereClause(
   const whereBase: Prisma.ClienteWhereInput = {
     empresaId,
     ...(Object.keys(createdAtFilter).length && { createdAt: createdAtFilter }),
-    ...(zonaId !== undefined && { ubicaciones: { some: { zona: zonaId } } }),
+    ...(zonaId !== undefined && {
+      ubicaciones: {
+        some: { zona: { equals: zonaId, mode: "insensitive" as const } },
+      },
+    }),
     ...(servicioId && {
       cuentasServicio: {
         some: { codigo: { contains: servicioId, mode: "insensitive" } },

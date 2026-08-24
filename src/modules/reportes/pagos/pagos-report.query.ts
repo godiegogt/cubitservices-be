@@ -41,7 +41,7 @@ export interface PagosReporteFilters {
     clienteId?: string;
     codigoCliente?: string;
     nombreCliente?: string;
-    zona?: number;
+    zona?: string;
     metodoPagoId?: string;
     estado?: EstadoPago;
     usuarioRegistradorId?: string;
@@ -78,7 +78,11 @@ function buildPagoWhere(
                 ? { nombreRazonSocial: { contains: filters.nombreCliente, mode: "insensitive" as const } }
                 : {}),
             ...(filters.zona !== undefined
-                ? { ubicaciones: { some: { zona: filters.zona } } }
+                ? {
+                    ubicaciones: {
+                        some: { zona: { equals: filters.zona, mode: "insensitive" as const } },
+                    },
+                }
                 : {}),
             },
         }

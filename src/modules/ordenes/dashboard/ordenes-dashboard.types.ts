@@ -9,7 +9,7 @@ export interface RawOrdenRow {
     fechaProgramada: Date | null;
     cliente: { id: string; nombreRazonSocial: string; telefono: string | null };
     tipoServicio: { id: string; nombre: string };
-    ubicacion: { zona: number | null };
+    ubicacion: { zona: string | null };
     asignaciones: {
         usuario: { id: string; nombres: string; apellidos: string | null };
     }[];

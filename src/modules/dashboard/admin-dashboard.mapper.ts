@@ -13,7 +13,7 @@ import { formatDateOnly } from "../../common/utils/datetime";
 export function mapFilters(
     fechaDesde: string,
     fechaHasta: string,
-    zona?: number
+    zona?: string
 ): DashboardFilters {
     return {
     fechaDesde,
@@ -59,7 +59,7 @@ export function mapIngresosPeriodo(
 }
 
 export function mapIngresosPorZona(
-    rows: { zona: number | null; usuarios: bigint; esperado: Prisma.Decimal; ingreso: Prisma.Decimal }[]
+    rows: { zona: string | null; usuarios: bigint; esperado: Prisma.Decimal; ingreso: Prisma.Decimal }[]
 ): IngresoZonaRow[] {
     return rows.map((row) => {
     const esperado = toNumber(row.esperado);

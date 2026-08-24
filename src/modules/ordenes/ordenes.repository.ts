@@ -89,7 +89,7 @@ export async function findOrdenesByEmpresa(
     origen?: OrigenOrden;
     fechaDesde?: string;
     fechaHasta?: string;
-    zona?: number;
+    zona?: string;
     search?: string;
   }
 ) {
@@ -116,7 +116,9 @@ export async function findOrdenesByEmpresa(
     },
   }),
 
-  ...(filters?.zona !== undefined && { ubicacion: { zona: filters.zona } }),
+  ...(filters?.zona !== undefined && {
+    ubicacion: { zona: { equals: filters.zona, mode: "insensitive" as const } },
+  }),
 
   ...(filters?.search && {
     OR: [

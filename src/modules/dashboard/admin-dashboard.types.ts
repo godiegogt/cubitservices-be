@@ -1,7 +1,7 @@
 export interface DashboardFilters {
     fechaDesde: string;
     fechaHasta: string;
-    zona: number | null;
+    zona: string | null;
 }
 
 export interface DashboardKpis {

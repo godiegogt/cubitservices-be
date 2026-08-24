@@ -9,7 +9,7 @@ export interface CobranzaQueryFilters {
     estadoCargo?: EstadoCargo[];
     estadoServicio?: EstadoCuentaServicio;
     tipoServicioId?: string;
-    zona?: number;
+    zona?: string;
 }
 
 const ESTADOS_CARGO_PENDIENTES: EstadoCargo[] = [
@@ -82,7 +82,9 @@ function buildCuentaServicioFilter(
         ? { tipoServicioId: filters.tipoServicioId }
         : {}),
     ...(filters.zona !== undefined
-        ? { ubicacion: { zona: filters.zona } }
+        ? {
+            ubicacion: { zona: { equals: filters.zona, mode: "insensitive" as const } },
+        }
         : {}),
     };
 }

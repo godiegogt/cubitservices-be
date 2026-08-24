@@ -22,7 +22,7 @@ export const createUbicacion = (data: {
     latitud?: number | null;
     longitud?: number | null;
     esPrincipal: boolean;
-    zona?: number | null;
+    zona?: string | null;
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;
@@ -44,7 +44,7 @@ export const updateUbicacion = (
     latitud?: number | null;
     longitud?: number | null;
     esPrincipal?: boolean;
-    zona?: number | null;
+    zona?: string | null;
     calle?: number | null;
     avenida?: number | null;
     numeroCasa?: number | null;

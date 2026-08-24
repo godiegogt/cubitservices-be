@@ -13,17 +13,25 @@ interface DashboardQueryFilters {
     fechaHasta: Date;
     fechaDesdeExplicita?: Date;
     fechaHastaExplicita?: Date;
-    zona?: number;
+    zona?: string;
 }
 
-function zonaFilterCuentaServicio(zona?: number) {
+function ubicacionFilter(zona?: string) {
     if (!zona) return {};
-    return { cuentaServicio: { ubicacion: { zona } } };
+    return {
+        ubicacion: {
+            zona: { equals: zona, mode: "insensitive" as const },
+        },
+    };
 }
 
-function zonaFilterUbicacion(zona?: number) {
+function zonaFilterCuentaServicio(zona?: string) {
     if (!zona) return {};
-    return { ubicacion: { zona } };
+    return { cuentaServicio: ubicacionFilter(zona) };
+}
+
+function zonaFilterUbicacion(zona?: string) {
+    return ubicacionFilter(zona);
 }
 
 export async function queryCobradoPeriodo(filters: DashboardQueryFilters) {
@@ -36,7 +44,7 @@ export async function queryCobradoPeriodo(filters: DashboardQueryFilters) {
             empresaId,
             estado: EstadoPago.CONFIRMADO,
         },
-        ...(zona ? { cargo: { cuentaServicio: { ubicacion: { zona } } } } : {}),
+        ...(zona ? { cargo: { cuentaServicio: ubicacionFilter(zona) } } : {}),
     },
     _sum: { montoAplicado: true },
     });
@@ -103,7 +111,7 @@ export async function queryIngresosPeriodo(filters: DashboardQueryFilters) {
         AND p.estado = 'CONFIRMADO'
         AND ap.created_at >= ${fechaDesde}
         AND ap.created_at <= ${fechaHasta}
-        AND cu.zona = ${zona}
+        AND cu.zona ILIKE ${zona}
         GROUP BY DATE(ap.created_at)
         ORDER BY DATE(ap.created_at) ASC
     `;
@@ -130,7 +138,7 @@ export async function queryIngresosPorZona(filters: DashboardQueryFilters) {
     const { empresaId, fechaDesde, fechaHasta } = filters;
 
     const rows = await prisma.$queryRaw<
-    { zona: number | null; usuarios: bigint; esperado: Prisma.Decimal; ingreso: Prisma.Decimal }[]
+    { zona: string | null; usuarios: bigint; esperado: Prisma.Decimal; ingreso: Prisma.Decimal }[]
     >`
     WITH zona_usuarios AS (
         SELECT

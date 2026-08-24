@@ -10,7 +10,7 @@ export const ordenesDashboardQuerySchema = z.object({
     tipoServicioId: z.string().uuid().optional(),
     responsableId: z.string().uuid().optional(),
     search: z.string().trim().min(1).optional(),
-    zona: z.coerce.number().int().optional(),
+    zona: z.string().trim().min(1).optional(),
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(20),
 }).refine(

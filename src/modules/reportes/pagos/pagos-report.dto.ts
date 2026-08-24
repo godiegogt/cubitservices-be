@@ -6,7 +6,7 @@ export interface ReportePagosFilters {
   clienteId?: string;
   codigoCliente?: string;
   nombreCliente?: string;
-  zona?: number;
+  zona?: string;
   metodoPagoId?: string;
   estado?: EstadoPago;
   usuarioRegistradorId?: string;

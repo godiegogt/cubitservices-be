@@ -356,7 +356,7 @@ model ClienteUbicacion {
   estado      EstadoUbicacion
   createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
-  zona        Int?
+  zona        String?
   calle       Int?
   avenida     Int?
   numeroCasa  Int?              @map("numero_casa")

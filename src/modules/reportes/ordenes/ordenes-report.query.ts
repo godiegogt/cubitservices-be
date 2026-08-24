@@ -50,7 +50,7 @@ function buildBaseWhere(
     }
 
     if (filters.zonaId !== undefined) {
-        where.ubicacion = { zona: filters.zonaId };
+        where.ubicacion = { zona: { equals: filters.zonaId, mode: "insensitive" } };
     }
 
     if (filters.fechaInicio || filters.fechaFin) {
