@@ -144,6 +144,7 @@ export async function createOrdenService(input: {
   fechaProgramada: string;
   requiereEvidenciaFinal?: boolean;
   observacionesGenerales?: string;
+  montoCargo?: number;
 }) {
   const cuentaServicio = await findCuentaServicioById(input.cuentaServicioId);
 
@@ -160,12 +161,17 @@ export async function createOrdenService(input: {
     );
   }
 
-  await Promise.all([
+  const [, tipoServicio] = await Promise.all([
     validateUbicacion(cuentaServicio.clienteId, input.ubicacionId),
     validateTipoServicio(input.empresaId, input.tipoServicioId),
   ]);
 
   const numeroOrden = await generateNumeroOrden(input.empresaId);
+  const now = new Date();
+  const periodoReferencia = `${now.getUTCFullYear()}-${String(
+    now.getUTCMonth() + 1
+  ).padStart(2, "0")}`;
+  const montoCargo = input.montoCargo ?? tipoServicio.precioBase.toNumber();
 
   return createOrden({
     ...input,
@@ -173,6 +179,15 @@ export async function createOrdenService(input: {
     numeroOrden,
     estado: EstadoOrdenServicio.PROGRAMADA,
     fechaProgramada: parseDateTime(input.fechaProgramada),
+    cargo:
+      montoCargo > 0
+        ? {
+            concepto: `Cargo por Orden de Servicio #${numeroOrden} - ${tipoServicio.nombre}`,
+            monto: montoCargo,
+            periodoReferencia,
+            fechaEmision: now,
+          }
+        : undefined,
   });
 }
 

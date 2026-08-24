@@ -1,10 +1,13 @@
 import {
   CategoriaServicio,
+  EstadoCargo,
   EstadoOrdenServicio,
   EstadoRegistroBasico,
+  OrigenCargo,
   OrigenOrden,
   Prisma,
   PrioridadOrden,
+  TipoCargo,
 } from "@prisma/client";
 import prisma from "../../config/prisma";
 import { startOfDay, endOfDay } from "../../common/utils/datetime";
@@ -47,6 +50,16 @@ const ordenServicioInclude = {
       nombre: true,
       descripcion: true,
       precioBase: true,
+      estado: true,
+    },
+  },
+  cargos: {
+    select: {
+      id: true,
+      tipoCargo: true,
+      concepto: true,
+      periodoReferencia: true,
+      monto: true,
       estado: true,
     },
   },
@@ -217,6 +230,12 @@ export async function createOrden(data: {
   requiereEvidenciaFinal?: boolean;
   observacionesGenerales?: string;
   usuarioId: string;
+  cargo?: {
+    concepto: string;
+    monto: number;
+    periodoReferencia: string;
+    fechaEmision: Date;
+  };
 }) {
   return prisma.$transaction(async (tx) => {
     const orden = await tx.ordenServicio.create({
@@ -249,7 +268,29 @@ export async function createOrden(data: {
       },
     });
 
-    return orden;
+    if (data.cargo) {
+      await tx.cargo.create({
+        data: {
+          empresaId: data.empresaId,
+          clienteId: data.clienteId,
+          cuentaServicioId: data.cuentaServicioId,
+          ordenServicioId: orden.id,
+          tipoCargo: TipoCargo.EXTRAORDINARIO,
+          concepto: data.cargo.concepto,
+          periodoReferencia: data.cargo.periodoReferencia,
+          monto: data.cargo.monto,
+          saldo: data.cargo.monto,
+          fechaEmision: data.cargo.fechaEmision,
+          estado: EstadoCargo.PENDIENTE,
+          origen: OrigenCargo.GENERACION_AUTOMATICA,
+        },
+      });
+    }
+
+    return tx.ordenServicio.findUniqueOrThrow({
+      where: { id: orden.id },
+      include: ordenServicioInclude,
+    });
   });
 }
 
