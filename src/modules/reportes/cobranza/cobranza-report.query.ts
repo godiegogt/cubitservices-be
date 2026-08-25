@@ -42,7 +42,9 @@ export type CargoReporteItem = Prisma.CargoGetPayload<{
 }>;
 
 const cargoReporteOrderBy: Prisma.CargoOrderByWithRelationInput[] = [
-    { createdAt: "desc" },
+    { cliente: { nombreRazonSocial: "asc" } },
+    { fechaEmision: "desc" },
+    { cuentaServicio: { nombre: "asc" } },
 ];
 
 function buildClienteFilter(
