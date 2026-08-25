@@ -1,4 +1,4 @@
-import { PrismaClient, EstadoRegistroBasico, EstadoUsuario } from "@prisma/client";
+import { PrismaClient, EstadoRegistroBasico, EstadoUsuario, CategoriaServicio } from "@prisma/client";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 
@@ -85,7 +85,43 @@ async function main() {
       estado: EstadoRegistroBasico.ACTIVO,
     },
   });
+  
+  const tipoServicioCable = await prisma.tipoServicio.upsert({
+    where: {
+      empresaId_nombre: {
+        empresaId: empresa.id,
+        nombre: "Servicio de cable",
+      },
+    },
+    update: {},
+    create: {
+      empresaId: empresa.id,
+      nombre: "Servicio de cable",
+      descripcion: "Servicio principal de televisión por cable",
+      precioBase: 90,
+      categoriaServicio: CategoriaServicio.SERVICIO,
+      estado: EstadoRegistroBasico.ACTIVO,
+    },
+  });
 
+    const tipoServicioTvExtra = await prisma.tipoServicio.upsert({
+    where: {
+      empresaId_nombre: {
+        empresaId: empresa.id,
+        nombre: "TV Extra",
+      },
+    },
+    update: {},
+    create: {
+      empresaId: empresa.id,
+      nombre: "TV Extra",
+      descripcion: "Servicio adicional de televisión",
+      precioBase: 15,
+      categoriaServicio: CategoriaServicio.SERVICIO,
+      estado: EstadoRegistroBasico.ACTIVO,
+    },
+  });
+  
   const passwordHash = await bcrypt.hash("Admin123*", 10);
 
   await prisma.usuario.upsert({
@@ -112,6 +148,7 @@ async function main() {
   console.log({
     empresa: empresa.nombre,
     roles: [rolAdmin.nombre, rolCajero.nombre, rolOperador.nombre, rolTecnico.nombre],
+    tiposServicio: [tipoServicioCable.nombre, tipoServicioTvExtra.nombre],
     usuario: "admin@cubitservices.com",
     password: "Admin123*",
   });
