@@ -1,8 +1,7 @@
 import { EstadoPago } from "@prisma/client";
 
 export interface PagoDashboardFilters {
-    fechaDesde: string;
-    fechaHasta: string;
+    fecha: string;
     clienteId?: string;
     metodoPagoId?: string;
     estado?: EstadoPago;
